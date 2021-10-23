@@ -1,4 +1,6 @@
 (dolist (subinit '(
+                   ;; Do not include a .el extension on these, to allow the
+                   ;; possibility of loading .elc files instead.
                    "smartparens"
                    "multiple-cursors"
                    "ivy"
@@ -7,9 +9,11 @@
                    "lsp"
                    "rust"
                    ))
-  (load (format "%s/init/%s" user-emacs-directory subinit)))
+  (load (expand-file-name (concat "init/" subinit) user-emacs-directory)))
 
-(setq custom-file (format "%s/custom.el" user-emacs-directory))
+;; Include a .el extension because custom-file is used in various ways where
+;; some probably require it.
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file)
 
 ;; Ibuffer (instead of default Buffer Menu)
