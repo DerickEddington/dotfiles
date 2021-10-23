@@ -1,0 +1,123 @@
+# This file is executed for interactive Bash shells.
+
+# If not running interactively, don't do anything
+case $- in
+    *i*) ;;
+    *) return;;
+esac
+
+
+# Try to use newer bash version if the default one is ancient.
+if [ ${BASH_VERSINFO[0]} -le 3  -a  $SHLVL -eq 1 ]
+then
+    # (The PLATFORM variable is defined in ~/.profile and is available here
+    # because that file sources this one.)
+
+    # If PLATFORM undefined, $HOME//... will be used.
+    NEW_SH="$HOME/$PLATFORM/local/bin/bash"
+
+    if [ -x "$NEW_SH" ]; then
+        export SHELL="$NEW_SH"
+        exec "$NEW_SH"
+    fi
+fi
+
+
+# Execute the below when any bash is run, whether top-level or not.
+
+
+# History
+# append to the history file, don't overwrite it
+shopt -s histappend
+# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
+HISTFILESIZE=2000000
+HISTSIZE=$HISTFILESIZE
+# don't put duplicate lines or lines starting with space in the history.
+# See bash(1) for more options
+HISTCONTROL=ignoreboth
+# Don't expand !
+set +o histexpand
+# Save multi-line commands as one entry.
+shopt -s cmdhist
+
+
+# My custom prompt.
+if [ ${BASH_VERSINFO[0]} -ge 4 ]; then
+    source ~/.bash_prompt
+fi
+
+
+# Alias definitions.
+# You may want to put all your additions into a separate file like
+# ~/.bash_aliases, instead of adding them here directly.
+# See /usr/share/doc/bash-doc/examples in the bash-doc package.
+if [ -f ~/.bash_aliases ]; then
+    source ~/.bash_aliases
+fi
+
+# enable color support with aliases
+if [ -n "$LS_COLORS" ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)"
+    # Note: The alias for `ls --color=` is handled by /etc/bashrc, in NixOS.
+    alias dir='dir --color=auto'
+    alias vdir='vdir --color=auto'
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+fi
+
+alias l='ls -CFhv --group-directories-first --quoting-style=c-maybe'
+alias ll='l -l'
+alias la='l -A'
+alias lla='ll -A'
+alias lt='lla -t'
+alias lr='lla -R'
+alias ltr='lt -R'
+alias lrt='lr -t'
+alias rm="rm -i -r"
+alias rmdir="rm -i -r"
+alias pstree="pstree -a -l -n"
+alias nano="nano -w"
+alias ps="ps fxu"
+alias df="df -h"
+alias free='free -h'
+alias objdump='objdump -M intel-mnemonic'
+alias emacs='emacs --no-window-system'
+alias root='sudo su -l'
+alias sul='sudo su -l'
+alias sshfs='sshfs -o reconnect -o workaround=all -o idmap=user -o follow_symlinks -o cache=yes -o cache_timeout=30 -o kernel_cache -o large_read'
+alias unsshfs='fusermount -u'
+
+function du {
+    ( shopt -s dotglob
+      if [ $# -ge 1 ]; then
+          local ARGS=("$@")
+      else
+          local ARGS=(*)
+      fi
+      command du -s -c -h "${ARGS[@]}" | sort -h )
+}
+
+
+# Shell options
+shopt -s autocd
+shopt -s cdspell
+shopt -s checkhash
+shopt -s checkjobs
+shopt -s dirspell
+#shopt -s dotglob
+shopt -s extglob
+# check the window size after each command and, if necessary,
+# update the values of LINES and COLUMNS.
+shopt -s checkwinsize
+# If set, the pattern "**" used in a pathname expansion context will
+# match all files and zero or more directories and subdirectories.
+shopt -s globstar
+
+
+# Only execute this when a top-level bash is run.  I.e. not for any bash
+# processes run as children of another bash.  This prevents things like repeated
+# adding of the same value to PATH.
+if [ $SHLVL -eq 1 ]; then
+    :
+fi

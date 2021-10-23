@@ -1,0 +1,4 @@
+escape ^Jj
+startup_message off
+caption always "%w"
+defscrollback 200000
