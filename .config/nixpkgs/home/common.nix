@@ -257,10 +257,30 @@ in
   # below were discovered with the CLI tool `dconf dump /`.
   # -----------------------------------------------------------------------------
   dconf.settings = {
-    # TODO: Not sure this is really doing something...
-    # "org/gnome/settings-daemon/plugins/power" = {
-    #   idle-dim = false;
-    # };
+
+    "org/mate/power-manager" = {
+      action-critical-battery = "suspend";
+      backlight-battery-reduce = false;
+      button-lid-ac = "nothing";
+      button-lid-battery = "nothing";
+      button-power = "interactive";
+      button-suspend = "nothing";
+      icon-policy = "charge";
+      kbd-backlight-battery-reduce = false;
+      sleep-display-ac = 0;
+      sleep-display-battery = 0;
+    };
+
+    "org/mate/desktop/session" = {
+      auto-save-session = true;  # Remember running apps when logging out.
+      idle-delay = 120;  # Minutes before activating screensaver.
+    };
+
+    "org/mate/screensaver" = {
+      idle-activation-enabled = true;
+      lock-enabled = false;
+      mode = "blank-only";
+    };
 
     "org/mate/marco/general" = {
       theme = "Green-Submarine";  # Or: "Green-Submarine-border"
@@ -294,9 +314,18 @@ in
       dpi = dpi * 1.0; # Converted to float.
     };
 
+    "org/mate/desktop/sound" = {
+      input-feedback-sounds = false;
+      theme-name = "__no_sounds";
+      event-sounds = false;
+    };
+
     "org/mate/desktop/peripherals/mouse" = {
       cursor-size = 24;
       cursor-theme = "redglass";
+      drag-threshold = 8;
+      motion-threshold = 10;
+      motion-acceleration = 10.0;
     };
 
     # TODO: Not needed, right?, with /etc/nixos/configuration.nix having
@@ -504,10 +533,22 @@ in
       show-weather = false;
     };
 
-    # TODO?
-    # "org/mate/notification-daemon" = {
-    #   popup-location = "bottom_right";
-    #   theme = "coco";
-    # };
+    "org/mate/notification-daemon" = {
+      popup-location = "bottom_right";
+      theme = "coco";
+    };
+
+    "org/mate/screenshot" = {
+      delay = 3;
+      include-pointer = false;
+      include-border = true;
+      border-effect = "none";
+    };
+
+    "org/mate/caja/preferences" = {
+      default-folder-viewer = "list-view";
+      confirm-move-to-trash = true;
+      enable-delete = true;
+    };
   };
 }
