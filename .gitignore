@@ -7,6 +7,10 @@
 /.cargo/git
 /.cargo/.package-cache
 /.cargo/registry
+/.compose-cache/
+/.config/caja/desktop-metadata
+/.config/menus/mate-applications-merged
+/.config/pulse/
 /Desktop
 /Downloads
 /.dotfiles
@@ -14,13 +18,20 @@
 /.emacs.d/.cache/
 /.emacs.d/**/*.elc
 /.emacs.d/elpa/
+/.emacs.d/history
 /.emacs.d/.lsp-session*
 /.emacs.d/transient/history.el
+/.esd_auth
+/.git-hidden
 /.gnupg/private*
 /.lesshst
 /.lldb/*history
+/.local/share/recently-used.xbel
 /Maildir
 /Music
+/.nix-defexpr/channels
+/.nix-defexpr/channels_root
+/.nix-profile
 /Pictures
 #TODO? /.rustup/downloads
 /.rustup/tmp
@@ -35,3 +46,23 @@
 /.wget-hsts
 /.Xauthority
 /.xsession-errors*
+
+# Things managed by home-manager
+/.bash_profile
+/.bashrc
+/.config/dconf/
+/.config/environment.d/10-home-manager.conf
+/.config/git/config
+/.local/share/home-manager/
+/.manpath
+/.mozilla/**/extensions/**/treestyletab@piro.sakura.ne.jp.xpi
+/.mozilla/**/extensions/**/uBlock0@raymondhill.net.xpi
+# Stylus
+/.mozilla/**/extensions/**/{7a7a4a92-a2a0-41d1-9fd7-1e92480d612d}.xpi
+# User-Agent Switcher
+/.mozilla/**/extensions/**/{a6c4a591-f1b2-4f03-b3ff-767e5bedf4e7}.xpi
+/.mozilla/firefox/profiles.ini
+/.mozilla/firefox/default/chrome/userChrome.css
+/.mozilla/firefox/default/chrome/userContent.css
+/.mozilla/firefox/default/user.js
+/.profile
