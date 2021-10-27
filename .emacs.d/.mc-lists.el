@@ -8,6 +8,7 @@
         company-indent-or-complete-common
         end-of-visual-line
         home-end-home
+        indent-for-tab-command
         read-only-mode
         sp-backward-delete-char
         sp-backward-kill-word

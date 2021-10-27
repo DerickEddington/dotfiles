@@ -8,6 +8,7 @@
 /.cargo/.package-cache
 /.cargo/registry
 /.compose-cache/
+/.config/caja/accels
 /.config/caja/desktop-metadata
 /.config/menus/mate-applications-merged
 /.config/pulse/
