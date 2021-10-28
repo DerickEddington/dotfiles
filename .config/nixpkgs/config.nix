@@ -1,7 +1,7 @@
 { pkgs, ... }:
 
 let
-  lib = pkgs.lib;
+  inherit (pkgs) lib;
 in
 {
   # Note that `NIXPKGS_ALLOW_UNFREE=1 nix-env -qa` can be used to see all
