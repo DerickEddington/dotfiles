@@ -9,6 +9,8 @@
 with builtins;
 
 let
+  nur = import (fetchTarball https://github.com/nix-community/NUR/archive/master.tar.gz) { inherit pkgs; };
+
   # # TODO: Is this the correct way to get this value from within home-manager? Or
   # # should it be gotten thru the given config or pkgs argument?
   # nixpkgs = import <nixpkgs/nixos> {};
@@ -25,6 +27,10 @@ let
   # TODO? variables for fonts, to use consistently throughout below?
 in
 {
+  _module.args = {
+    inherit nur;
+  };
+
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
@@ -246,7 +252,9 @@ in
       };
     };
 
-    extensions = with pkgs.nur.repos.rycee.firefox-addons; [
+    # Note: Would be incompatible with /etc/nixos/firefox.nix having a non-empty
+    # nixExtensions list.
+    extensions = with nur.repos.rycee.firefox-addons; [
       tree-style-tab
       ublock-origin
     ];

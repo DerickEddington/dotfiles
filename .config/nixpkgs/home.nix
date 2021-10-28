@@ -8,6 +8,9 @@
 
 with builtins;
 
+let
+  nur = config._module.args.nur;
+in
 {
   imports = [ ./home/common.nix ];
 
@@ -27,7 +30,9 @@ with builtins;
     #   };
     # };
 
-    # extensions = with pkgs.nur.repos.rycee.firefox-addons; [
+    # # Note: Would be incompatible with /etc/nixos/firefox.nix having a non-empty
+    # # nixExtensions list.
+    # extensions = with nur.repos.rycee.firefox-addons; [
     #   user-agent-string-switcher
     #   stylus
     # ];
