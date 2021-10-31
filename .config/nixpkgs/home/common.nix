@@ -336,12 +336,6 @@ in
       motion-acceleration = 10.0;
     };
 
-    # TODO: Not needed, right?, with /etc/nixos/configuration.nix having
-    #       xkbOptions = "caps:ctrl_modifier"
-    # "org/mate/desktop/peripherals/keyboard/kbd" = {
-    #   options = ["caps\tcaps:ctrl_modifier"];
-    # };
-
     "org/mate/desktop/peripherals/keyboard" = {
       numlock-state = "off";
     };
