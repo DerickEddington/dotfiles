@@ -20,7 +20,7 @@ function _my_bash_prompt_setup()
     # command must be executed after, so that _my_bash_prompt_command is
     # executed first, as needed to capture the PREV_EXIT_STATUS=$? of the user's
     # command.
-    PROMPT_COMMAND="_my_bash_prompt_command $DO_COLORS ; ${PROMPT_COMMAND:- :}"
+    PROMPT_COMMAND="_my_bash_prompt_command $DO_COLORS ${PROMPT_COMMAND:+;} ${PROMPT_COMMAND:-}"
 
     PS0="${GREY}${_my_bash_prompt_sep_prefix}"
     PS0+="${_my_bash_prompt_sep_with_time}${NO_COLOR}\n"
@@ -38,6 +38,7 @@ function _my_bash_prompt_command()
         local BLUE="\[\e[00;34m\]"
         local WHITE="\[\e[01;37m\]"
         local GREY="\[\e[00;37m\]"
+        local MAGENTA="\[\e[00;35m\]"
         local NO_COLOR="\[\e[00m\]"
     else
         local RED=""
@@ -46,6 +47,7 @@ function _my_bash_prompt_command()
         local BLUE=""
         local WHITE=""
         local GREY=""
+        local MAGENTA=""
         local NO_COLOR=""
     fi
 
@@ -60,10 +62,18 @@ function _my_bash_prompt_command()
         local STATUS_PREFIX="${RED}!--- \\\$?=${PREV_EXIT_STATUS} ${PAD}"
     fi
 
-    # TODO: Change the colors if UID=0, for root
+    if [ $EUID -eq 0 ]; then
+        local USER_HOST_COLOR="${MAGENTA}"
+        local CWD_COLOR="${BLUE}"
+        local SIGIL_COLOR="${RED}"
+    else
+        local USER_HOST_COLOR="${GREEN}"
+        local CWD_COLOR="${BLUE}"
+        local SIGIL_COLOR="${YELLOW}"
+    fi
     PS1="${STATUS_PREFIX}${_my_bash_prompt_sep_with_time}\n"
-    PS1+="${GREEN}\u@\h ${BLUE}\w\n"
-    PS1+="${YELLOW}\\\$${NO_COLOR} "
+    PS1+="${USER_HOST_COLOR}\u@\h ${CWD_COLOR}\w\n"
+    PS1+="${SIGIL_COLOR}\\\$${NO_COLOR} "
 
     # TODO: Is this still good on NixOS?  It does something similar in
     # /etc/bashrc, also in addition to what its /etc/bashrc does for VTE
