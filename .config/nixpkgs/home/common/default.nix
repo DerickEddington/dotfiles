@@ -9,6 +9,7 @@
 with builtins;
 
 let
+  hostName = import ../hostName.nix;
   nur = import (fetchTarball https://github.com/nix-community/NUR/archive/master.tar.gz) { inherit pkgs; };
 
   # # TODO: Is this the correct way to get this value from within home-manager? Or
@@ -18,17 +19,14 @@ let
   systemPath = /run/current-system/sw;
   # systemPath = nixpkgs.config.system.path;
 
-  # This DPI corresponds to my current monitor.
-  dpi = 110;
-  # Defining services.xserver.dpi (in /etc/nixos/configuration.nix) confused
-  # Firefox and degraded its UI, independently of its other DPI settings below.
-  # dpi = nixpkgs.config.services.xserver.dpi;
+  # Usually defined by ./per-host/${hostName}
+  dpi = config._module.args.mine.dpi;
 
   # TODO? variables for fonts, to use consistently throughout below?
 in
 {
-  _module.args = {
-    inherit nur;
+  _module.args.mine = {
+    inherit hostName nur;
   };
 
   # Let Home Manager install and manage itself.
@@ -97,11 +95,7 @@ in
   programs.git = rec {
     enable = true;
     userName  = config.home.username;
-    userEmail = let
-      rx = "[[:space:]]*([^[:space:]]+)[[:space:]]*";
-      hostName = elemAt (match rx (readFile /etc/hostname)) 0;
-    in
-      "${userName}@${hostName}";
+    userEmail = "${userName}@${hostName}";
     extraConfig = {
       init = {
         defaultBranch = "main";
