@@ -504,8 +504,8 @@ in
         locked = true;
         toplevel-id = "bottom";
         object-type = "applet";
-        panel-right-stick = false; # TODO: try true
-        position = 1809; # TODO: try relative to the right side
+        panel-right-stick = true;
+        position = 4;
       };
 
       "org/mate/panel/objects/sys-load-monitor" = {
@@ -513,8 +513,8 @@ in
         locked = true;
         toplevel-id = "bottom";
         object-type = "applet";
-        panel-right-stick = false; # TODO: try true
-        position = 2152; # TODO: try relative to the right side
+        panel-right-stick = true;
+        position = 3;
       };
 
       "org/mate/panel/objects/sys-load-monitor/prefs" = {
@@ -528,8 +528,8 @@ in
         applet-iid = "NotificationAreaAppletFactory::NotificationArea";
         locked = true;
         object-type = "applet";
-        panel-right-stick = false; # TODO: try true
-        position = 2368; # TODO: try relative to the right side
+        panel-right-stick = true;
+        position = 2;
         toplevel-id = "bottom";
       };
 
@@ -541,7 +541,7 @@ in
         applet-iid = "ClockAppletFactory::ClockApplet";
         locked = true;
         toplevel-id = "bottom";
-        position = 73;
+        position = 1;
         object-type = "applet";
         panel-right-stick = true;
       };
