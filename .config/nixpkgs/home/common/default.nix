@@ -126,6 +126,9 @@ in
         credential = {
           helper = "cache --timeout ${toString (8 * 60 * 60)}";
         };
+        merge = {
+          conflictStyle = "diff3";
+        };
       };
     };
 
