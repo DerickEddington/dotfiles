@@ -8,7 +8,8 @@
 
 let
   hostName = import ./hostName.nix;
-  nur = config._module.args.mine.nur;
+  # nur = config.my.nur.fetched;
+  inherit (config.my.rycee.fetched) firefox-addons;
 in
 {
   imports = [
@@ -34,7 +35,7 @@ in
 
     # # Note: Would be incompatible with /etc/nixos/firefox.nix having a non-empty
     # # nixExtensions list.
-    # extensions = with nur.repos.rycee.firefox-addons; [
+    # extensions = with firefox-addons; [
     #   user-agent-string-switcher
     #   stylus
     # ];
