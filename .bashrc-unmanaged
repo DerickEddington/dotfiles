@@ -58,7 +58,6 @@ fi
 # enable color support with aliases
 if [ -n "$LS_COLORS" ]; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)"
-    # Note: The alias for `ls --color=` is handled by /etc/bashrc, in NixOS.
     alias dir='dir --color=auto'
     alias vdir='vdir --color=auto'
     alias grep='grep --color=auto'
@@ -66,9 +65,10 @@ if [ -n "$LS_COLORS" ]; then
     alias egrep='egrep --color=auto'
 fi
 
-alias l='ls -CFhv --group-directories-first --quoting-style=c-maybe'
-alias ll='l -l'
-alias la='l -A'
+alias ls='ls -CFhv --group-directories-first --quoting-style=c-maybe --color=tty'
+alias l='ls -A -l'
+alias ll='ls -l'
+alias la='ls -A'
 alias lla='ll -A'
 alias lt='lla -t'
 alias lr='lla -R'
