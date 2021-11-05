@@ -17,8 +17,6 @@ let
 
   # nur = config.my.nur.fetched;
   inherit (config.my.rycee.fetched) firefox-addons;
-
-  # TODO? variables for fonts, to use consistently throughout below?
 in
 {
   options.my = with types; {
@@ -82,27 +80,6 @@ in
       # Whatever bashrcExtra does as first thing, any following home-manager
       # options can override these same aspects of bashrcExtra if it had also
       # done these.
-
-      # historyFileSize = 2000000;
-      # historySize = historyFileSize / 4;
-      # historyControl = let ignoreboth = ["ignorespace" "ignoredups"];
-      #                  in ignoreboth;
-      # shellOptions = [
-      #   "autocd"
-      #   "cdspell"
-      #   "checkhash"
-      #   "checkjobs"
-      #   "checkwinsize"
-      #   "cmdhist"
-      #   "dirspell"
-      #   "extglob"
-      #   "globstar"
-      #   "histappend"
-      # ];
-      # shellAliases = {
-      #   l = "ls -CFhv --group-directories-first --quoting-style=c-maybe";
-      #   ...
-      # };
 
       # Added as last thing in ~/.bashrc, after the things home-manager
       # auto-generates, and after the interactive-shell check.  initExtra can
@@ -191,11 +168,8 @@ in
             # "layout.css.dpi" = dpi;
 
             "font.default.x-western" = "sans-serif";
-            # "font.name.sans-serif.x-western" = "Ubuntu";
-            # "font.name.monospace.x-western" = "Ubuntu Mono";
             "font.size.variable.x-western" = 15;
             "font.size.monospace.x-western" = 14;
-            # "font.size.fixed.x-western" = 14;
             "font.minimum-size.x-western" = 14;
             "browser.display.use_document_fonts" = 0;
 
@@ -312,27 +286,20 @@ in
       };
 
       "org/mate/marco/general" = {
-        theme = "Green-Submarine";  # Or: "Green-Submarine-border"
-        #TODO? button-layout = "menu:minimize,maximize,close";
+        theme = "Green-Submarine";
         titlebar-font = "Ubuntu Medium 11";
         num-workspaces = 4;
         allow-tiling = true;
         action-double-click-titlebar = "toggle_maximize_vertically";
         show-tab-border = true;
         center-new-windows = true;
-        #TODO?  compositing-manager = true;
-        #TODO?  compositing-fast-alt-tab = false;
       };
 
       "org/mate/desktop/interface" = {
         window-scaling-factor = 1;
-        #TODO? gtk-decoration-layout = "menu:minimize,maximize,close";
         font-name = "Ubuntu 13";
         document-font-name = "Ubuntu 13";
         monospace-font-name = "Ubuntu Mono 14";
-        #TODO icon-theme = "Radiant-MATE";
-        #TODO gtk-theme = "Menta";
-        #TODO? enable-animations = true;
       };
 
       "org/mate/caja/desktop" = {
@@ -400,7 +367,6 @@ in
 
       "org/mate/terminal/profiles/default" = {
         foreground-color = "#000000000000";
-        # visible-name = "TODO?";
         palette = "#000000000000:#828200000000:#00006E6E1010:#FCFCE9E94F4F:#100F1615C4C4:#787800008080:#000078788080:#88888A8A8585:#000000000000:#828200000000:#00006E6E1010:#FCFCE9E94F4F:#100F1615C4C4:#787800008080:#000078788080:#FFFFFFFFFFFF";
         use-system-font = false;
         silent-bell = true;
@@ -437,7 +403,6 @@ in
         y-bottom = 0;
         auto-hide = true;
         size = 48;
-        #TODO? y = 1392;
       };
 
       "org/mate/panel/objects/menu" = {
@@ -486,12 +451,11 @@ in
         panel-right-stick = false;
       };
 
-      # TODO: Why isn't this showing?
       "org/mate/panel/objects/window-list" = {
         applet-iid = "WnckletFactory::WindowListApplet";
         locked = true;
         toplevel-id = "bottom";
-        position = 240; # TODO: Good?
+        position = 240;
         object-type = "applet";
       };
 
