@@ -533,6 +533,7 @@ in
       };
 
       "org/mate/caja/preferences" = {
+        use-iec-units = true;
         default-folder-viewer = "list-view";
         confirm-move-to-trash = true;
         enable-delete = true;
