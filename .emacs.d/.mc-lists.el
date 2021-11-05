@@ -7,6 +7,7 @@
         comment-dwim
         company-indent-or-complete-common
         end-of-visual-line
+        goto-line
         home-end-home
         indent-for-tab-command
         read-only-mode
@@ -14,7 +15,9 @@
         sp-backward-kill-word
         sp-backward-sexp
         sp-backward-unwrap-sexp
+        sp-backward-up-sexp
         sp-delete-char
+        sp-down-sexp
         sp-forward-sexp
         sp-kill-hybrid-sexp
         sp-kill-region
