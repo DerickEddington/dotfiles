@@ -317,8 +317,8 @@ in
       };
 
       "org/mate/desktop/peripherals/mouse" = {
-        cursor-size = 24;
-        cursor-theme = "redglass";
+        cursor-size = 48;
+        cursor-theme = "ComixCursors-LH-Opaque-Orange";
         drag-threshold = 8;
         motion-threshold = 10;
         motion-acceleration = 10.0;
