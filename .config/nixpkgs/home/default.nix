@@ -4,7 +4,11 @@
 #
 # See: https://nix-community.github.io/home-manager/options.html
 
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
+
+let
+  inherit (lib) mkForce;
+in
 
 let
   hostName = import ./hostName.nix;
@@ -42,7 +46,7 @@ in
   };
 
   # Extend the imported options.
-  dconf.settings = with pkgs.lib; {
+  dconf.settings = {
     # # More launchers in panel than ./home/common.nix has by default.
     # "org/mate/panel/general" = {
     #   object-id-list = mkForce [
