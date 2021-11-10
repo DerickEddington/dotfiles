@@ -6,8 +6,10 @@
 
 { config, pkgs, lib, ... }:
 
-with builtins;
-with lib;
+let
+  inherit (builtins) getEnv;
+  inherit (lib) mkOption types;
+in
 
 let
   hostName = import ../hostName.nix;
@@ -163,7 +165,7 @@ in
             "browser.newtabpage.activity-stream.showSponsored" = false;
 
             # Note: Not needed when services.xserver.dpi is set to the DPI.
-            # "layout.css.devPixelsPerPx" = builtins.toString (dpi / 96.0);
+            # "layout.css.devPixelsPerPx" = toString (dpi / 96.0);
             "layout.css.devPixelsPerPx" = "1.4";
             # "layout.css.dpi" = dpi;
 

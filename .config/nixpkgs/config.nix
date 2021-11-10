@@ -1,7 +1,8 @@
 { pkgs, ... }:
 
 let
-  inherit (pkgs) lib;
+  inherit (builtins) elem;
+  inherit (pkgs.lib) getName;
 in
 {
   # Note that `NIXPKGS_ALLOW_UNFREE=1 nix-env -qa` can be used to see all
@@ -11,7 +12,7 @@ in
   # allowUnfree = true;
 
   # Allow and show only select "unfree" packages.
-  allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+  allowUnfreePredicate = pkg: elem (getName pkg) [
     # "${name}"
   ];
 

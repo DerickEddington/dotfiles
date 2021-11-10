@@ -2,6 +2,8 @@
 # evaluated in modules' imports list, but that would cause infinite recursion if
 # config.my were used.  Having this in an imported file allows reuse.
 
-with builtins;
+let
+  inherit (builtins) elemAt match readFile;
+in
 
 elemAt (match "[[:space:]]*([^[:space:]]+)[[:space:]]*" (readFile /etc/hostname)) 0
