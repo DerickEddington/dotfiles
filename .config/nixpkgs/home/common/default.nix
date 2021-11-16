@@ -174,6 +174,7 @@ in
             "font.size.monospace.x-western" = 14;
             "font.minimum-size.x-western" = 14;
             "browser.display.use_document_fonts" = 0;
+            "browser.display.background_color" = "#9a9996";
 
             "general.smoothScroll" = false;
 
@@ -185,9 +186,15 @@ in
             "browser.urlbar.suggest.quicksuggest" = false;
             "browser.urlbar.suggest.quicksuggest.sponsored" = false;
 
+            # Anti-telemetry
+            "toolkit.telemetry.pioneer-new-studies-available" = false;
             "app.shield.optoutstudies.enabled" = false;
             "datareporting.healthreport.uploadEnabled" = false;
             "datareporting.policy.dataSubmissionEnabled" = false;
+            # Do not report what I download to Mozilla's masters.
+            "browser.safebrowsing.downloads.enabled" = false;
+            "browser.safebrowsing.downloads.remote.block_potentially_unwanted" = false;
+            "browser.safebrowsing.downloads.remote.block_uncommon" = false;
 
             "privacy.donottrackheader.enabled" = true;
             "privacy.trackingprotection.enabled" = true;
@@ -225,12 +232,6 @@ in
           # Darker background for new tabs (to not blast eyes with blinding
           # white).
           userContent = ''
-            @-moz-document url("about:newtab") {
-                body {
-                    background-color: #888888 !important;
-                }
-            }
-
             .tab {
               font-size-adjust: 0.52 !important;
             }
