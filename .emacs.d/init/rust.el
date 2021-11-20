@@ -13,6 +13,10 @@
 
 (require 'lsp-mode)
 (add-hook 'rust-mode-hook #'lsp)
+;; The rust-analyzer LSP lens for "Run Test|Debug" displays with the glyphless
+;; VARIATION SELECTOR-15 character (#xFE0E) but we don't want to see the
+;; hex-code box for that.
+(aset glyphless-char-display #xFE0E 'zero-width)
 
 (require 'smartparens)
 (define-key rust-mode-map [remap sp-forward-slurp-sexp] #'sp-slurp-hybrid-sexp)
