@@ -49,3 +49,5 @@ if [ -d "$HOME/$PLATFORM/bin" ] ; then
         fi
     done
 fi
+
+export PATH

@@ -1,0 +1,6 @@
+# TODO: Until https://github.com/NixOS/nixpkgs/issues/119513 is fixed.
+if [ -z "$_XPROFILE_SOURCED" ]; then
+    export _XPROFILE_SOURCED=true
+
+    . "$HOME"/.profile
+fi
