@@ -3,14 +3,15 @@
 
 (setq mc/cmds-to-run-for-all
       '(
+        beginning-of-defun
         beginning-of-visual-line
         comment-dwim
         company-indent-or-complete-common
+        end-of-defun
         end-of-visual-line
         goto-line
         home-end-home
         indent-for-tab-command
-        read-only-mode
         sp-backward-delete-char
         sp-backward-kill-word
         sp-backward-sexp
@@ -21,10 +22,12 @@
         sp-forward-sexp
         sp-kill-hybrid-sexp
         sp-kill-region
+        sp-remove-active-pair-overlay
         ))
 
 (setq mc/cmds-to-run-once
       '(
         dap-tooltip-mouse-motion
         handle-switch-frame
+        read-only-mode
         ))
