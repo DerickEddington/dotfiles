@@ -1,6 +1,7 @@
 (dolist (subinit '(
                    ;; Do not include a .el extension on these, to allow the
                    ;; possibility of loading .elc files instead.
+                   "utils"  ;; Should be kept as first
                    "smartparens"
                    "multiple-cursors"
                    "ivy"
@@ -8,6 +9,7 @@
                    "flycheck"
                    "lsp"
                    "rust"
+                   "modeline"  ;; Should be kept as last
                    ))
   (load (expand-file-name (concat "init/" subinit) user-emacs-directory)))
 
