@@ -12,7 +12,7 @@
  '(blink-cursor-delay 0.7)
  '(blink-cursor-interval 0.5)
  '(blink-matching-paren-dont-ignore-comments t)
- '(cargo-process--command-clippy "clippy")
+ '(cargo-process--command-clippy "+nightly clippy")
  '(cargo-process--command-fmt "+nightly fmt -- --unstable-features --edition 2018")
  '(cargo-process--enable-rust-backtrace t)
  '(cargo-process--open-file-after-new t)
