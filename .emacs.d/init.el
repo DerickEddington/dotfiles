@@ -28,6 +28,8 @@
 
 (global-set-key (kbd "C-c g") 'magit-file-dispatch)
 
+(global-set-key [remap just-one-space] #'cycle-spacing)
+
 (global-set-key (kbd "C-M-<delete>") 'backward-kill-sexp)
 (global-set-key (kbd "C-\\") (lambda () (interactive) (insert ?λ)))
 (global-set-key (kbd "C-.") (lambda () (interactive) (insert ?▷)))

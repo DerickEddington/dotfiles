@@ -345,6 +345,7 @@ in
       };
 
       "org/mate/marco/window-keybindings" = {
+        activate-window-menu = "disabled";
         toggle-shaded = "disabled";
         move-to-center = "disabled";
         move-to-side-w = "disabled";

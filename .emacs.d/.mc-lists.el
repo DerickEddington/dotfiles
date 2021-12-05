@@ -22,11 +22,13 @@
         sp-forward-sexp
         sp-kill-hybrid-sexp
         sp-kill-region
+        sp-kill-word
         sp-remove-active-pair-overlay
         ))
 
 (setq mc/cmds-to-run-once
       '(
+        View-scroll-page-backward
         dap-tooltip-mouse-motion
         handle-switch-frame
         read-only-mode
