@@ -21,3 +21,5 @@
 (require 'smartparens)
 (define-key rust-mode-map [remap sp-forward-slurp-sexp] #'sp-slurp-hybrid-sexp)
 (define-key rust-mode-map [remap sp-transpose-sexp] #'sp-transpose-hybrid-sexp)
+
+(add-hook 'rust-mode-hook #'(lambda () (setq fill-column 98)))

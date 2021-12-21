@@ -7,6 +7,7 @@
         beginning-of-visual-line
         comment-dwim
         company-indent-or-complete-common
+        delete-indentation
         end-of-defun
         end-of-visual-line
         goto-line
