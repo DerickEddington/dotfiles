@@ -61,13 +61,16 @@ in
     home.homeDirectory = getEnv "HOME";
 
     #---------------------------------------------------------------------------
+    # Environment Variables
+    #---------------------------------------------------------------------------
+    home.sessionVariables = {
+    };
+
+    #---------------------------------------------------------------------------
     # Bash
     #---------------------------------------------------------------------------
     programs.bash = {
       enable = true;
-
-      sessionVariables = {
-      };
 
       # Added as last thing in ~/.profile, after the sessionVariables part that
       # home-manager auto-generates.
