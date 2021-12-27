@@ -8,7 +8,7 @@
 
 let
   inherit (builtins) getEnv;
-  inherit (lib) mkOption types;
+  inherit (lib) hm mkOption types;
 in
 
 let
@@ -489,8 +489,8 @@ in
       };
 
       "org/mate/panel/objects/sys-load-monitor/prefs" = {
-        size = 70;
-        speed = 2000;
+        size = hm.gvariant.mkUint32 70;
+        speed = hm.gvariant.mkUint32 2000;
         view-memload = true;
         view-netload = true;
       };
