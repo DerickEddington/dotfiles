@@ -24,11 +24,14 @@
         sp-kill-hybrid-sexp
         sp-kill-region
         sp-kill-word
+        sp-next-sexp
         sp-remove-active-pair-overlay
         ))
 
 (setq mc/cmds-to-run-once
       '(
+        counsel-M-x
+        lsp-signature-stop
         View-scroll-page-backward
         dap-tooltip-mouse-motion
         handle-switch-frame
