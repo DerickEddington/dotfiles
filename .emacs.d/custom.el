@@ -150,6 +150,7 @@
  '(magit-status-goto-file-position t)
  '(magit-status-margin '(t age-abbreviated magit-log-margin-width nil 16))
  '(magit-view-git-manual-method 'man)
+ '(magit-wip-mode t)
  '(make-backup-files nil)
  '(markdown-code-lang-modes
    '(("ocaml" . tuareg-mode)
