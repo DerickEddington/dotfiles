@@ -13,6 +13,8 @@
         goto-line
         home-end-home
         indent-for-tab-command
+        markdown-cycle
+        markdown-outdent-or-delete
         sp-backward-delete-char
         sp-backward-kill-word
         sp-backward-sexp
@@ -30,10 +32,10 @@
 
 (setq mc/cmds-to-run-once
       '(
-        counsel-M-x
-        lsp-signature-stop
         View-scroll-page-backward
+        counsel-M-x
         dap-tooltip-mouse-motion
         handle-switch-frame
+        lsp-signature-stop
         read-only-mode
         ))
