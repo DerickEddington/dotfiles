@@ -99,7 +99,9 @@ in
     #---------------------------------------------------------------------------
     # Git
     #---------------------------------------------------------------------------
-    programs.git = rec {
+    programs.git = let
+      fetchParallel = 0;  # "some reasonable default"
+    in rec {
       enable = true;
       userName  = config.home.username;
       userEmail = "${userName}@${hostName}";
@@ -110,8 +112,14 @@ in
         credential = {
           helper = "cache --timeout ${toString (8 * 60 * 60)}";
         };
+        fetch = {
+          parallel = fetchParallel;
+        };
         merge = {
           conflictStyle = "diff3";
+        };
+        submodule = {
+          fetchJobs = fetchParallel;
         };
       };
     };
