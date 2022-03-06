@@ -132,6 +132,7 @@
  '(lsp-ui-sideline-actions-kind-regex "quickfix.*")
  '(lsp-ui-sideline-diagnostic-max-lines 2)
  '(lsp-ui-sideline-ignore-duplicate t)
+ '(lsp-ui-sideline-show-code-actions t)
  '(lsp-ui-sideline-show-diagnostics nil)
  '(lsp-ui-sideline-update-mode 'line)
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
