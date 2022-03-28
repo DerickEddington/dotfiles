@@ -11,6 +11,7 @@
             ivy-mode
             lsp-lens-mode
             lsp-mode
+            magit-wip-mode
             smartparens-mode
             visual-line-mode
             )))
