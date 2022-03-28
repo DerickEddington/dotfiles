@@ -8,6 +8,10 @@
         comment-dwim
         company-indent-or-complete-common
         delete-indentation
+        dired-next-line
+        dired-previous-line
+        dired-tree-down
+        dired-up-directory
         end-of-defun
         end-of-visual-line
         goto-line
@@ -28,6 +32,8 @@
         sp-kill-word
         sp-next-sexp
         sp-remove-active-pair-overlay
+        wdired-next-line
+        wdired-previous-line
         ))
 
 (setq mc/cmds-to-run-once

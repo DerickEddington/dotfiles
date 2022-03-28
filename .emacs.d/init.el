@@ -22,6 +22,10 @@
 (global-set-key (kbd "C-x C-b") 'ibuffer)
 (require 'ibuffer-project)
 
+;; Load this so it's immediately available (to have `dired-jump') before a
+;; `dired' buffer is created.
+(require 'dired-x)
+
 (require 'home-end)
 (global-set-key [home] 'home-end-home)
 (global-set-key [end]  'home-end-end)
