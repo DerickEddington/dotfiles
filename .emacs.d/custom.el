@@ -3,6 +3,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(adaptive-wrap-extra-indent 2)
  '(after-save-hook '(magit-after-save-refresh-status))
  '(auth-source-save-behavior nil)
  '(auto-revert-buffer-list-filter 'magit-auto-revert-repository-buffer-p)
@@ -33,6 +34,7 @@
  '(company-tooltip-limit 15)
  '(compilation-message-face 'bold)
  '(confirm-kill-emacs 'y-or-n-p)
+ '(counsel-find-file-at-point t)
  '(counsel-mode t)
  '(ctl-arrow nil)
  '(default-frame-alist
@@ -210,6 +212,7 @@
  '(rust-rustfmt-switches '("+nightly" "--unstable-features" "--edition" "2021"))
  '(savehist-mode t)
  '(scroll-bar-mode nil)
+ '(shell-command-prompt-show-cwd t)
  '(show-paren-delay 0.25)
  '(show-paren-style 'mixed)
  '(show-paren-when-point-inside-paren t)
@@ -237,7 +240,7 @@
  '(tool-bar-mode nil)
  '(tooltip-mode nil)
  '(view-read-only t)
- '(visual-line-fringe-indicators '(nil right-curly-arrow))
+ '(visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
  '(wdired-allow-to-change-permissions t)
  '(wdired-use-dired-vertical-movement 'sometimes)
  '(what-cursor-show-names t)

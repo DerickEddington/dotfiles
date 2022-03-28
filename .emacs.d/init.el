@@ -46,5 +46,9 @@
 (put 'downcase-region 'disabled nil)
 (put 'upcase-region 'disabled nil)
 
+;; It'd be nice to have this, but Adaptive-Wrap-Prefix mode usually causes too
+;; much slow-down for moving around buffers.  Instead, I selectively enable it.
+;(add-hook 'visual-line-mode-hook #'adaptive-wrap-prefix-mode)
+
 ;; Work around bug in message-insert-formatted-citation-line
 (setq gnus-extract-address-components 'gnus-extract-address-components)

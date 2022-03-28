@@ -3,6 +3,7 @@
 
 (setq mc/cmds-to-run-for-all
       '(
+        backward-sexp
         beginning-of-defun
         beginning-of-visual-line
         comment-dwim
@@ -14,6 +15,7 @@
         dired-up-directory
         end-of-defun
         end-of-visual-line
+        forward-sexp
         goto-line
         home-end-home
         indent-for-tab-command
@@ -41,6 +43,8 @@
         View-scroll-page-backward
         counsel-M-x
         dap-tooltip-mouse-motion
+        find-file-read-only
+        gud-tooltip-mouse-motion
         handle-switch-frame
         lsp-signature-stop
         read-only-mode
