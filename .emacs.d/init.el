@@ -8,6 +8,7 @@
                    "magit"
                    "flycheck"
                    "lsp"
+                   "gdb"
                    "rust"
                    "modeline"  ;; Should be kept as last
                    ))
