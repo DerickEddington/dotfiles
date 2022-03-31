@@ -50,6 +50,7 @@
  '(eldoc-idle-delay 1)
  '(eldoc-minor-mode-string "")
  '(eldoc-print-after-edit t)
+ '(emacs-lisp-mode-hook '(eldoc-mode imenu-add-menubar-index hs-minor-mode))
  '(enable-local-eval nil)
  '(enable-local-variables :safe)
  '(enable-recursive-minibuffers t)
@@ -69,6 +70,7 @@
  '(global-visual-line-mode t)
  '(grep-command "egrep --color -nH -e ")
  '(gud-tooltip-mode t)
+ '(hs-isearch-open nil)
  '(ibuffer-compressed-file-name-regexp
    "\\.\\(arj\\|bgz\\|bz2\\|gz\\|lzh\\|taz\\|tgz\\|xz\\|zip\\|z\\|zst\\)$")
  '(ibuffer-default-sorting-mode 'alphabetic)
@@ -132,6 +134,7 @@
  '(lsp-ui-doc-show-with-cursor nil)
  '(lsp-ui-doc-show-with-mouse t)
  '(lsp-ui-doc-use-webkit nil)
+ '(lsp-ui-imenu-colors '("#161CCC" "#006E10"))
  '(lsp-ui-peek-always-show t)
  '(lsp-ui-sideline-actions-kind-regex "quickfix.*")
  '(lsp-ui-sideline-diagnostic-max-lines 2)

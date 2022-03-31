@@ -23,3 +23,5 @@
 (define-key rust-mode-map [remap sp-transpose-sexp] #'sp-transpose-hybrid-sexp)
 
 (add-hook 'rust-mode-hook #'(lambda () (setq fill-column 98)))
+(add-hook 'rust-mode-hook #'imenu-add-menubar-index)
+(add-hook 'rust-mode-hook #'hs-minor-mode)
