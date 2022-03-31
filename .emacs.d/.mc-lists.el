@@ -36,6 +36,7 @@
         sp-remove-active-pair-overlay
         wdired-next-line
         wdired-previous-line
+        widget-kill-line
         ))
 
 (setq mc/cmds-to-run-once
