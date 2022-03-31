@@ -30,6 +30,9 @@
 (global-set-key [home] 'home-end-home)
 (global-set-key [end]  'home-end-end)
 
+(require 'expand-region)
+(global-set-key (kbd "C-=") 'er/expand-region)
+
 (global-set-key (kbd "C-c g") 'magit-file-dispatch)
 
 (global-set-key [remap just-one-space] #'cycle-spacing)
