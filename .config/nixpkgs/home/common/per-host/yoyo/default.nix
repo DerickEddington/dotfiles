@@ -8,4 +8,9 @@
     # Firefox and degraded its UI, independently of its other DPI settings below.
     # dpi = nixpkgs.config.services.xserver.dpi;
   };
+
+  # Automatically install the "debug" output of packages if they have one, and
+  # set the NIX_DEBUG_INFO_DIRS environment variable to include them, for GDB to
+  # find them.
+  home.enableDebugInfo = true;
 }
