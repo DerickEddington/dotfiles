@@ -19,6 +19,7 @@
         goto-line
         home-end-home
         indent-for-tab-command
+        kill-region
         markdown-cycle
         markdown-outdent-or-delete
         sp-backward-delete-char
