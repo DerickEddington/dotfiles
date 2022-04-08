@@ -8,6 +8,7 @@
             counsel-mode
             eldoc-mode
             global-auto-revert-mode
+            hs-minor-mode
             ivy-mode
             lsp-lens-mode
             lsp-mode
