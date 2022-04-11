@@ -9,7 +9,6 @@
 (add-hook 'rust-mode-hook #'cargo-minor-mode)
 
 (require 'flycheck)
-(require 'flycheck-rust)
 
 (require 'lsp-mode)
 (add-hook 'rust-mode-hook #'lsp)
