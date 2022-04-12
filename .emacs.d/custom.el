@@ -142,6 +142,19 @@
  '(lsp-ui-sideline-show-code-actions t)
  '(lsp-ui-sideline-show-diagnostics nil)
  '(lsp-ui-sideline-update-mode 'line)
+ '(magit-blame-styles
+   '((headings
+      (heading-format . "%C %.7H %A %a %s
+"))
+     (margin
+      (margin-format "%s%f" "%C %a%f" "%H%f")
+      (margin-width . 68)
+      (margin-face . magit-blame-margin)
+      (margin-body-face . magit-blame-dimmed))
+     (lines
+      (show-lines . t)
+      (show-message . t))))
+ '(magit-blame-time-format "%F_%H:%M")
  '(magit-bury-buffer-function 'magit-restore-window-configuration)
  '(magit-cherry-margin '(t age-abbreviated magit-log-margin-width t 16))
  '(magit-diff-highlight-keywords nil)
@@ -341,6 +354,12 @@
  '(lsp-ui-sideline-current-symbol ((t (:inherit highlight))))
  '(lsp-ui-sideline-global ((t (:box (:line-width 1 :style pressed-button) :slant italic :weight normal :height 0.8))))
  '(lsp-ui-sideline-symbol ((t (:foreground "grey30" :box (:line-width -1 :color "grey30")))))
+ '(magit-blame-dimmed ((t (:inherit magit-dimmed :background "#BDB8A0" :underline nil :slant normal :weight normal))))
+ '(magit-blame-hash ((t (:inherit magit-hash))) t)
+ '(magit-blame-heading ((t (:inherit magit-blame-highlight :extend t :box (:line-width 7 :color "gray75") :height 0.9))))
+ '(magit-blame-highlight ((t (:extend t :background "gray75" :foreground "black" :underline nil :slant normal :weight normal))))
+ '(magit-blame-margin ((t (:inherit magit-blame-highlight))))
+ '(magit-blame-name ((t (:inherit magit-log-author))) t)
  '(magit-branch-current ((t (:inherit magit-branch-local :box 2))))
  '(magit-branch-local ((t (:inherit font-lock-string-face :weight bold))))
  '(magit-branch-remote ((t (:inherit font-lock-constant-face :weight bold))))
