@@ -27,6 +27,9 @@
 ;; `dired' buffer is created.
 (require 'dired-x)
 
+(require 'company)
+(global-set-key (kbd "TAB") #'company-indent-or-complete-common)
+
 (require 'home-end)
 (global-set-key [home] 'home-end-home)
 (global-set-key [end]  'home-end-end)

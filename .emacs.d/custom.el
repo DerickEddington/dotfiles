@@ -66,6 +66,7 @@
  '(gdb-display-io-nopopup t)
  '(gdb-switch-when-another-stopped nil)
  '(git-commit-style-convention-checks '(non-empty-second-line overlong-summary-line))
+ '(global-company-mode t)
  '(global-flycheck-mode t)
  '(global-visual-line-mode t)
  '(grep-command "egrep --color -nH -e ")
