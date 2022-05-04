@@ -27,6 +27,7 @@
 /.emacs.d/auto-save-list
 /.emacs.d/.cache/
 /.emacs.d/**/*.elc
+/.emacs.d/**/*.eln
 /.emacs.d/elpa/
 /.emacs.d/history
 /.emacs.d/.lsp-session*
