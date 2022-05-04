@@ -332,6 +332,7 @@
  '(fringe ((t nil)))
  '(header-line ((t (:background "gray70" :foreground "black" :box (:line-width -1 :style released-button)))))
  '(header-line-highlight ((t (:background "#CFC9AC"))))
+ '(help-key-binding ((t (:foreground "DarkBlue"))))
  '(highlight ((t (:background "yellow3"))))
  '(info-menu-star ((t nil)))
  '(isearch ((t (:inherit highlight))))
