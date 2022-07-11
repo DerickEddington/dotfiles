@@ -25,6 +25,11 @@ in
   home.packages = with pkgs; [
   ];
 
+  my.emacs.extraPackages = [(epkgs:
+    with epkgs; [
+    ]
+  )];
+
   # Extend the imported options.
   programs.firefox = {
     # profiles = {
