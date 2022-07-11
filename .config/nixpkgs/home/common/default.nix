@@ -21,6 +21,10 @@ let
   inherit (config.my.rycee.fetched) firefox-addons;
 in
 {
+  imports = [
+    ./emacs.nix
+  ];
+
   options.my = with types; {
 
     dpi = mkOption {
@@ -65,7 +69,9 @@ in
     #---------------------------------------------------------------------------
     # Environment Variables
     #---------------------------------------------------------------------------
-    home.sessionVariables = {
+    home.sessionVariables = rec {
+      VISUAL = "${config.programs.emacs.finalPackage}/bin/emacs --no-window-system";
+      EDITOR = VISUAL;
     };
 
     #---------------------------------------------------------------------------
