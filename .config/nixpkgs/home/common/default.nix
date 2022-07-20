@@ -15,6 +15,7 @@ let
   hostName = import ../hostName.nix;
   # (toString avoids the path coercion in antiquotation that would copy to /nix/store/.)
   systemPath = toString /run/current-system/sw;
+  userProfilePath = toString ~/.nix-profile;
 
   inherit (config.my) dpi;
 
@@ -441,7 +442,7 @@ in
 
       "org/mate/panel/objects/web-browser" = {
         locked = true;
-        launcher-location = "${systemPath}/share/applications/firefox.desktop";
+        launcher-location = "${userProfilePath}/share/applications/firefox.desktop";
         position = 48;
         object-type = "launcher";
         toplevel-id = "bottom";
@@ -468,7 +469,7 @@ in
 
       "org/mate/panel/objects/source-code-editor" = {
         locked = true;
-        launcher-location = "${systemPath}/share/applications/emacs.desktop";
+        launcher-location = "${userProfilePath}/share/applications/emacs.desktop";
         toplevel-id = "bottom";
         position = 192;
         object-type = "launcher";
