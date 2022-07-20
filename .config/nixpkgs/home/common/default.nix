@@ -13,7 +13,8 @@ in
 
 let
   hostName = import ../hostName.nix;
-  systemPath = /run/current-system/sw;
+  # (toString avoids the path coercion in antiquotation that would copy to /nix/store/.)
+  systemPath = toString /run/current-system/sw;
 
   inherit (config.my) dpi;
 
