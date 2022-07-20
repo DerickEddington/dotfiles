@@ -417,4 +417,5 @@
  '(widget-field ((t (:background "gray75"))))
  '(widget-single-line-field ((t (:inherit widget-field :background "gray85"))))
  '(woman-bold ((((background dark)) (:foreground "red"))))
- '(woman-italic ((((background dark)) (:foreground "green2")))))
+ '(woman-italic ((((background dark)) (:foreground "green2"))))
+ '(woman-unknown ((t (:inherit font-lock-string-face)))))
