@@ -451,7 +451,7 @@ in
 
       "org/mate/panel/objects/music-player" = {
         locked = true;
-        launcher-location = "${systemPath}/share/applications/rhythmbox.desktop";
+        launcher-location = "${systemPath}/share/applications/org.gnome.Rhythmbox3.desktop";
         toplevel-id = "bottom";
         position = 96;
         object-type = "launcher";
