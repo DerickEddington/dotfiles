@@ -72,7 +72,7 @@ in
     # Environment Variables
     #---------------------------------------------------------------------------
     home.sessionVariables = rec {
-      VISUAL = "${config.programs.emacs.finalPackage}/bin/emacs --no-window-system";
+      VISUAL = "emacs --no-window-system";
       EDITOR = VISUAL;
     };
 
