@@ -11,7 +11,9 @@
 /.config/atril/
 /.config/caja/accels
 /.config/caja/desktop-metadata
+/.config/chromium/
 /.config/Electron/
+/.config/gtk-2.0/gtkfilechooser.ini
 /.config/marco/sessions/
 /.config/mate/backgrounds.xml
 /.config/mate-session/saved-session/
@@ -21,6 +23,7 @@
 /.config/QtProject.conf
 /.config/session-state/
 /.config/VirtualBox/
+/.dbus/
 /Desktop
 /Downloads
 /.dotfiles
