@@ -1,3 +1,7 @@
+# Remember that, instead of using this file, Home Manager can define the
+# `nixpkgs.config` option.  Both ways are per-user, but the Home Manager option
+# applies only within itself, and does not apply to `nix-env`.
+
 { pkgs, ... }:
 
 let
