@@ -26,6 +26,7 @@ in
   imports = [
     ./emacs.nix
     ./nixos-config.nix
+    ./rootless-docker.nix
   ];
 
   options.my = with types; {
