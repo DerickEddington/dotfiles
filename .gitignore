@@ -12,6 +12,7 @@
 /.config/caja/accels
 /.config/caja/desktop-metadata
 /.config/chromium/
+/.config/docker/key.json
 /.config/Electron/
 /.config/gtk-2.0/gtkfilechooser.ini
 /.config/marco/sessions/
@@ -25,6 +26,9 @@
 /.config/VirtualBox/
 /.dbus/
 /Desktop
+/.docker/.buildNodeID
+/.docker/.token_seed
+/.docker/.token_seed.lock
 /Downloads
 /.dotfiles
 /.emacs.d/auto-save-list
@@ -67,6 +71,7 @@
 /.config/dconf/
 /.config/environment.d/10-home-manager.conf
 /.config/git/config
+/.config/systemd/
 /.local/share/home-manager/
 /.manpath
 /.mozilla/
