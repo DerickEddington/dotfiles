@@ -25,6 +25,7 @@ in
 {
   imports = [
     ./emacs.nix
+    ./nixos-config.nix
   ];
 
   options.my = with types; {
