@@ -25,6 +25,7 @@ in
 {
   imports = [
     ./emacs.nix
+    ./git-svn.nix
     ./nixos-config.nix
     ./rootless-docker.nix
   ];
