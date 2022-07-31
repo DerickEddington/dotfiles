@@ -17,8 +17,6 @@ let
   systemPath = toString /run/current-system/sw;
   userProfilePath = toString ~/.nix-profile;
 
-  inherit (config.my) dpi;
-
   # nur = config.my.nur.fetched;
   inherit (config.my.rycee.fetched) firefox-addons;
 in
@@ -31,11 +29,6 @@ in
   ];
 
   options.my = with types; {
-
-    dpi = mkOption {
-      type = ints.positive;
-      description = "DPI of primary monitor used with the host machine";
-    };
 
     # # Stopped using NUR, because it was broken once, and because
     # # re-downloading it all after a GC of /nix/store takes too long.
@@ -188,11 +181,6 @@ in
             "browser.newtabpage.activity-stream.showSearch" = false;
             "browser.newtabpage.activity-stream.showSponsored" = false;
 
-            # Note: Not needed when services.xserver.dpi is set to the DPI.
-            # "layout.css.devPixelsPerPx" = toString (dpi / 96.0);
-            "layout.css.devPixelsPerPx" = "1.4";
-            # "layout.css.dpi" = dpi;
-
             "font.default.x-western" = "sans-serif";
             "font.size.variable.x-western" = 15;
             "font.size.monospace.x-western" = 14;
@@ -256,19 +244,8 @@ in
           # Darker background for new tabs (to not blast eyes with blinding
           # white).
           userContent = ''
-            .tab {
-              font-size-adjust: 0.52 !important;
-            }
-
             .tab:not(:hover) .closebox {
               display: none;
-            }
-
-            :root {
-              --tab-height: 29px !important;
-            }
-            .tab {
-              height: var(--tab-height) !important;
             }
           '';
         };
@@ -331,10 +308,6 @@ in
 
       "org/mate/caja/desktop" = {
         font = "Ubuntu 12";
-      };
-
-      "org/mate/desktop/font-rendering" = {
-        dpi = dpi * 1.0; # Converted to float.
       };
 
       "org/mate/desktop/sound" = {
