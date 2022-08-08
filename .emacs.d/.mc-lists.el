@@ -17,6 +17,7 @@
         end-of-visual-line
         forward-sexp
         goto-line
+        home-end-end
         home-end-home
         indent-for-tab-command
         kill-region
@@ -35,6 +36,7 @@
         sp-kill-word
         sp-next-sexp
         sp-remove-active-pair-overlay
+        wdired--self-insert
         wdired-next-line
         wdired-previous-line
         widget-kill-line
