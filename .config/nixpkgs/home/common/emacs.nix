@@ -3,6 +3,12 @@
 let
   inherit (builtins) concatMap foldl';
   inherit (lib) mkOption types;
+
+  unstableEmacsFiles = rec {
+    channel = <nixos-unstable>;
+    pkg = "pkgs/applications/editors/emacs";
+    sub = x: channel + "/${pkg}/${toString x}";
+  };
 in
 
 {
@@ -13,6 +19,20 @@ in
       default = [];
     };
 
+    elpa = {
+      generated = mkOption {
+        type = nullOr path;
+        # By default, use the latest list of what ELPA has, so that updated
+        # versions of Emacs packages in ELPA are available to us sooner.  The
+        # stable <nixos> channel is not updated after release, whereas the
+        # <nixos-unstable> channel is continually updated.
+        default = let
+          archive = "elisp-packages/elpa-generated.nix";
+        in
+          unstableEmacsFiles.sub archive;
+      };
+    };
+
     melpa = {
       archiveJson = mkOption {
         type = nullOr path;
@@ -21,11 +41,9 @@ in
         # stable <nixos> channel is not updated after release, whereas the
         # <nixos-unstable> channel is continually updated.
         default = let
-          channel = <nixos-unstable>;
-          pkg = "pkgs/applications/editors/emacs";
           archive = "elisp-packages/recipes-archive-melpa.json";
         in
-          channel + "/${pkg}/${archive}";
+          unstableEmacsFiles.sub archive;
       };
     };
 
@@ -71,15 +89,32 @@ in
       ])];
 
       # This `overrides` (used with `overrideScope'`) causes these exact
-      # emacs-package derivations (that are our custom "latest MELPA" ones) to
-      # also be used to satisfy the dependencies of any emacs-packages that
-      # depend on these emacs-packages' names.  Otherwise, multiple versions of
-      # some emacs-packages might be installed, e.g. the latest `ivy` that we
-      # give here and another older-version `ivy` (from the original
-      # emacs-packages set) since `counsel` also depends on it.  That is avoided
-      # by this overriding, e.g. only the single latest `ivy` is installed and
-      # is also used for the dependency of `counsel`.
+      # emacs-package derivations (that are our custom "latest ELPA & MELPA"
+      # ones) to also be used to satisfy the dependencies of any emacs-packages
+      # that depend on these emacs-packages' names.  Otherwise, multiple
+      # versions of some emacs-packages might be installed, e.g. the latest
+      # `ivy` that we give here and another older-version `ivy` (from the
+      # original emacs-packages set) since `counsel` also depends on it.  That
+      # is avoided by this overriding, e.g. only the single latest `ivy` is
+      # installed and is also used for the dependency of `counsel`.
       overrides = [
+        # Maybe use our custom archive of ELPA.
+        (self: super: let
+          inherit (config.my.emacs.elpa) generated;
+          elpaChoice =
+            # Maybe use our custom archive.
+            if generated == null
+            then { inherit (super) elpaPackages; }
+            else { elpaPackages = super.elpaPackages.override { inherit generated; }; };
+          inherit (elpaChoice) elpaPackages;
+        in (
+          # Attribute that enables named unambiguous access to this set without
+          # regard to how the below orders its members at the top-level.
+          { inherit elpaPackages; }
+          # All from ELPA, with lower priority than MELPA (because this override
+          # function is before the below).
+          // elpaPackages
+        ))
         # Maybe use our custom archive of MELPA; and control the order of Stable
         # versus Unstable MELPA.
         (self: super: let
