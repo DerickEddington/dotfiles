@@ -85,6 +85,7 @@ in
         rg
         rust-mode
         smartparens
+        tramp  # To use version from ELPA that is newer than built-in.
         toml-mode
       ])];
 
