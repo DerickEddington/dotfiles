@@ -171,6 +171,8 @@
  '(magit-process-popup-time 5)
  '(magit-published-branches
    '("origin/master" "origin/main" "origin/default" "origin/primary"))
+ '(magit-reflog-margin '(t age-abbreviated magit-log-margin-width nil 16))
+ '(magit-refs-margin '(t age-abbreviated magit-log-margin-width nil 16))
  '(magit-refs-margin-for-tags t)
  '(magit-section-initial-visibility-alist '((stashes . hide) (untracked . hide)))
  '(magit-slow-confirm '(discard drop-stashes set-and-push))
