@@ -68,6 +68,7 @@ in
         adaptive-wrap
         all-the-icons
         cargo
+        cmake-mode
         company
         counsel
         expand-region
