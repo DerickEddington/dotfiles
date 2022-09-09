@@ -38,6 +38,7 @@
 /.emacs.d/elpa/
 /.emacs.d/history
 /.emacs.d/.lsp-session*
+/.emacs.d/tramp
 /.emacs.d/transient/history.el
 /.emacs.d/url/cache/
 /.esd_auth
