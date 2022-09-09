@@ -83,5 +83,11 @@ in
       in
         map svnConfig cfg.directories;
     };
+
+    my.emacs.extraPackages = [(epkgs:
+      with epkgs; [
+        magit-svn
+      ]
+    )];
   };
 }
