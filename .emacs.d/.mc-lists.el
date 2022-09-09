@@ -51,5 +51,6 @@
         gud-tooltip-mouse-motion
         handle-switch-frame
         lsp-signature-stop
+        overwrite-mode
         read-only-mode
         ))
