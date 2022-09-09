@@ -71,6 +71,7 @@ in
         cmake-mode
         company
         counsel
+        counsel-tramp
         expand-region
         flycheck
         home-end
@@ -80,6 +81,7 @@ in
         lsp-ivy
         lsp-mode
         lsp-ui
+        lua-mode
         magit
         multiple-cursors
         nix-mode
