@@ -87,6 +87,7 @@ in
         smartparens
         tramp  # To use version from ELPA that is newer than built-in.
         toml-mode
+        yaml-mode
       ])];
 
       # This `overrides` (used with `overrideScope'`) causes these exact
