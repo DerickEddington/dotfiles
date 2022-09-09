@@ -1,8 +1,5 @@
 (require 'cc-mode)
 
-(require 'company)
-(define-key c-mode-map (kbd "TAB") #'company-indent-or-complete-common)
-
 (require 'eldoc)
 
 (require 'flycheck)
