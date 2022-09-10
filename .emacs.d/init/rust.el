@@ -12,6 +12,11 @@
 
 (require 'lsp-mode)
 (add-hook 'rust-mode-hook #'lsp)
+(lsp-register-client
+ (make-lsp-client :new-connection (lsp-tramp-connection "rust-analyzer")
+                  :major-modes '(rust-mode)
+                  :remote? t
+                  :server-id 'rust-analyzer-remote))
 
 (require 'smartparens)
 (define-key rust-mode-map [remap sp-forward-slurp-sexp] #'sp-slurp-hybrid-sexp)
