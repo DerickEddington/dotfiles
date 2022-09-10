@@ -7,7 +7,8 @@
 (require 'lsp-mode)
 (add-hook 'c-mode-hook #'lsp)
 (lsp-register-client
- (make-lsp-client :new-connection (lsp-tramp-connection "clangd")
+ (make-lsp-client :new-connection (lsp-tramp-connection
+                                   #'(lambda () (cons "clangd" lsp-clients-clangd-args)))
                   :major-modes '(c-mode)  ; Could also include: c++-mode
                   :remote? t
                   :server-id 'clangd-remote))
