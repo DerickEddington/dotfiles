@@ -209,6 +209,7 @@
  '(message-citation-line-function 'message-insert-formatted-citation-line)
  '(message-confirm-send t)
  '(message-kill-buffer-on-exit t)
+ '(message-log-max 1000000)
  '(message-send-mail-function 'smtpmail-send-it)
  '(minibuffer-depth-indicate-mode t)
  '(mode-line-format
@@ -256,7 +257,6 @@
  '(swiper-goto-start-of-match t)
  '(swiper-include-line-number-in-search t)
  '(tab-always-indent 'complete)
- '(tab-width 4)
  '(tab-first-completion 'word)
  '(tool-bar-mode nil)
  '(tooltip-mode nil)
