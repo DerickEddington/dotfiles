@@ -7,7 +7,7 @@
  '(after-save-hook '(magit-after-save-refresh-status))
  '(auth-source-save-behavior nil)
  '(auto-revert-buffer-list-filter 'magit-auto-revert-repository-buffer-p)
- '(auto-revert-check-vc-info t)
+ '(auto-revert-check-vc-info nil)
  '(auto-revert-mode-text "")
  '(blink-cursor-blinks -1)
  '(blink-cursor-delay 0.7)
@@ -267,7 +267,8 @@
  '(tramp-remote-path
    '(tramp-default-remote-path tramp-own-remote-path "/bin" "/usr/bin" "/sbin" "/usr/sbin" "/usr/local/bin" "/usr/local/sbin" "/local/bin" "/local/freeware/bin" "/local/gnu/bin" "/usr/freeware/bin" "/usr/pkg/bin" "/usr/contrib/bin" "/opt/bin" "/opt/sbin" "/opt/local/bin"))
  '(tramp-use-ssh-controlmaster-options nil)
- '(vc-handled-backends '(SVN Git))
+ '(vc-handled-backends nil)
+ '(vc-ignore-dir-regexp "")
  '(view-read-only t)
  '(visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
  '(wdired-allow-to-change-permissions t)
