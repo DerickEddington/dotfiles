@@ -34,6 +34,7 @@
  '(counsel-find-file-at-point t)
  '(counsel-mode t)
  '(ctl-arrow nil)
+ '(debug-ignored-errors (cons 'remote-file-error debug-ignored-errors))
  '(default-frame-alist
     '((menu-bar-lines . 1)
       (width . 93)

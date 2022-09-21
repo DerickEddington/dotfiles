@@ -2,6 +2,7 @@
                    ;; Do not include a .el extension on these, to allow the
                    ;; possibility of loading .elc files instead.
                    "utils"  ;; Should be kept as first
+                   "tramp"
                    "smartparens"
                    "multiple-cursors"
                    "ivy"
