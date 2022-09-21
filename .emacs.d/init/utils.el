@@ -68,3 +68,27 @@ visited and a warning displayed."
                (my-follow-link)
              (message "Warning: editing through the sym-link bypasses any version control.")
              )))))
+
+
+(require 'xref)
+
+(defcustom my-dont-ask-follow-symlinks nil
+  "Functions for which non-nil `my-follow-symlinks' will not ask.
+
+Can be used like:
+  (defun your-lang-mode-hook ()
+    (setq-local my-dont-ask-follow-symlinks '(xref-pop-to-location)))"
+  :type '(set (const xref-pop-to-location)) ;; Could be extended with more items.
+  :local t
+  :group 'my)
+
+(defun my--xref-pop-to-location--around-advice--dont-ask-follow-symlinks (func &rest rest)
+  (let ((my-follow-symlinks
+         (or (and my-follow-symlinks
+                  (memq 'xref-pop-to-location my-dont-ask-follow-symlinks)
+                  t)
+             my-follow-symlinks)))
+    (apply func rest)))
+
+(advice-add 'xref-pop-to-location :around
+            #'my--xref-pop-to-location--around-advice--dont-ask-follow-symlinks)
