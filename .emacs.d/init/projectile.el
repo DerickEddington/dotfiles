@@ -1,10 +1,9 @@
 ;; Must be before `(require 'projectile)' is ever done, to have effect for
 ;; non-file non-project buffers.
-(custom-set-variables
- '(projectile-mode-line-prefix ""))
+;(custom-set-variables
+; '(projectile-mode-line-prefix ""))
 
 (require 'projectile)
-(require 'ibuffer-projectile)
 
 (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
 
