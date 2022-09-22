@@ -235,6 +235,7 @@
  '(racer-eldoc-timeout 5)
  '(remote-file-name-inhibit-locks t)
  '(require-final-newline 'ask)
+ '(rg-command-line-flags '("--search-zip" "--follow"))
  '(rust-format-on-save t)
  '(rust-indent-method-chain t)
  '(rust-indent-return-type-to-arguments nil)
