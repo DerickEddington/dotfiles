@@ -74,6 +74,7 @@
  '(ibuffer-compressed-file-name-regexp
    "\\.\\(arj\\|bgz\\|bz2\\|gz\\|lzh\\|taz\\|tgz\\|xz\\|zip\\|z\\|zst\\)$")
  '(ibuffer-default-sorting-mode 'alphabetic)
+ '(ibuffer-eliding-string "…")
  '(ibuffer-projectile-group-name-function 'my-ibuffer-projectile-group-name)
  '(ibuffer-projectile-prefix "Proj: ")
  '(ibuffer-projectile-skip-if-remote nil)
