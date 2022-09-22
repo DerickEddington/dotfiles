@@ -71,11 +71,12 @@ in
         cmake-mode
         company
         counsel
+        counsel-projectile
         counsel-tramp
         expand-region
         flycheck
         home-end
-        ibuffer-project
+        ibuffer-projectile
         ivy
         ivy-hydra
         lsp-ivy
@@ -85,6 +86,7 @@ in
         magit
         multiple-cursors
         nix-mode
+        projectile
         rg
         rust-mode
         smartparens

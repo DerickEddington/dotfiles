@@ -4,6 +4,7 @@
                    "utils"  ;; Should be kept as first
                    "my"     ;; Should be kept as second
                    "tramp"
+                   "projectile"
                    "smartparens"
                    "multiple-cursors"
                    "ivy"
@@ -27,7 +28,7 @@
 
 ;; Ibuffer (instead of default Buffer Menu)
 (global-set-key (kbd "C-x C-b") 'ibuffer)
-(require 'ibuffer-project)
+(require 'ibuffer-projectile)
 
 ;; Load this so it's immediately available (to have `dired-jump') before a
 ;; `dired' buffer is created.
