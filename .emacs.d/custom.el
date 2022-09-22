@@ -272,8 +272,7 @@
  '(tooltip-mode nil)
  '(tramp-default-method "ssh")
  '(tramp-histfile-override t)
- '(tramp-remote-path
-   '(tramp-default-remote-path tramp-own-remote-path "/bin" "/usr/bin" "/sbin" "/usr/sbin" "/usr/local/bin" "/usr/local/sbin" "/local/bin" "/local/freeware/bin" "/local/gnu/bin" "/usr/freeware/bin" "/usr/pkg/bin" "/usr/contrib/bin" "/opt/bin" "/opt/sbin" "/opt/local/bin"))
+ '(tramp-remote-path (cons 'tramp-own-remote-path tramp-remote-path))
  '(tramp-use-ssh-controlmaster-options nil)
  '(vc-handled-backends nil)
  '(vc-ignore-dir-regexp "")
