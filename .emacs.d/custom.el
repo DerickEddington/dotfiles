@@ -90,6 +90,7 @@
          (ibuffer-do-sort-by-alphabetic)))))
  '(ibuffer-projectile-group-name-function 'my-ibuffer-projectile-group-name)
  '(ibuffer-projectile-prefix "Proj: ")
+ '(ibuffer-projectile-skip-if-remote nil)
  '(ibuffer-show-empty-filter-groups nil)
  '(ibuffer-truncate-lines nil)
  '(indent-tabs-mode nil)
