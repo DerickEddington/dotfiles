@@ -9,6 +9,7 @@
  '(auto-revert-buffer-list-filter 'magit-auto-revert-repository-buffer-p)
  '(auto-revert-check-vc-info nil)
  '(auto-revert-mode-text "")
+ '(auto-revert-remote-files t)
  '(blink-cursor-blinks -1)
  '(blink-cursor-delay 0.7)
  '(blink-cursor-interval 0.5)
