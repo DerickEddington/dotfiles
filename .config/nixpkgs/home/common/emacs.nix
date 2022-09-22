@@ -71,10 +71,13 @@ in
         cmake-mode
         company
         counsel
+        counsel-fd
         counsel-projectile
         counsel-tramp
         expand-region
         flycheck
+        fd-dired
+        git-modes
         home-end
         ibuffer-projectile
         ivy
