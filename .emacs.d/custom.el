@@ -64,7 +64,6 @@
  '(gdb-display-io-nopopup t)
  '(gdb-switch-when-another-stopped nil)
  '(git-commit-style-convention-checks '(non-empty-second-line overlong-summary-line))
- '(global-auto-revert-mode t)
  '(global-company-mode t)
  '(global-flycheck-mode t)
  '(global-visual-line-mode t)
@@ -148,7 +147,6 @@
  '(lsp-ui-sideline-show-code-actions t)
  '(lsp-ui-sideline-show-diagnostics nil)
  '(lsp-ui-sideline-update-mode 'line)
- '(magit-auto-revert-mode nil)
  '(magit-blame-styles
    '((headings
       (heading-format . "%C %.7H %A %a %s
