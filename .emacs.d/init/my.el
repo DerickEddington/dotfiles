@@ -82,5 +82,6 @@ Can be used like:
              my-follow-symlinks)))
     (apply func rest)))
 
-(advice-add 'xref-pop-to-location :around
-            #'my--xref-pop-to-location--around-advice--dont-ask-follow-symlinks)
+(unless vc-handled-backends  ;; If VC is disabled.
+  (advice-add 'xref-pop-to-location :around
+              #'my--xref-pop-to-location--around-advice--dont-ask-follow-symlinks))

@@ -23,9 +23,6 @@
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file)
 
-;; Disable VC Mode because it has caused problems over TRAMP.
-(my-disable-vc-mode)
-
 ;; Ibuffer (instead of default Buffer Menu)
 (global-set-key (kbd "C-x C-b") 'ibuffer)
 
