@@ -72,7 +72,6 @@ Can be used like:
   (defun your-lang-mode-hook ()
     (setq-local my-dont-ask-follow-symlinks '(xref-pop-to-location)))"
   :type '(set (const xref-pop-to-location)) ;; Could be extended with more items.
-  :local t
   :group 'my)
 
 (defun my--xref-pop-to-location--around-advice--dont-ask-follow-symlinks (func &rest rest)
