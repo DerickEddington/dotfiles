@@ -166,6 +166,22 @@ in
             ;
           }
         )
+        # Custom packages that are modifications of existing or are new additions.
+        (self: super:
+          {
+            lsp-mode = self.melpaPackages.lsp-mode.overrideAttrs (oldAttrs: {
+              # Always compile and load `lsp-mode` with `lsp-use-plists` set to
+              # true, because it is too difficult to set the `LSP_USE_PLISTS`
+              # env-var in both the compile-time and the load-time of the
+              # `lsp-mode` package (as would be needed otherwise).
+              postPatch =
+                (oldAttrs.postPatch or "")
+                + (let orig = ''^( *)\(defvar +(lsp-use-plists) +\(getenv +"LSP_USE_PLISTS"\)\)'';
+                       new = ''\1;; Patched by Derick to always be true.\n\1(defconst \2 t)'';
+                   in ''sed -i -E -e 's/${orig}/${new}/' lsp-protocol.el'');
+            });
+          }
+        )
       ];
     };
   };
