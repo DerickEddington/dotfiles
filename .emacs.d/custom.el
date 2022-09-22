@@ -81,14 +81,15 @@
            (size 9 -1 :right)
            " "
            (mode 16 16 :left :elide)
-           " " project-file-relative)))
+           " " project-relative-file)))
  '(ibuffer-hook
    '((lambda nil
-       (setq ibuffer-filter-groups
-             (ibuffer-project-generate-filter-groups))
+       (ibuffer-projectile-set-filter-groups)
        (unless
-           (eq ibuffer-sorting-mode 'project-file-relative)
-         (ibuffer-do-sort-by-project-file-relative)))))
+           (eq ibuffer-sorting-mode 'alphabetic)
+         (ibuffer-do-sort-by-alphabetic)))))
+ '(ibuffer-projectile-group-name-function 'my-ibuffer-projectile-group-name)
+ '(ibuffer-projectile-prefix "Proj: ")
  '(ibuffer-show-empty-filter-groups nil)
  '(ibuffer-truncate-lines nil)
  '(indent-tabs-mode nil)
@@ -224,6 +225,11 @@
  '(next-error-recenter '(4))
  '(package-archives nil)
  '(parse-sexp-ignore-comments t)
+ '(projectile-enable-cmake-presets t)
+ '(projectile-mode t nil (projectile))
+ '(projectile-mode-line-function 'my-projectile-mode-line)
+ '(projectile-mode-line-prefix "")
+ '(projectile-per-project-compilation-buffer t)
  '(python-shell-interpreter "python3")
  '(racer-complete-insert-argument-placeholders nil)
  '(racer-eldoc-timeout 5)
