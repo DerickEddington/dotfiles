@@ -60,7 +60,7 @@
  '(flycheck-display-errors-delay 0.5)
  '(flycheck-global-modes '(rust-mode))
  '(flycheck-idle-change-delay 5)
- '(gc-cons-threshold 51200000)
+ '(gc-cons-threshold 100000000)
  '(gdb-display-io-nopopup t)
  '(gdb-switch-when-another-stopped nil)
  '(git-commit-style-convention-checks '(non-empty-second-line overlong-summary-line))
