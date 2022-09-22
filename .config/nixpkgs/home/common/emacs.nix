@@ -72,14 +72,12 @@ in
         company
         counsel
         counsel-fd
-        counsel-projectile
         counsel-tramp
         expand-region
         flycheck
         fd-dired
         git-modes
         home-end
-        ibuffer-projectile
         ivy
         ivy-hydra
         lsp-ivy
@@ -89,7 +87,6 @@ in
         magit
         multiple-cursors
         nix-mode
-        projectile
         rg
         rust-mode
         smartparens

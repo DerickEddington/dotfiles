@@ -74,20 +74,6 @@
  '(ibuffer-compressed-file-name-regexp
    "\\.\\(arj\\|bgz\\|bz2\\|gz\\|lzh\\|taz\\|tgz\\|xz\\|zip\\|z\\|zst\\)$")
  '(ibuffer-default-sorting-mode 'alphabetic)
- '(ibuffer-formats
-   '((mark modified read-only locked " "
-           (name 18 18 :left :elide)
-           " "
-           (size 9 -1 :right)
-           " "
-           (mode 16 16 :left :elide)
-           " " project-relative-file)))
- '(ibuffer-hook
-   '((lambda nil
-       (ibuffer-projectile-set-filter-groups)
-       (unless
-           (eq ibuffer-sorting-mode 'alphabetic)
-         (ibuffer-do-sort-by-alphabetic)))))
  '(ibuffer-projectile-group-name-function 'my-ibuffer-projectile-group-name)
  '(ibuffer-projectile-prefix "Proj: ")
  '(ibuffer-projectile-skip-if-remote nil)
@@ -226,7 +212,6 @@
  '(package-archives nil)
  '(parse-sexp-ignore-comments t)
  '(projectile-enable-cmake-presets t)
- '(projectile-mode t nil (projectile))
  '(projectile-mode-line-function 'my-projectile-mode-line)
  '(projectile-mode-line-prefix "")
  '(projectile-per-project-compilation-buffer t)
