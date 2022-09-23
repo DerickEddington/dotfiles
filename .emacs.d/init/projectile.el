@@ -1,7 +1,6 @@
 ;; Must be before `(require 'projectile)' is ever done, to have effect for
 ;; non-file non-project buffers.
-;(custom-set-variables
-; '(projectile-mode-line-prefix ""))
+;(setq projectile-mode-line-prefix "")
 
 (require 'projectile)
 
