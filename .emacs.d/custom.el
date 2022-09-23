@@ -73,8 +73,21 @@
  '(hs-isearch-open nil)
  '(ibuffer-compressed-file-name-regexp
    "\\.\\(arj\\|bgz\\|bz2\\|gz\\|lzh\\|taz\\|tgz\\|xz\\|zip\\|z\\|zst\\)$")
- '(ibuffer-default-sorting-mode 'alphabetic)
+ '(ibuffer-default-sorting-mode 'project-file-relative)
+ '(ibuffer-directory-abbrev-alist directory-abbrev-alist)
  '(ibuffer-eliding-string "…")
+ '(ibuffer-formats
+   '((mark read-only modified " "
+           (name 18 18 :left :elide)
+           "  "
+           (mode 13 13 :left :elide)
+           " "
+           (my-size 6 -1 :right)
+           "  " my-process-and-relative-filename)
+     (mark " "
+           (name 16 -1)
+           " " filename)))
+ '(ibuffer-project-use-cache t)
  '(ibuffer-projectile-group-name-function 'my-ibuffer-projectile-group-name)
  '(ibuffer-projectile-prefix "Proj: ")
  '(ibuffer-projectile-skip-if-remote nil)
@@ -209,6 +222,8 @@
       (propertized-buffer-identification "%b"))
      " " mode-line-modes mode-line-misc-info mode-line-end-spaces))
  '(mode-line-percent-position '(6 "%q"))
+ '(my-ibuffer-project-root-regexps
+   '("~/.config/[^/]+" "~/.emacs.d" "~/.ssh" "~/bin" "/boot" "/nix/store/[^/]+" "/nix/var/log/nix/drvs" "/nix/var/nix/profiles/per-user/[^/]+/channels/[^/]+"))
  '(next-error-recenter '(4))
  '(package-archives nil)
  '(parse-sexp-ignore-comments t)
