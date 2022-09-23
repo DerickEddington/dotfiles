@@ -4,6 +4,7 @@
 (defgroup my nil
   "My own things.")
 
+
 (defun my-disable-vc-mode ()
   (remove-hook 'find-file-hook #'vc-refresh-state)
   (remove-hook 'kill-buffer-hook #'vc-kill-buffer-hook)

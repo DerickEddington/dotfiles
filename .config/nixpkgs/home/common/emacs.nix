@@ -78,6 +78,7 @@ in
         fd-dired
         git-modes
         home-end
+        ibuffer-project
         ivy
         ivy-hydra
         lsp-ivy
