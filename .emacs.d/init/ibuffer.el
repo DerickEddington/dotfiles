@@ -38,7 +38,7 @@ apply to remote directories."
 
 Causes `ibuffer' to use our filter-groups initially, which avoids
 seeing stale state that otherwise would require an extra
-`ibuffer-update' call."
+`ibuffer-update' call to see properly."
   (interactive "P")
   (when clear-cache
     (ibuffer-project-clear-cache))
@@ -46,6 +46,22 @@ seeing stale state that otherwise would require an extra
         other-window-p name qualifiers noselect shrink formats)
     (ibuffer
      other-window-p name qualifiers noselect shrink filter-groups formats)))
+
+
+(defun my-ibuffer-update (arg &optional silent)
+  "Regenerate filter-groups according to `ibuffer-project', when appropriate.
+
+Causes `ibuffer-update' to use updated filter-groups, which
+avoids seeing new buffers placed in the \"Default\" group that
+otherwise would require an extra `ibuffer' call to see properly."
+  (interactive "P")
+  (when (and ibuffer-filter-groups  ; When nil, has been intentionally modified.
+             (seq-every-p (lambda (g) (pcase g (`(,group-label (project-root . ,qualifier)) t)))
+                          ibuffer-filter-groups))
+    (setq ibuffer-filter-groups (ibuffer-project-generate-filter-groups)))
+  (ibuffer-update arg silent))
+
+(define-key ibuffer-mode-map [remap ibuffer-update] #'my-ibuffer-update)
 
 
 (defun my-size--summarizer (column-strings)
