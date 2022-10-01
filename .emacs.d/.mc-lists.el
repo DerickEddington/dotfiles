@@ -6,6 +6,7 @@
         backward-sexp
         beginning-of-defun
         beginning-of-visual-line
+        c-electric-semi&comma
         comment-dwim
         company-indent-or-complete-common
         delete-indentation
