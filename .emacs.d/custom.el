@@ -223,7 +223,7 @@
      " " mode-line-modes mode-line-misc-info mode-line-end-spaces))
  '(mode-line-percent-position '(6 "%q"))
  '(my-ibuffer-project-root-regexps
-   '("~/.config/[^/]+" "~/.emacs.d" "~/.ssh" "~/bin" "/boot" "/nix/store/[^/]+" "/nix/var/log/nix/drvs" "/nix/var/nix/profiles/per-user/[^/]+/channels/[^/]+" "/usr/src/glibc/[^/]+"))
+   '("~/\\.config/[^/]+" "~/\\.emacs\\.d" "~/\\.ssh" "~/bin" "/boot" "/nix/store/[^/]+" "/nix/var/log/nix/drvs" "/nix/var/nix/profiles/per-user/[^/]+/channels/[^/]+" "/usr/src/glibc/[^/]+"))
  '(next-error-recenter '(4))
  '(package-archives nil)
  '(parse-sexp-ignore-comments t)
