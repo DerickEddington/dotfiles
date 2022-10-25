@@ -52,6 +52,10 @@ in
 
   # Extend the imported options.
   dconf.settings = {
+    # # Different mouse theme.
+    # "org/mate/desktop/peripherals/mouse" = {
+    #   cursor-theme = mkForce "ComixCursors-Opaque-Green";
+    # };
     # # More launchers in panel than ./home/common.nix has by default.
     # "org/mate/panel/general" = {
     #   object-id-list = mkForce [
