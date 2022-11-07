@@ -55,6 +55,9 @@
  '(enable-recursive-minibuffers t)
  '(face-font-family-alternatives nil)
  '(face-font-registry-alternatives nil)
+ '(fd-dired-display-in-current-window nil)
+ '(fd-dired-ls-option
+   '("| rg --null-data --multiline --no-unicode '/?(\\x00)' -r '$1' | xargs -0 ls -l -d -A -h -F | uniq" . "-ldAhF"))
  '(fill-column 80)
  '(find-file-visit-truename nil)
  '(flycheck-check-syntax-automatically '(save idle-buffer-switch mode-enabled))
