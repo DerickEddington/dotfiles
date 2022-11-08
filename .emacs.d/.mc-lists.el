@@ -10,6 +10,7 @@
         comment-dwim
         company-indent-or-complete-common
         delete-indentation
+        dired-maybe-insert-subdir
         dired-next-line
         dired-previous-line
         dired-tree-down
@@ -48,10 +49,12 @@
         View-scroll-page-backward
         counsel-M-x
         dap-tooltip-mouse-motion
+        dired-toggle-read-only
         find-file-read-only
         gud-tooltip-mouse-motion
         handle-switch-frame
         lsp-signature-stop
         overwrite-mode
         read-only-mode
+        wdired-exit
         ))
