@@ -16,9 +16,6 @@ let
   # (toString avoids the path coercion in antiquotation that would copy to /nix/store/.)
   systemPath = toString /run/current-system/sw;
   userProfilePath = toString ~/.nix-profile;
-
-  # nur = config.my.nur.fetched;
-  inherit (config.my.rycee.fetched) firefox-addons;
 in
 {
   imports = [
@@ -27,31 +24,6 @@ in
     ./nixos-config.nix
     ./rootless-docker.nix
   ];
-
-  options.my = with types; {
-
-    # # Stopped using NUR, because it was broken once, and because
-    # # re-downloading it all after a GC of /nix/store takes too long.
-    # nur = {
-    #   url = mkOption { type = str; default = https://github.com/nix-community/NUR/archive/master.tar.gz; };
-    #   fetched = mkOption {
-    #     type = attrsOf anything;
-    #     default = import (fetchTarball config.my.nur.url) { inherit pkgs; };
-    #   };
-    # };
-
-    # Instead, directly use each NUR repo that I use.
-    rycee = {
-      url = mkOption {
-        type = str;
-        default = https://gitlab.com/rycee/nur-expressions/-/archive/master/nur-expressions-master.tar.bz2;
-      };
-      fetched = mkOption {
-        type = attrsOf anything;
-        default = import (fetchTarball config.my.rycee.url) { inherit pkgs; };
-      };
-    };
-  };
 
   config = {
     # Let Home Manager install and manage itself.
@@ -251,12 +223,14 @@ in
         };
       };
 
-      # Note: Would be incompatible with /etc/nixos/firefox.nix having a
-      # non-empty nixExtensions list.
-      extensions = with firefox-addons; [
-        tree-style-tab
-        ublock-origin
-      ];
+      # NOTE: No longer used, because Firefox ends-up managing their updates
+      #       even with this option.
+      # # Note: Would be incompatible with /etc/nixos/firefox.nix having a
+      # # non-empty nixExtensions list.
+      # extensions = with firefox-addons; [
+      #   tree-style-tab
+      #   ublock-origin
+      # ];
     };
 
     #---------------------------------------------------------------------------
