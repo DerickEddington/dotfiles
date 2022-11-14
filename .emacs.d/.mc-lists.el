@@ -9,7 +9,9 @@
         c-electric-semi&comma
         comment-dwim
         company-indent-or-complete-common
+        counsel-yank-pop
         delete-indentation
+        dired-do-kill-lines
         dired-maybe-insert-subdir
         dired-next-line
         dired-previous-line
