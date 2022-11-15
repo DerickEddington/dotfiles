@@ -68,6 +68,7 @@ in
         adaptive-wrap
         all-the-icons
         cargo
+        charmap
         cmake-mode
         company
         counsel
