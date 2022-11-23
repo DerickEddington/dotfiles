@@ -6,7 +6,11 @@
         backward-sexp
         beginning-of-defun
         beginning-of-visual-line
+        c-electric-paren
         c-electric-semi&comma
+        c-electric-star
+        c-end-of-defun
+        c-indent-line-or-region
         comment-dwim
         company-indent-or-complete-common
         counsel-yank-pop
@@ -55,6 +59,7 @@
         find-file-read-only
         gud-tooltip-mouse-motion
         handle-switch-frame
+        ivy-switch-buffer
         lsp-signature-stop
         overwrite-mode
         read-only-mode
