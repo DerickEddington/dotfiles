@@ -6,8 +6,10 @@
         backward-sexp
         beginning-of-defun
         beginning-of-visual-line
+        c-electric-brace
         c-electric-paren
         c-electric-semi&comma
+        c-electric-slash
         c-electric-star
         c-end-of-defun
         c-indent-line-or-region
