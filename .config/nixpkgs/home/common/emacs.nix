@@ -56,7 +56,7 @@ in
   config = {
     programs.emacs = {
       enable = true;
-      package = pkgs.emacsNativeComp;
+      package = pkgs.emacs-gtk;
       extraPackages = epkgs: concatMap (f: f epkgs) config.my.emacs.extraPackages;
       overrides = self: super:
         let listOfAttrs = map (f: f self super) config.my.emacs.overrides;
