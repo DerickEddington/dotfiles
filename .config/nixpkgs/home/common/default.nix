@@ -20,9 +20,10 @@ let
 in
 {
   imports = [
+    ./module-args.nix
+    ./debugging.nix
     ./emacs.nix
     ./git-svn.nix
-    ./module-args.nix
     ./rootless-docker.nix
   ];
 
@@ -33,6 +34,7 @@ in
     home.enableNixpkgsReleaseCheck = true;
 
     nixpkgs.overlays = import ../../my/overlays (_self: _super: {
+                                debuggingSupportConfig = config.my.debugging.support;
                               });
 
     # Home Manager needs a bit of information about you and the paths it should

@@ -1,5 +1,7 @@
 # User-specific options specific to this particular host machine.
 
+{ pkgs, ... }:
+
 let
   hostName = import ../../hostName.nix;
 in
@@ -10,4 +12,9 @@ in
   imports = [
     (../../common/per-host + "/${hostName}")
   ];
+
+  my.debugging.support = {
+    sourceCode.of.prebuilt.packages = with pkgs; [
+    ];
+  };
 }

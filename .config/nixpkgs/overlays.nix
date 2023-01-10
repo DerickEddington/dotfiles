@@ -8,5 +8,8 @@
 # similar) could be set to `import ~/${loc}/my/overlays ...` so that my overlays are passed
 # arguments that are the same as used by H.M. (etc) and so that this file's defaults are not used.
 
-import ./my/overlays (_self: _super: {
+import ./my/overlays (self: _super: {
+  # Use the system-wide NixOS option value for this, if available, so that its choices apply even
+  # outside of NixOS and outside of Home Manager.
+  debuggingSupportConfig = self.myLib.nixos.config.my.debugging.support or {};
 })

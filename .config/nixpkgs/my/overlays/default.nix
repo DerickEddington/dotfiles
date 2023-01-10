@@ -45,6 +45,13 @@ let
   ];
 
   debuggingSupportOverlays = [
+    (self: super: let
+      inherit (super) myLib;
+      inherit (deps self super) debuggingSupportConfig;
+
+      selection = debuggingSupportFor super;
+    in
+      (myLib.pkgWithDebuggingSupport.byMyConfig debuggingSupportConfig).overlayResult selection)
   ];
 
   choicesOverlays = customOverlays ++ debuggingSupportOverlays;
