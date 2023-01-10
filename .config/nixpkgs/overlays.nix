@@ -1,21 +1,12 @@
-# Use the same overlays as the NixOS system configuration and/or use
-# user-specific overlays.  By default (as this file was initially provided),
-# both are used, but a user may modify or delete this file as desired.
+# Pass defaults to my actual overlays definition.  This exists to adapt the standard Nixpkgs
+# overlays config file (this file) to do it my way.  A user may modify or delete this file as
+# desired.
+#
+# This file should only be used for operations like `nix-env` that exist independently and do not
+# involve Home Manager, NixOS, etc.  For the overlays of a Nixpkgs instance used by Home Manager
+# (etc), this file should not be used, and instead the `nixpkgs.overlays` option of H.M. (or
+# similar) could be set to `import ~/${loc}/my/overlays ...` so that my overlays are passed
+# arguments that are the same as used by H.M. (etc) and so that this file's defaults are not used.
 
-let
-  inherit (builtins) pathExists;
-  myLib = import ./my/lib {};
-  inherit (myLib) nixosConfigLoc;
-in
-
-let
-  systemWideOverlays = let
-    file = nixosConfigLoc.dirName + "/nixpkgs/overlays.nix";
-  in
-    if (nixosConfigLoc.isDefined) && (pathExists file) then import file else [];
-
-  myOverlays = [
-    # Add yours here:
-  ];
-in
-(systemWideOverlays ++ myOverlays)
+import ./my/overlays (_self: _super: {
+})

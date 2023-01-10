@@ -32,6 +32,9 @@ in
 
     home.enableNixpkgsReleaseCheck = true;
 
+    nixpkgs.overlays = import ../../my/overlays (_self: _super: {
+                              });
+
     # Home Manager needs a bit of information about you and the paths it should
     # manage.
     home.username = getEnv "USER";
