@@ -8,6 +8,7 @@ let
   # Packages to override to have debugging support added.  This causes rebuilding of these.
   debuggingSupportFor = pkgs: {
     inherit (pkgs)
+      my-hello-test  # Have this to always exercise my Nix library for debugging support.
     ;
   };
 
@@ -28,6 +29,14 @@ let
   early.myLib = import ../lib { pkgs = null; };  # Only for use before `myLibOverlays`.
 
   firstOverlays = [
+    # Add my altered "hello" package.  Can be useful for testing.  This is in `firstOverlays` so
+    # that `super.hello` is not the overridden package from `systemWideOverlays` (that package
+    # usually adds debugging support in its own way, but we want to ensure that only our way is in
+    # effect here).  We do not use `self.hello` because that usually is the one from
+    # `systemWideOverlays`.
+    (self: super: {
+      my-hello-test = early.myLib.makeHelloTestPkg super;
+    })
   ];
 
   systemWideOverlays =
