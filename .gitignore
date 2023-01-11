@@ -71,6 +71,7 @@
 /.bashrc
 /.config/dconf/
 /.config/environment.d/10-home-manager.conf
+/.config/gdb/my-source-path-init
 /.config/git/config
 /.config/systemd/
 /.local/share/home-manager/
