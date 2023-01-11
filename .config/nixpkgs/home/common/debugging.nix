@@ -2,9 +2,8 @@
 
 let
   inherit (builtins) replaceStrings;
-  inherit (lib) mkIf;
   inherit (lib.attrsets) recursiveUpdate;
-  inherit (myLib) nixosConfigLoc sourceCodeOfPkg;
+  inherit (myLib) nixosConfigLoc;
 
   # Get the raw definition of the `debugging` module from my system-wide NixOS directory.
   systemWideDebuggingModule = rec {
@@ -32,6 +31,9 @@ in
   };
 
   config = let
+    inherit (lib) mkIf;
+    inherit (myLib) sourceCodeOfPkg;
+
     cfg = config.my.debugging;
   in {
     # Reuse the raw definition, but change an asepct, of `config.my.debugging` from system-wide.

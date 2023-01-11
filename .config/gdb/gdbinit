@@ -1,10 +1,10 @@
 # Useful locations to have in the "source path".  (Note that `dir` adds to the front (pushes), so
 # these lines are in reverse order of precedence, but within a line the order is the precedence.)
 
-# These work with my /etc/nixos/lib/source-code-of-package.nix that automatically manages these.
-# Most Nixpkgs' source files are unpacked and prepared in their own /build/ directory, and
-# sourceCodeOfPackage copies build directories to /run/current-system/sw/src/of-pkg-via-my/, or
-# ~/.nix-profile/src/of-pkg-via-my/, or ./result/src/of-pkg-via-my/, etc.
+# These work with my custom NixOS and Home Manager configurations that automatically manage these.
+# Most Nixpkgs' source files are unpacked and prepared in their own /build/ directory, and my
+# pkgWithDebuggingSupport copies build directories to /run/current-system/sw/src/of-pkg-via-my/ or
+# ~/.nix-profile/src/of-pkg-via-my/.
 dir ~/.nix-profile/src/of-pkg-via-my /run/current-system/sw/src/of-pkg-via-my
 
 # These are managed by the user.
