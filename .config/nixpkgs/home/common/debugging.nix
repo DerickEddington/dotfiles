@@ -31,24 +31,49 @@ in
   };
 
   config = let
-    inherit (lib) mkIf;
-    inherit (myLib) sourceCodeOfPkg;
+    inherit (lib) mkDefault mkIf;
+    inherit (lib.strings) concatMapStringsSep;
+    inherit (myLib) makeTmpfilesRule sourceCodeOfPkg;
 
     cfg = config.my.debugging;
   in {
-    # Reuse the raw definition, but change an asepct, of `config.my.debugging` from system-wide.
+    # Reuse the raw definition, but change aspects, of `config.my.debugging` from system-wide.
     my.debugging = recursiveUpdate sysWide.config.my.debugging {
-      # Don't use those that are for the system-wide configuration (e.g. `hostLibc`), and instead
-      # use our own selection that is for the user configuration.
-      support.sourceCode.of.prebuilt.packages = [
-        # Could add from `pkgs` here, to be common to all users.
-      ];
+      support = {
+        debugInfo.tmpDirs = mkDefault (if cfg.support.debugInfo.all.enable
+                                       then [~/tmp/debug]
+                                       else []);
+        sourceCode = {
+          # Don't use those that are for the system-wide configuration (e.g. `hostLibc`), and
+          # instead use our own selection that is for the user configuration.
+          of.prebuilt.packages = [
+            # Could add from `pkgs` here, to be common to all users.
+          ];
+          tmpDirs = mkDefault (if cfg.support.sourceCode.all.enable
+                               then [~/tmp/src]
+                               else []);
+        };
+      };
     };
 
     home = {
       # Automatically install the "debug" output of packages if they have one, and set the
       # NIX_DEBUG_INFO_DIRS environment variable to include them, for GDB to find them.
       enableDebugInfo = cfg.support.debugInfo.of.prebuilt.enable;
+
+      sessionVariablesExtra = let
+        # Extend NIX_DEBUG_INFO_DIRS.  Must use sessionVariablesExtra because sessionVariables is
+        # types.attrs which silently drops earlier attribute definitions and so would not work for
+        # this.  (That type is deprecated because of that.)
+        NIX_DEBUG_INFO_DIRS = let
+          systemWide = "\${NIX_DEBUG_INFO_DIRS:+:}$NIX_DEBUG_INFO_DIRS";
+          underHome = concatMapStringsSep ":" toString cfg.support.debugInfo.tmpDirs;
+        in
+          ''NIX_DEBUG_INFO_DIRS="${underHome}${systemWide}"'';
+      in
+        mkIf (cfg.support.debugInfo.tmpDirs != []) ''
+          export ${NIX_DEBUG_INFO_DIRS}
+        '';
 
       packages = mkIf cfg.support.sourceCode.of.prebuilt.enable
         (map sourceCodeOfPkg.only
@@ -59,5 +84,10 @@ in
       # ~/.nix-profile/src/.  This works-out for where my custom approach places the source-code
       # files - in a derivation's output directory under ./src/.)
     };
+
+    systemd.user.tmpfiles.rules = let
+      mkRule = makeTmpfilesRule {};
+    in
+      (map mkRule cfg.support.debugInfo.tmpDirs) ++ (map mkRule cfg.support.sourceCode.tmpDirs);
   };
 }

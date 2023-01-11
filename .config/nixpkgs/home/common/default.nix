@@ -7,9 +7,8 @@
 { config, pkgs, lib, ... }:
 
 let
-  inherit (builtins) concatStringsSep getEnv;
+  inherit (builtins) getEnv;
   inherit (lib) hm mkOption types;
-  inherit (lib.strings) concatMapStringsSep;
 in
 
 let
@@ -56,22 +55,6 @@ in
         VISUAL = "emacs --no-window-system";
         EDITOR = VISUAL;
       };
-      sessionVariablesExtra = let
-        # Extend NIX_DEBUG_INFO_DIRS.  Must use sessionVariablesExtra because
-        # sessionVariables is types.attrs which silently drops earlier attribute
-        # definitions and so would not work for this.  (That type is deprecated
-        # because of that.)
-        NIX_DEBUG_INFO_DIRS = let
-          systemWide = "\${NIX_DEBUG_INFO_DIRS:+:}$NIX_DEBUG_INFO_DIRS";
-          underHome = concatMapStringsSep ":" (d: "$HOME/${d}")
-            ["tmp/debug" "debug" ".local/lib/debug"];
-          underTmps = concatStringsSep ":"
-            ["/tmp/debug" "/tmp" "/var/tmp/debug"];
-        in
-          ''NIX_DEBUG_INFO_DIRS="${underHome}:${underTmps}${systemWide}"'';
-      in ''
-        export ${NIX_DEBUG_INFO_DIRS}
-      '';
     };
 
     #---------------------------------------------------------------------------

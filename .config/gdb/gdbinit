@@ -8,7 +8,7 @@
 dir ~/.nix-profile/src/of-pkg-via-my /run/current-system/sw/src/of-pkg-via-my
 
 # These are managed by the user.
-dir ~/tmp/src ~/src ~/.local/src /tmp/src /tmp /var/tmp/src
+dir ~/tmp/src /tmp/src /var/tmp/src
 
 
 # How a program behaves under debugging
