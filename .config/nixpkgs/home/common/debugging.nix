@@ -31,10 +31,11 @@ in
   };
 
   config = let
-    inherit (builtins) elem;
+    inherit (builtins) elem listToAttrs;
     inherit (lib) mkDefault mkIf;
     inherit (lib.strings) concatMapStringsSep optionalString;
-    inherit (myLib) makeTmpfilesRule nixos sourceCodeOfPkg;
+    inherit (myLib) nixos sourceCodeOfPkg;
+    inherit (myLib.tmpfiles.debugging) mkDebugInfoDirPkg mkSourceCodeDirPkg;
 
     cfg = config.my.debugging;
     enabled.anySourceCode = let inherit (cfg.support) sourceCode;
@@ -80,33 +81,43 @@ in
           export ${NIX_DEBUG_INFO_DIRS}
         '';
 
-      file.".config/gdb/my-source-path-init".text = let
-        sys.hasSrc = elem "/src" nixos.config.environment.pathsToLink;
-        sys.srcLoc = optionalString sys.hasSrc "/run/current-system/sw/src/of-pkg-via-my";
-        sys.hasTmp = nixos.config.my.debugging.support.sourceCode.tmpDirs != [];
-        sys.tmpLoc = toString nixos.config.my.debugging.support.sourceCode.tmpDirs;
-        user.hasSrc = enabled.anySourceCode;
-        user.srcLoc = optionalString user.hasSrc "~/.nix-profile/src/of-pkg-via-my";
-        user.hasTmp = cfg.support.sourceCode.tmpDirs != [];
-        user.tmpLoc = toString cfg.support.sourceCode.tmpDirs;
-      in ''
-        # Useful locations to have in the "source path".  (Note that `dir` adds to the front
-        # (pushes), so these lines are in reverse order of precedence, but within a line the
-        # order is the precedence.)
+      file = {
+        ".config/gdb/my-source-path-init".text = let
+          sys.hasSrc = elem "/src" nixos.config.environment.pathsToLink;
+          sys.srcLoc = optionalString sys.hasSrc "/run/current-system/sw/src/of-pkg-via-my";
+          sys.hasTmp = nixos.config.my.debugging.support.sourceCode.tmpDirs != [];
+          sys.tmpLoc = toString nixos.config.my.debugging.support.sourceCode.tmpDirs;
+          user.hasSrc = enabled.anySourceCode;
+          user.srcLoc = optionalString user.hasSrc "~/.nix-profile/src/of-pkg-via-my";
+          user.hasTmp = cfg.support.sourceCode.tmpDirs != [];
+          user.tmpLoc = toString cfg.support.sourceCode.tmpDirs;
+        in ''
+          # Useful locations to have in the "source path".  (Note that `dir` adds to the front
+          # (pushes), so these lines are in reverse order of precedence, but within a line the
+          # order is the precedence.)
 
-        ${optionalString (sys.hasSrc || user.hasSrc) ''
-            # These work with my custom NixOS and Home Manager configurations that automatically
-            # manage these.  Most Nixpkgs' source files are unpacked and prepared in their own
-            # /build/ directory, and my pkgWithDebuggingSupport copies build directories to
-            # /run/current-system/sw/src/of-pkg-via-my/ or ~/.nix-profile/src/of-pkg-via-my/.
-            dir ${user.srcLoc} ${sys.srcLoc}
-          ''}
+          ${optionalString (sys.hasSrc || user.hasSrc) ''
+              # These work with my custom NixOS and Home Manager configurations that automatically
+              # manage these.  Most Nixpkgs' source files are unpacked and prepared in their own
+              # /build/ directory, and my pkgWithDebuggingSupport copies build directories to
+              # /run/current-system/sw/src/of-pkg-via-my/ or ~/.nix-profile/src/of-pkg-via-my/.
+              dir ${user.srcLoc} ${sys.srcLoc}
+            ''}
 
-        ${optionalString (sys.hasTmp || user.hasTmp) ''
-            # These are managed by the user.
-            dir ${user.tmpLoc} ${sys.tmpLoc}
-          ''}
-      '';
+          ${optionalString (sys.hasTmp || user.hasTmp) ''
+              # These are managed by the user.
+              dir ${user.tmpLoc} ${sys.tmpLoc}
+            ''}
+        '';
+      }
+      //
+      (listToAttrs (map
+        ({ pkg, destPath }: {
+          name = ".config/user-tmpfiles.d/${baseNameOf destPath}";
+          value = { source = pkg + destPath; };
+        })
+        ((map (mkDebugInfoDirPkg  {}) cfg.support.debugInfo.tmpDirs) ++
+         (map (mkSourceCodeDirPkg {}) cfg.support.sourceCode.tmpDirs))));
 
       packages = mkIf cfg.support.sourceCode.of.prebuilt.enable
         (map sourceCodeOfPkg.only
@@ -118,9 +129,12 @@ in
       # files - in a derivation's output directory under ./src/.)
     };
 
+    # Enable the tmpfiles user units for systemd.
     systemd.user.tmpfiles.rules = let
-      mkRule = makeTmpfilesRule {};
+      hasDbg = cfg.support.debugInfo.tmpDirs  != [];
+      hasSrc = cfg.support.sourceCode.tmpDirs != [];
+      never = "never-will-exist-mZwKT8DRkfYbYk1tFQYjiFgjKzXXGaGTol87GpwHxY7CIPgOC2aKnFmMcbCDq9N7";
     in
-      (map mkRule cfg.support.debugInfo.tmpDirs) ++ (map mkRule cfg.support.sourceCode.tmpDirs);
+      mkIf (hasDbg || hasSrc) ["r /tmp/${never}"];  # Just need a no-op entry, to be non-empty.
   };
 }

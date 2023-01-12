@@ -74,6 +74,8 @@
 /.config/gdb/my-source-path-init
 /.config/git/config
 /.config/systemd/
+/.config/user-tmpfiles.d/my-home-z-tmp-debug.conf
+/.config/user-tmpfiles.d/my-home-z-tmp-src.conf
 /.local/share/home-manager/
 /.manpath
 /.mozilla/
