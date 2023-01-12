@@ -24,6 +24,7 @@
                    "lsp"
                    "gdb"
                    "rust"
+                   "nix"
                    "c"
                    "modeline"  ;; Should be kept as last
                    ))
