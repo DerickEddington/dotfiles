@@ -8,7 +8,7 @@
 
 let
   inherit (builtins) getEnv;
-  inherit (lib) hm mkOption types;
+  inherit (lib) hm mkDefault mkEnableOption mkIf;
 in
 
 let
@@ -26,7 +26,25 @@ in
     ./rootless-docker.nix
   ];
 
+  options.my = {
+    tmpDir = mkEnableOption "`~/tmp` existence";
+  };
+
   config = {
+    #---------------------------------------------------------------------------
+    # My Custom Options
+    #---------------------------------------------------------------------------
+    my = {
+      tmpDir = mkDefault true;
+    };
+
+    systemd.user.tmpfiles.rules =
+      # Also enables the systemd-tmpfiles units (cleaning (etc) of all config'ed tmpfiles.d paths)
+      mkIf config.my.tmpDir ["q %h/tmp"];
+
+    #---------------------------------------------------------------------------
+    # Home Manager itself
+    #---------------------------------------------------------------------------
     # Let Home Manager install and manage itself.
     programs.home-manager.enable = true;
 

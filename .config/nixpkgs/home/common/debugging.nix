@@ -129,12 +129,9 @@ in
       # files - in a derivation's output directory under ./src/.)
     };
 
-    # Enable the tmpfiles user units for systemd.
-    systemd.user.tmpfiles.rules = let
-      hasDbg = cfg.support.debugInfo.tmpDirs  != [];
-      hasSrc = cfg.support.sourceCode.tmpDirs != [];
-      never = "never-will-exist-mZwKT8DRkfYbYk1tFQYjiFgjKzXXGaGTol87GpwHxY7CIPgOC2aKnFmMcbCDq9N7";
-    in
-      mkIf (hasDbg || hasSrc) ["r /tmp/${never}"];  # Just need a no-op entry, to be non-empty.
+    # Ensure that the systemd-tmpfiles user units are enabled, when needed.
+    my.tmpDir =
+      mkIf ((cfg.support.debugInfo.tmpDirs != []) || (cfg.support.sourceCode.tmpDirs != []))
+        true;
   };
 }
