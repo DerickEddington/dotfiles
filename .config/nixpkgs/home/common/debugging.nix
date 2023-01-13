@@ -1,4 +1,4 @@
-{ config, pkgs, lib, myLib, ... }:
+{ config, pkgs, lib, myLib, nixos-config, ... }:
 
 let
   inherit (builtins) replaceStrings;
@@ -34,7 +34,7 @@ in
     inherit (builtins) elem listToAttrs;
     inherit (lib) mkDefault mkIf;
     inherit (lib.strings) concatMapStringsSep optionalString;
-    inherit (myLib) nixos sourceCodeOfPkg;
+    inherit (myLib) sourceCodeOfPkg;
     inherit (myLib.tmpfiles.debugging) mkDebugInfoDirPkg mkSourceCodeDirPkg;
 
     cfg = config.my.debugging;
@@ -83,10 +83,10 @@ in
 
       file = {
         ".config/gdb/my-source-path-init".text = let
-          sys.hasSrc = elem "/src" nixos.config.environment.pathsToLink;
+          sys.hasSrc = elem "/src" nixos-config.environment.pathsToLink;
           sys.srcLoc = optionalString sys.hasSrc "/run/current-system/sw/src/of-pkg-via-my";
-          sys.hasTmp = nixos.config.my.debugging.support.sourceCode.tmpDirs != [];
-          sys.tmpLoc = toString nixos.config.my.debugging.support.sourceCode.tmpDirs;
+          sys.hasTmp = nixos-config.my.debugging.support.sourceCode.tmpDirs != [];
+          sys.tmpLoc = toString nixos-config.my.debugging.support.sourceCode.tmpDirs;
           user.hasSrc = enabled.anySourceCode;
           user.srcLoc = optionalString user.hasSrc "~/.nix-profile/src/of-pkg-via-my";
           user.hasTmp = cfg.support.sourceCode.tmpDirs != [];
