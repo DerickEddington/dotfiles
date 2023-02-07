@@ -31,6 +31,7 @@
         home-end-home
         indent-for-tab-command
         kill-region
+        magit-section-toggle
         markdown-cycle
         markdown-outdent-or-delete
         sp-backward-delete-char
