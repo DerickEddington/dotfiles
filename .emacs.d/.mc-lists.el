@@ -8,6 +8,7 @@
         beginning-of-visual-line
         c-electric-brace
         c-electric-paren
+        c-electric-pound
         c-electric-semi&comma
         c-electric-slash
         c-electric-star
@@ -56,6 +57,7 @@
 (setq mc/cmds-to-run-once
       '(
         View-scroll-page-backward
+        View-scroll-page-forward
         counsel-M-x
         dap-tooltip-mouse-motion
         dired-toggle-read-only
