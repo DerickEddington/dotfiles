@@ -161,7 +161,6 @@ in
           # Unstable.
           {
             inherit (self.melpaStablePackages)
-              magit
             ;
           }
         )
