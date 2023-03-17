@@ -19,6 +19,8 @@ set print pretty on
 
 # Helpers
 
+source ~/.config/gdb/my/init
+
 define omit
   if $argc == 0
     tbreak +1

@@ -1,0 +1,4 @@
+define-prefix my
+document my
+My own namespace for my own commands.
+end
