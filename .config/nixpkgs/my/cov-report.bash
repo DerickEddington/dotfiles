@@ -1,0 +1,98 @@
+# A utility to help generate code-coverage reports from the dumps of such data
+# produced by binaries that were built by LLVM (e.g. Clang or Rust) to have such
+# instrumentation.
+#
+# This is also used by ~/.config/gdb/my/cov that helps generate code-coverage
+# reports from within GDB while a program is still running.
+#
+# The llvm-* tools commands used below are not denoted by absolute paths
+# intentionally, because the version of those tools must correspond exactly to
+# the same toolchain that was used to build the binaries that are being worked
+# with, and it is the user's responsibility to arrange for the correct version
+# of those to be in the PATH.  (nix-shell can be helpful for this.)
+#
+# (This file is separate from ./cov-report.nix to be easier to edit/maintain and
+# in case executing this directly is ever needed.)
+
+set -o nounset -o errexit
+shopt -s nullglob
+((${VERBOSE:=0} >= 3)) && set -o xtrace
+
+
+BIN="$1"
+NAME="$(basename "$BIN")"
+
+# By default (if $2 is not given) assume that the binaries were built with the
+# profile-file location configured via LLVM's build-time command-line option as
+# -fprofile-instr-generate=./.my-cov-report/%p.profraw
+if [ .my-cov-report = "$(basename "$PWD")" ]; then
+    COVDIR=.
+else
+    COVDIR=./.my-cov-report
+fi
+
+if (($# == 1)); then
+    INPUTS=(
+        # Dumped by the instrumented program's runs.  Typically these names are
+        # of the form: $PID.profraw where PID was that of each run.  (The reason
+        # I don't use NAME in these is because it's more convenient to build all
+        # of the compilation-units of a program for instrumentation to use just
+        # %p.profraw without needing to try to know or involve the program
+        # name.)
+        $COVDIR/*.profraw
+        # Previous outputs of this script that I saved to be merged along with
+        # the latest.  Especially helpful when a run crashed without dumping its
+        # .profraw, and so its last coverage counters are lost, but I'd also
+        # been using this script with that run (via debugger) before it crashed
+        # and so there was a .profdata from that, which captured some/most of
+        # that run's coverage counters, which I rename to .merge.profdata so it
+        # will be merged with subsequent runs' so the crashed run's coverage
+        # counters are still included.
+        $COVDIR/"$NAME".*.merge.profdata
+    )
+elif (($# >= 3)); then
+    COVDIR="$2"
+    mkdir -p "$COVDIR"
+    INPUTS=("${@:3}")
+else
+    echo "error: invalid arguments" 1>&2
+    exit 1
+fi
+
+
+llvm-profdata merge -sparse "${INPUTS[@]}" \
+              -o $COVDIR/"$NAME".profdata  # (Overwrites any pre-existing.)
+
+ARGS=(
+    -instr-profile=$COVDIR/"$NAME".profdata
+    "$BIN"
+)
+if [ -v MY_COV_REPORT_SHOW_OPTS ]; then
+    SHOW_OPTS=($MY_COV_REPORT_SHOW_OPTS)
+else
+    SHOW_OPTS=(
+        -show-line-counts-or-regions
+        -show-branches=count
+       #-show-expansions
+       #-show-instantiations=false
+    )
+fi
+SHOW_ARGS=(
+    "${SHOW_OPTS[@]}"
+    "${ARGS[@]}"
+)
+
+llvm-cov show "${SHOW_ARGS[@]}" -format=html > $COVDIR/"$NAME".cov.html
+
+# For the below, force color, because my usual usage is with stdout as terminal
+# or pager, and even if stdout is redirected I'd probably want the ANSI color
+# escape codes in that too.
+
+if (($VERBOSE >= 2)); then
+    llvm-cov show -use-color "${SHOW_ARGS[@]}"  # Print to stdout.
+    echo
+fi
+
+if (($VERBOSE >= 1)); then
+    llvm-cov report -use-color "${ARGS[@]}"     # Print to stdout.
+fi

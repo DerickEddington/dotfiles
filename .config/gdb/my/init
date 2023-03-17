@@ -37,3 +37,6 @@ end
 define hook-quit
   eval "shell rm -r -f /tmp/my-gdb-%u", $myGDBtmpDirID
 end
+
+
+source ~/.config/gdb/my/cov

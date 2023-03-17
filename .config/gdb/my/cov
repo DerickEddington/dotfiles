@@ -1,0 +1,92 @@
+define-prefix my cov
+document my cov
+Commands for use when the debugee was built by LLVM for code-coverage reporting
+(i.e. with `-fprofile-instr-generate -fcoverage-mapping`).  This is relevant to
+binaries built by Clang or Rust.
+
+Note that these should only be used after the __llvm_profile_* symbols have been
+properly located for the current debugee.  E.g. after the debugee has been
+start'ed.
+end
+
+
+define my cov write
+  with language c -- \
+    set $myCovWriteRetCode = ((int (*)(void)) __llvm_profile_write_file)()
+  if $myCovWriteRetCode
+    printf "Warning: __llvm_profile_write_file error code: %d\n", $myCovWriteRetCode
+  end
+end
+document my cov write
+Dump the current profiling counters, of the current run of the debugee program,
+to the profile-file location as configured via LLVM's build-time command-line
+option (e.g. -fprofile-instr-generate=./.my-cov-report/%p.profraw) or run-time
+environment-variable (e.g. LLVM_PROFILE_FILE=$NAME.%p.profraw).
+
+Intended to be used before program exit while interactively debugging and while
+possibly altering program flow manually (e.g. injecting changes to variables,
+injecting calls, etc.).
+
+Note that using this will cause artificially multiplied counter values, unless
+the profile file is manually deleted before each use and before program exit.
+This is because this function appends profile data when the profile file already
+exists, and because this function is automatically called again atexit.  To
+automatically handle this, use the command `my cov report` instead.
+end
+
+
+define my cov reset
+  with language c -- \
+    call ((void (*)(void)) __llvm_profile_reset_counters)()
+end
+document my cov reset
+Reset all the profiling counters, of the current run of the debugee program,
+to zero.  This can be useful for rare purposes.
+end
+
+
+define my cov mv-raw
+  pipe  info proc  |  PID=$(rg -r '$1' "^process +(\\d+)") RAW=./.my-cov-report/$PID.profraw \
+        && mv -f $RAW $RAW.prev 2>/dev/null
+end
+document my cov mv-raw
+Internal.
+Preserve the last .profraw file, in case of a crash,
+but move it out of the way of subsequent dumps.
+end
+
+
+define my cov gen-report
+  with language c -- \
+    init-if-undefined $myCovGenReport_showOpts = "\
+      -show-line-counts-or-regions \
+      -show-branches=count \
+    "
+  if $argc >= 1
+    # This also retains the most-recently-set, for future calls.
+    set $myCovGenReport_showOpts = $arg0
+  end
+  eval "pipe  info proc exe  |  BIN=$(rg -r '$1' \"^exe *= *'(.+)'\") \
+        && MY_COV_REPORT_SHOW_OPTS=\"%s\" my-cov-report \"$BIN\"", $myCovGenReport_showOpts
+end
+document my cov gen-report
+Internal.
+The needed input data, the raw profile file(s),
+is assumed to have been dumped to ./.my-cov-report/.
+end
+
+
+define my cov report
+  my cov mv-raw  # Prevent artificially multiplied counter values.
+  my cov write
+  if $argc == 0
+    my cov gen-report
+  else
+    my cov gen-report $arg0
+  end
+  my cov mv-raw  # Again, for when the debugee program exits.
+end
+document my cov report
+Generate a report about the current code-coverage
+of the current run of the debugee program.
+end
