@@ -30,6 +30,12 @@ in
     ]
   )];
 
+  # my.rust = {
+  #   enable = true;
+  #   toolchains = {
+  #   };
+  # };
+
   # # Have debug-info and source-code for packages where this is applied.  This is for packages
   # # that normally don't provide these, and this uses my custom approach that overrides and
   # # overlays packages to achieve having these.

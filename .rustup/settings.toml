@@ -1,0 +1,3 @@
+default_toolchain = "the-stable"
+profile = "minimal"
+version = "12"

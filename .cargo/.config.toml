@@ -1,0 +1,8 @@
+# Useful when without an internet connection.
+#net.offline = true
+
+# Was needed when offline and these were present but no longer in ~/.cargo/registry/cache/ for
+# some reason.
+#paths = [
+#  ".cargo/registry/src/github.com-.../...",
+#]

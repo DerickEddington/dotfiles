@@ -24,6 +24,7 @@ in
     ./emacs.nix
     ./git-svn.nix
     ./rootless-docker.nix
+    ./rust.nix
   ];
 
   options.my = {

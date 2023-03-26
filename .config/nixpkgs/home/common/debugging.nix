@@ -82,7 +82,7 @@ in
         '';
 
       file = {
-        ".config/gdb/my-source-path-init".text = let
+        ".config/gdb/my/home-manager-init".text = let
           sys.hasSrc = elem "/src" nixos-config.environment.pathsToLink;
           sys.srcLoc = optionalString sys.hasSrc "/run/current-system/sw/src/of-pkg-via-my";
           sys.hasTmp = nixos-config.my.debugging.support.sourceCode.tmpDirs != [];
@@ -108,6 +108,15 @@ in
               # These are managed by the user.
               dir ${user.tmpLoc} ${sys.tmpLoc}
             ''}
+
+          ${optionalString config.my.rust.enable (let
+              pp = "/nix/store/*-rustc-*/lib/rustlib/etc/gdb_load_rust_pretty_printers.py";
+            in ''
+              # For the Rustup custom my.rust.toolchains (that are sometimes from combined
+              # derivations with many symlinks where the parent-directory paths don't always match
+              # but it's OK).
+              add-auto-load-safe-path ${pp}
+            '')}
         '';
       }
       //

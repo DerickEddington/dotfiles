@@ -71,7 +71,7 @@
 /.bashrc
 /.config/dconf/
 /.config/environment.d/10-home-manager.conf
-/.config/gdb/my-source-path-init
+/.config/gdb/my/home-manager-init
 /.config/git/config
 /.config/systemd/
 /.config/user-tmpfiles.d/my-home-*-tmp-debug.conf

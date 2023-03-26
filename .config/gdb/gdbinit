@@ -1,5 +1,5 @@
-# Useful locations to have in the "source path".
-source ~/.config/gdb/my-source-path-init
+# Aspects setup by my Home Manager configuration.
+source ~/.config/gdb/my/home-manager-init
 
 
 # How a program behaves under debugging
