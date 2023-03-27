@@ -2,8 +2,9 @@
 
 let
   inherit (lib) mkDefault mkEnableOption mkIf mkOption types;
-  inherit (lib.attrsets) mapAttrs';
-  inherit (pkgs) symlinkJoin;
+  inherit (lib.attrsets) mapAttrs' mapAttrsToList;
+  inherit (lib.strings) escapeShellArg;
+  inherit (pkgs) runCommandLocal symlinkJoin;
   inherit (pkgs) rust-bin;  # (Assumes my system-wide overlay added this.)
 
   cfg = config.my.rust;
@@ -32,9 +33,52 @@ in
   in
     mkIf cfg.enable {
 
-      home.packages = with pkgs; [
+      home.packages = (with pkgs; [
         rustup
-      ];
+      ])
+      ++
+      # This symlinks toolchains' standard-library's debug-info's "compilation directory"
+      # structures from the ~/.nix-profile/src/of-pkg-via-my/ of my debugging-support design, so
+      # that debugging of binaries produced by these toolchains will automatically find the
+      # source-code for the corresponding Rust Standard Library, when available.
+      (mapAttrsToList
+        # TODO: Maybe move to a function in myLib system-wide.
+        (name: toolchainDrv:
+          runCommandLocal "srcdir-for-rustup-custom-toolchain--${name}"
+            { nativeBuildInputs = with pkgs; [ dwarfdump ripgrep ]; }
+            ''
+              shopt -s nullglob
+              set -o errexit -o nounset -o pipefail # -o xtrace
+
+              function cancel { mkdir "$out"; exit 0; }  # Just produce empty output.
+
+              toolchain=${escapeShellArg toolchainDrv}
+              rustlib="$toolchain/lib/rustlib"
+              rustSrc="$rustlib/src/rust"
+              [[    -d "$rustSrc/library/std"  # Their newer layout.
+                 || -d "$rustSrc/src/libstd"   # Their older layout.
+              ]] || cancel  # If not, no std-lib sources in this given toolchain, so do nothing.
+
+              targetTriple=${escapeShellArg pkgs.stdenv.hostPlatform.config}
+              pushd "$rustlib/$targetTriple/lib"
+              libstd=(libstd-*.so)
+              [ ''${#libstd[@]} -eq 1 ]  # If not, fail intentionally.
+              compDir=()
+              for rx in '^library/std/src/lib\.rs' '^src/libstd/lib\.rs' ; do
+                compDir+=(
+                  $(dwarfdump --search-regex="$rx" --search-print-parent --format-dense \
+                              "$libstd"                                                 \
+                    | (rg --replace '$1' --only-matching --regexp ' DW_AT_comp_dir<(.+?)> ' \
+                       || true)))
+              done
+              popd
+              [ ''${#compDir[@]} -eq 1 ]  # If not, fail intentionally.
+
+              outSubDir="$out/src/of-pkg-via-my/$(dirname "$compDir")"
+              mkdir -p "$outSubDir"
+              ln -v -s "$rustSrc" "$outSubDir/$(basename "$compDir")"
+            '')
+        cfg.toolchains);
 
       home.file = mapAttrs'
         (name: toolchainDrv: {

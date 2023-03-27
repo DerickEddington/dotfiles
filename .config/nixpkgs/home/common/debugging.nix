@@ -41,7 +41,8 @@ in
     enabled.anySourceCode = let inherit (cfg.support) sourceCode;
                             in (    sourceCode.all.enable
                                  || sourceCode.of.prebuilt.enable
-                                 || sourceCode.of.locallyBuilt.enable);
+                                 || sourceCode.of.locallyBuilt.enable
+                                 || config.my.rust.enable);
   in {
     # Reuse the raw definition, but change aspects, of `config.my.debugging` from system-wide.
     my.debugging = recursiveUpdate sysWide.config.my.debugging {
