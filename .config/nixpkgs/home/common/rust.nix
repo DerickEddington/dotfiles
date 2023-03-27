@@ -1,6 +1,7 @@
 { config, pkgs, lib, ... }:
 
 let
+  inherit (builtins) pathExists;
   inherit (lib) mkDefault mkEnableOption mkIf mkOption types;
   inherit (lib.attrsets) mapAttrs' mapAttrsToList;
   inherit (lib.strings) escapeShellArg;
@@ -27,6 +28,19 @@ in
       type = types.enum (mapAttrsToList (n: v: n) cfg.toolchains);
       default = "the-stable";
     };
+    packages = mkOption {
+      description = "Tools for development with Rust that I like to have.";
+      type = with types; listOf package;
+      default = (with pkgs; [
+        (assert ! pathExists "${rustup}/bin/rust-analyzer";
+         # If the rustup package ever provides this itself, I'll want to use that instead.
+         rust-bin.stable.latest.rust-analyzer)
+      ]) ++ (with pkgs.unstable; [  # From unstable Nixpkgs, for newer versions.
+        cargo-binutils
+        cargo-readme
+        evcxr
+      ]);
+    };
   };
 
   config = let
@@ -34,8 +48,9 @@ in
     mkIf cfg.enable {
 
       home.packages = (with pkgs; [
-        rustup
+        rustup  # Not optional.
       ])
+      ++ cfg.packages
       ++
       # This symlinks toolchains' standard-library's debug-info's "compilation directory"
       # structures from the ~/.nix-profile/src/of-pkg-via-my/ of my debugging-support design, so
