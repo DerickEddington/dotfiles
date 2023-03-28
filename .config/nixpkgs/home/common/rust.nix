@@ -4,6 +4,7 @@ let
   inherit (builtins) pathExists;
   inherit (lib) mkDefault mkEnableOption mkIf mkOption types;
   inherit (lib.attrsets) mapAttrs' mapAttrsToList;
+  inherit (lib.lists) flatten;
   inherit (lib.strings) escapeShellArg;
   inherit (pkgs) runCommandLocal symlinkJoin;
   inherit (pkgs) rust-bin;  # (Assumes my system-wide overlay added this.)
@@ -176,6 +177,56 @@ in
           #     ]) ++ (with pkgs; [
           #     ])));
         };
+      };
+
+      # Customize the locations of the large dispensable sub-directories of ~/.rustup/ and
+      # ~/.cargo/ to be outside of the home directory, so their contents are excluded from
+      # backups.  Note: it's still possible for a user to reorganize these sub-dirs to be located
+      # somewhere else some other way, and this activation-script block will not disturb those
+      # when they already exist.
+      home.activation = let
+        user = escapeShellArg config.home.username;
+        subDir = path: sub: escapeShellArg "${path}/${sub}";
+        mkDirs = spec: flatten (mapAttrsToList (path: subs: map (subDir path) subs) spec);
+        dirs.keep = mkDirs {
+          ".rustup" = ["toolchains"];
+          ".cargo"  = [];
+        };
+        dirs.temp = mkDirs {
+          ".rustup" = ["downloads" "tmp"];
+          ".cargo"  = ["git" "registry"];
+        };
+      in {
+        myRustToolsDirs = lib.hm.dag.entryAfter ["writeBoundary"] ''
+          # Setup my custom layout for ~/.rustup/ and ~/.cargo/.
+
+          function myRustToolsDirs_setup
+          {
+            local MODE="$1" TARGET="$2" LINKS=("''${@:3}")
+
+            if [ -e "$TARGET" ]; then
+              for X in "''${LINKS[@]}"; do
+                if ! [ -e ~/"$X" ]; then
+                  if ! [ -e "$TARGET/$X" ]; then
+                    $DRY_RUN_CMD  mkdir $VERBOSE_ARG -p "$(dirname "$TARGET/$X")"
+                    case "$MODE" in
+                      (dirs)  local CREATE=(mkdir $VERBOSE_ARG) ;;
+                      (files) local CREATE=(touch)              ;;
+                    esac
+                    $DRY_RUN_CMD  ''${CREATE[@]} "$TARGET/$X"
+                  fi
+                  $DRY_RUN_CMD  mkdir $VERBOSE_ARG -p "$(dirname ~/"$X")"
+                  $DRY_RUN_CMD  ln $VERBOSE_ARG -s -f -T "$TARGET/$X" ~/"$X"
+                fi
+              done
+            else
+              warnEcho "Skipping missing $TARGET"
+            fi
+          }
+
+          myRustToolsDirs_setup dirs /mnt/omit/home/${user} ${toString dirs.keep}
+          myRustToolsDirs_setup dirs /var/tmp/home/${user}  ${toString dirs.temp}
+        '';
       };
     };
 }
