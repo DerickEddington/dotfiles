@@ -45,6 +45,7 @@ in
   };
 
   config = let
+    user = config.home.username;
   in
     mkIf cfg.enable {
 
@@ -182,50 +183,56 @@ in
       # Customize the locations of the large dispensable sub-directories of ~/.rustup/ and
       # ~/.cargo/ to be outside of the home directory, so their contents are excluded from
       # backups.  Note: it's still possible for a user to reorganize these sub-dirs to be located
-      # somewhere else some other way, and this activation-script block will not disturb those
-      # when they already exist.
+      # somewhere else some other way, and these tmpfiles rules will not disturb those when they
+      # already exist.
+      systemd.user.tmpfiles.rules = [
+        "q /mnt/omit/%h                    0700 ${user} users -"
+        "q /var/tmp/%h                     0700 ${user} users 30d"
+
+        "d /mnt/omit/%h/.rustup            -    ${user} users -"
+        "d /mnt/omit/%h/.rustup/toolchains -    -       -     -"
+        "d /mnt/omit/%h/.rustup/tmp        -    -       -      1d"  # Must be same device.
+        "d /var/tmp/%h/.rustup             -    ${user} users 30d"
+        "d /var/tmp/%h/.rustup/downloads   -    -       -     30d"
+        "d %h/.rustup            - - - -"
+        "L %h/.rustup/toolchains - - - - /mnt/omit%h/.rustup/toolchains"
+        "L %h/.rustup/tmp        - - - - /mnt/omit%h/.rustup/tmp"
+        "L %h/.rustup/downloads  - - - - /var/tmp%h/.rustup/downloads"
+
+        "d /var/tmp/%h/.cargo              -    ${user} users 30d"
+        "d /var/tmp/%h/.cargo/registry     -    -       -     30d"
+        "d /var/tmp/%h/.cargo/git          -    -       -     30d"
+        "d %h/.cargo             - - - -"
+        "L %h/.cargo/registry    - - - - /var/tmp%h/.cargo/registry"
+        "L %h/.cargo/git         - - - - /var/tmp%h/.cargo/git"
+      ];
+
       home.activation = let
-        user = escapeShellArg config.home.username;
-        subDir = path: sub: escapeShellArg "${path}/${sub}";
-        mkDirs = spec: flatten (mapAttrsToList (path: subs: map (subDir path) subs) spec);
-        dirs.keep = mkDirs {
-          ".rustup" = ["toolchains"];
-          ".cargo"  = [];
-        };
-        dirs.temp = mkDirs {
-          ".rustup" = ["downloads" "tmp"];
-          ".cargo"  = ["git" "registry"];
-        };
+        inherit (lib.hm) dag;
       in {
-        myRustToolsDirs = lib.hm.dag.entryAfter ["writeBoundary"] ''
-          # Setup my custom layout for ~/.rustup/ and ~/.cargo/.
+        # When ~/.rustup/toolchains does not exist, must create it before linkGeneration, to
+        # prevent linkGeneration from creating it as a normal directory, so that it's created as
+        # the symlink according to the user-tmpfiles rule above.
+        myRustupToolchainsDirWhenMissing = dag.entryBetween ["linkGeneration"]
+                                                            ["writeBoundary"] ''
+          if ! [ -e ~/.rustup/toolchains ] && ! [ -L ~/.rustup/toolchains ]
+          then
+            [ -v VERBOSE ] && echo "Will create missing ~/.rustup/toolchains"
 
-          function myRustToolsDirs_setup
-          {
-            local MODE="$1" TARGET="$2" LINKS=("''${@:3}")
+            $DRY_RUN_CMD  ${pkgs.systemd}/bin/systemd-tmpfiles --user --create      \
+                                                --prefix="/mnt/omit/$HOME/.rustup"  \
+                                                --prefix="$HOME/.rustup/toolchains"
 
-            if [ -e "$TARGET" ]; then
-              for X in "''${LINKS[@]}"; do
-                if ! [ -e ~/"$X" ]; then
-                  if ! [ -e "$TARGET/$X" ]; then
-                    $DRY_RUN_CMD  mkdir $VERBOSE_ARG -p "$(dirname "$TARGET/$X")"
-                    case "$MODE" in
-                      (dirs)  local CREATE=(mkdir $VERBOSE_ARG) ;;
-                      (files) local CREATE=(touch)              ;;
-                    esac
-                    $DRY_RUN_CMD  ''${CREATE[@]} "$TARGET/$X"
-                  fi
-                  $DRY_RUN_CMD  mkdir $VERBOSE_ARG -p "$(dirname ~/"$X")"
-                  $DRY_RUN_CMD  ln $VERBOSE_ARG -s -f -T "$TARGET/$X" ~/"$X"
-                fi
-              done
-            else
-              warnEcho "Skipping missing $TARGET"
+            # For the very-first time my.rust.enable is enabled, our tmpfiles rules don't exist
+            # yet, and so our systemd-tmpfiles command above does nothing, and so we must create
+            # the symlink manually in this very-rare (but important) case.
+            if ! [ -e ~/.rustup/toolchains ]; then
+              $DRY_RUN_CMD  mkdir $VERBOSE_ARG -p -m 0700 /mnt/omit/$HOME
+              $DRY_RUN_CMD  mkdir $VERBOSE_ARG -p /mnt/omit/$HOME/.rustup/toolchains ~/.rustup
+              $DRY_RUN_CMD  ln $VERBOSE_ARG -s -T /mnt/omit$HOME/.rustup/toolchains \
+                                                  ~/.rustup/toolchains
             fi
-          }
-
-          myRustToolsDirs_setup dirs /mnt/omit/home/${user} ${toString dirs.keep}
-          myRustToolsDirs_setup dirs /var/tmp/home/${user}  ${toString dirs.temp}
+          fi
         '';
       };
     };
