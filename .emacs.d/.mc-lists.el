@@ -51,6 +51,7 @@
         wdired--self-insert
         wdired-next-line
         wdired-previous-line
+        wdired-toggle-bit
         widget-kill-line
         ))
 
