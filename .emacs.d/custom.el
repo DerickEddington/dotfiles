@@ -42,6 +42,7 @@
       (height . 54)
       (tool-bar-lines . 0)))
  '(diff-default-read-only t)
+ '(diff-switches "-u -r")
  '(dired-create-destination-dirs 'ask)
  '(dired-listing-switches "-l -A -h -F")
  '(dired-vc-rename-file t)
