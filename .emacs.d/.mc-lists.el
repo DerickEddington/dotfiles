@@ -69,5 +69,6 @@
         lsp-signature-stop
         overwrite-mode
         read-only-mode
+        suspend-frame
         wdired-exit
         ))
