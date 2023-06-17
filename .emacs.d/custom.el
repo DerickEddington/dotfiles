@@ -281,9 +281,18 @@
  '(tab-first-completion 'word)
  '(tool-bar-mode nil)
  '(tooltip-mode nil)
+ '(tramp-auto-save-directory "~/tmp/tramp-auto-save")
+ '(tramp-connection-properties
+   (cons
+    '(nil "remote-shell" "bash")
+    tramp-connection-properties))
+ '(tramp-copy-size-limit 2097152)
  '(tramp-default-method "ssh")
  '(tramp-histfile-override t)
  '(tramp-remote-path (cons 'tramp-own-remote-path tramp-remote-path))
+ '(tramp-sh-extra-args
+   '(("\\(\\`\\|/\\)bash\\'" . "-noediting -norc -noprofile")
+     ("\\(\\`\\|/\\)zsh\\'" . "-f +Z -V")))
  '(tramp-use-ssh-controlmaster-options nil)
  '(vc-directory-exclusion-list (cons "build" vc-directory-exclusion-list))
  '(vc-handled-backends '(Git SVN))
