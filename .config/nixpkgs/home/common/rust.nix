@@ -33,9 +33,6 @@ in
       description = "Tools for development with Rust that I like to have.";
       type = with types; listOf package;
       default = (with pkgs; [
-        (assert ! pathExists "${rustup}/bin/rust-analyzer";
-         # If the rustup package ever provides this itself, I'll want to use that instead.
-         rust-bin.stable.latest.rust-analyzer)
       ]) ++ (with pkgs.unstable; [  # From unstable Nixpkgs, for newer versions.
         cargo-binutils
         cargo-readme
