@@ -51,7 +51,7 @@ in
 
     home.enableNixpkgsReleaseCheck = true;
 
-    nixpkgs.overlays = import ../../my/overlays (_self: _super: {
+    nixpkgs.overlays = import ../../nixpkgs/my/overlays (_self: _super: {
                                 debuggingSupportConfig = config.my.debugging.support;
                               });
 
@@ -63,7 +63,7 @@ in
     # Packages available in per-user profile.  Only add to this that which all users should have,
     # because it is inconvenient for them to need to remove elements from this.
     home.packages = with pkgs; [
-      my-hello-test  # Exercise ../../my/overlays and its addition of debugging support.
+      my-hello-test  # Exercise ../../nixpkgs/my/overlays and its addition of debugging support.
     ];
 
     #---------------------------------------------------------------------------
