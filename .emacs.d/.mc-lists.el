@@ -45,6 +45,7 @@
         sp-forward-sexp
         sp-kill-hybrid-sexp
         sp-kill-region
+        sp-kill-sexp
         sp-kill-word
         sp-next-sexp
         sp-remove-active-pair-overlay
@@ -70,5 +71,6 @@
         overwrite-mode
         read-only-mode
         suspend-frame
+        undo-redo
         wdired-exit
         ))
