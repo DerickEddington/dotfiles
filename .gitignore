@@ -1,5 +1,7 @@
 *~
 /.*_history
+/.bash_history.d/combined
+/.bash_history.d/by-time/
 /.bzr.log
 /.cache
 /.cargo/bin
