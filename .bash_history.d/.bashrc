@@ -1,3 +1,6 @@
+# (Remember: This might also be source'ed by other things or at other times -
+#  e.g. by my `nix-shell --pure` wrapper.)
+
 # Append to the history file, don't overwrite it
 shopt -s histappend
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
@@ -24,9 +27,15 @@ function _my_unique_histfile {
     echo "$FILENAME"
 }
 
-MY_SESSION_HISTFILE=$(_my_unique_histfile $$)
-# Assign these HIST* once ready - might cause side-effects.
-HISTFILE="$MY_SESSION_HISTFILE"
+if ! [[ "${HISTFILE:-}" = */.bash_history.d/by-time/* ]]
+then
+    MY_SESSION_HISTFILE=$(_my_unique_histfile $$)
+    # Assign these HIST* once ready - might cause side-effects.
+    HISTFILE="$MY_SESSION_HISTFILE"
+else
+    # HISTFILE was already setup according to my custom scheme, so keep using that.
+    MY_SESSION_HISTFILE="$HISTFILE"
+fi
 # Practically unlimited, but limited against madness.
 HISTFILESIZE=10000000
 # Limit a mad session's history to be small enough to not clobber much of the `combined` file.
@@ -44,7 +53,7 @@ HISTTIMEFORMAT='%F %T %Z:  '
 function _my_lock_combined_histfile {
     local LOCK_FD LOCK_FILE=~/.bash_history.d/combined.lock
     exec {LOCK_FD}>> $LOCK_FILE  # Open a new file descriptor of it.
-    if flock ${1:-} --timeout 10 $LOCK_FD ; then
+    if command -p flock ${1:-} --timeout 10 $LOCK_FD ; then
         echo $LOCK_FD
     else
         echo "Failed to lock $LOCK_FILE" >&2
@@ -92,7 +101,15 @@ function _my_histfile_combining {
             local PREV_COMBINED=$(command mktemp ~/.bash_history.d/combined-prev-XXXXXXXXXX)
             command cp ~/.bash_history.d/combined "$PREV_COMBINED"
 
-            if ! my-bash_history-combiner "$PREV_COMBINED" "$MY_SESSION_HISTFILE" \
+            if type my-bash_history-combiner >& /dev/null; then
+                local MY_BASH_HISTORY_COMBINER=my-bash_history-combiner
+            else
+                # When it's not in the PATH (e.g. when inside `nix-shell --pure`), assume it's
+                # here:
+                local MY_BASH_HISTORY_COMBINER=~/.nix-profile/bin/my-bash_history-combiner
+            fi
+
+            if ! $MY_BASH_HISTORY_COMBINER "$PREV_COMBINED" "$MY_SESSION_HISTFILE" \
                    > ~/.bash_history.d/combined  # Write to original, to preserve inode.
             then
                 command cp -f "$PREV_COMBINED" ~/.bash_history.d/combined  # Restore if error.
@@ -106,4 +123,12 @@ function _my_histfile_combining {
         no-histfile -f  # If this session had no commands entered, delete its empty history file.
     fi
 }
-trap _my_histfile_combining EXIT
+
+if [ -v IN_NIX_SHELL ]; then
+    # Run it via the exitHandler EXIT trap of $stdenv/setup of nix-shell.
+    exitHooks+=(_my_histfile_combining)
+elif [ -z "$(trap -p EXIT)" ]; then  # Don't replace any preexisting trap.
+    trap _my_histfile_combining EXIT
+else
+    echo "Note: Unable to setup _my_histfile_combining for exit." 1>&2
+fi
