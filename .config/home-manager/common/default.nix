@@ -1,8 +1,8 @@
 # Common options that each user probably will not need to change.  A user's
-# ~/.config/nixpkgs/home.nix (which imports this file), can extend and/or
-# override the options set in this file.  A user should only change this file,
-# committed to the main branch of the dotfiles repository, if the change should
-# be merged upstream and supplied to all users of the host system.
+# $XDG_CONFIG_HOME/home-manager/home.nix (which imports this file), can extend
+# and/or override the options set in this file.  A user should only change this
+# file, committed to the main branch of the dotfiles repository, if the change
+# should be merged upstream and supplied to all users of the host system.
 
 { config, pkgs, lib, ... }:
 
@@ -63,9 +63,12 @@ in
     # Packages available in per-user profile.  Only add to this that which all users should have,
     # because it is inconvenient for them to need to remove elements from this.
     home.packages = with pkgs; [
-      # ~/.bash_history.d/.bashrc needs this `my-bash_history-combiner` utility.
+      # $XDG_CONFIG_HOME/my/bash/interactive/history/ needs this `my-bash_history-combiner`
+      # utility.
       (import ../../nixpkgs/my/bash_history-combiner.nix { inherit pkgs; })
-      my-hello-test  # Exercise ../../nixpkgs/my/overlays and its addition of debugging support.
+
+      # Exercise ../../nixpkgs/my/overlays and its addition of debugging support.
+      my-hello-test
     ];
 
     #---------------------------------------------------------------------------
@@ -87,7 +90,7 @@ in
       # Added as last thing in ~/.profile, after the sessionVariables part that
       # home-manager auto-generates.
       profileExtra = ''
-        . $HOME/.profile-unmanaged
+        . "''${XDG_CONFIG_HOME:-$HOME/.config}/my/env/profile.sh"
       '';
 
       # Added as first thing in ~/.bashrc, before the interactive-shell check.
@@ -102,7 +105,7 @@ in
       # auto-generates, and after the interactive-shell check.  initExtra can
       # override/undo any preceding home-manager options.
       initExtra = ''
-        source ~/.bashrc-unmanaged
+        source "''${XDG_CONFIG_HOME:-$HOME/.config}/my/bash/interactive/init.bash"
       '';
     };
 

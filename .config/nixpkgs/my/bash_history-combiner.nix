@@ -6,16 +6,16 @@ in
 
 rustPlatform.buildRustPackage rec {
   pname = "my_bash_history_combiner";
-  version = "0.0.1";
+  version = "0.0.2";
 
   src = fetchFromGitHub {
     owner = "DerickEddington";
     repo = pname;
     rev = version;
-    hash = "sha256-EbZXdZw/8GlS5O/QuaNZEYFL72o1oBuw6BxrgfaPDdE=";
+    hash = "sha256-Ox7+TlP5v1uEsbC5Vb+J+/cS/Q2V2ZVU1hPfr1jJsbA=";
   };
 
-  cargoHash = "sha256-pSH+IR2b81TAmpmjd94l9o8dFIDBb5mN7cK7ya9A6wc=";
+  cargoHash = "sha256-++MXtIg7iVkYHYpQ4GtOJlmF8OU8oHth6yF/NXDR/nE=";
 
   meta = with lib; {
     description = "Combines a Bash session history with a single history with dups and ignores erased.";

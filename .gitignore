@@ -1,7 +1,5 @@
 *~
 /.*_history
-/.bash_history.d/combined
-/.bash_history.d/by-time/
 /.bzr.log
 /.cache
 /.cargo/bin
@@ -50,6 +48,10 @@
 /.lldb/*history
 /.local/share/*
 !/.local/share/rust-script
+/.local/state/*
+!/.local/state/my/
+/.local/state/my/bash/interactive/history/combined
+/.local/state/my/bash/interactive/history/by-time/
 /Maildir
 /Music
 /.nix-defexpr/channels

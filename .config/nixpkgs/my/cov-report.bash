@@ -2,8 +2,8 @@
 # produced by binaries that were built by LLVM (e.g. Clang or Rust) to have such
 # instrumentation.
 #
-# This is also used by ~/.config/gdb/my/cov that helps generate code-coverage
-# reports from within GDB while a program is still running.
+# This is also used by $XDG_CONFIG_HOME/gdb/my/cov that helps generate
+# code-coverage reports from within GDB while a program is still running.
 #
 # The llvm-* tools commands used below are not denoted by absolute paths
 # intentionally, because the version of those tools must correspond exactly to

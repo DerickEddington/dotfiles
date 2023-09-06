@@ -1,6 +1,16 @@
 # (Remember: This might also be source'ed by other things or at other times -
 #  e.g. by my `nix-shell --pure` wrapper.)
 
+MY_BASH_HISTDIR=${XDG_STATE_HOME:-~/.local/state}/my/bash/interactive/history
+
+MY_BASH_COMBINED_HISTFILE_LOCK=${XDG_RUNTIME_DIR:-/tmp/user/${USER:-$EUID}}/
+MY_BASH_COMBINED_HISTFILE_LOCK+=my/bash/interactive/history/combined.lock
+command -p  mkdir -p "$(command -p  dirname "$MY_BASH_COMBINED_HISTFILE_LOCK")"
+
+MY_BASH_HISTORY_COMBINER_IGNORES=${MY_BASH_CONFIG:-${XDG_CONFIG_HOME:-~/.config}/my/bash}/
+MY_BASH_HISTORY_COMBINER_IGNORES+=interactive/history/ignores.regexes
+export MY_BASH_HISTORY_COMBINER_IGNORES  # For my-bash_history-combiner utility.
+
 # Append to the history file, don't overwrite it
 shopt -s histappend
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
@@ -19,7 +29,7 @@ shopt -s lithist
 # (this is true independently of my extra `nix-shell` shell function).
 function _my_unique_histfile {
     local ID=$1
-    local FILENAME=~/.bash_history.d/by-time/$(date +%Y/%m/%d/%T)--${HOSTNAME}${ID:+--}$ID
+    local FILENAME=$MY_BASH_HISTDIR/by-time/$(date +%Y/%m/%d/%T)--${HOSTNAME}${ID:+--}$ID
     mkdir -p "$(dirname "$FILENAME")"
     if type -t mktemp >& /dev/null; then
         FILENAME=$(mktemp "$FILENAME"--XXXXXXXXXX)
@@ -27,14 +37,14 @@ function _my_unique_histfile {
     echo "$FILENAME"
 }
 
-if ! [[ "${HISTFILE:-}" = */.bash_history.d/by-time/* ]]
+if ! [[ "${HISTFILE:-}" = */by-time/* ]]
 then
-    MY_SESSION_HISTFILE=$(_my_unique_histfile $$)
+    MY_BASH_SESSION_HISTFILE=$(_my_unique_histfile $$)
     # Assign these HIST* once ready - might cause side-effects.
-    HISTFILE="$MY_SESSION_HISTFILE"
+    HISTFILE=$MY_BASH_SESSION_HISTFILE
 else
     # HISTFILE was already setup according to my custom scheme, so keep using that.
-    MY_SESSION_HISTFILE="$HISTFILE"
+    MY_BASH_SESSION_HISTFILE=$HISTFILE
 fi
 # Practically unlimited, but limited against madness.
 HISTFILESIZE=10000000
@@ -51,8 +61,8 @@ HISTTIMEFORMAT='%F %T %Z:  '
 
 # Mutex the `combined` file, because multiple sessions access it.
 function _my_lock_combined_histfile {
-    local LOCK_FD LOCK_FILE=~/.bash_history.d/combined.lock
-    exec {LOCK_FD}>> $LOCK_FILE  # Open a new file descriptor of it.
+    local LOCK_FD LOCK_FILE=$MY_BASH_COMBINED_HISTFILE_LOCK
+    exec {LOCK_FD}>> "$LOCK_FILE"  # Open a new file descriptor of it.
     if command -p flock ${1:-} --timeout 10 $LOCK_FD ; then
         echo $LOCK_FD
     else
@@ -65,7 +75,7 @@ function _my_lock_combined_histfile {
 function _my_load_combined_histfile {
     local LOCK_FD=$(_my_lock_combined_histfile --shared)
     if (($? == 0)); then
-        history -n ~/.bash_history.d/combined  # (-n seems slightly more appropriate than -r would)
+        history -n "$MY_BASH_HISTDIR"/combined  # (-n seems slightly more appropriate than -r)
         exec {LOCK_FD}>&-  # Close the FD to release the lock.
     fi
 }
@@ -80,8 +90,8 @@ PROMPT_COMMAND="${PROMPT_COMMAND:-} ${PROMPT_COMMAND:+;} history -a || true"
 # Helper command for when you want a session to not save any of its history.
 # Note that `history -a` etc will do nothing, as desired, without a HISTFILE.
 function no-histfile {
-    [ "$MY_SESSION_HISTFILE" ] && command rm ${1:--i} "$MY_SESSION_HISTFILE"
-    unset HISTFILE MY_SESSION_HISTFILE
+    [ "$MY_BASH_SESSION_HISTFILE" ] && command rm ${1:--i} "$MY_BASH_SESSION_HISTFILE"
+    unset HISTFILE MY_BASH_SESSION_HISTFILE
 }
 
 # Combine the previous `combined` history with this session's and write that as the new `combined`
@@ -92,14 +102,14 @@ function no-histfile {
 function _my_histfile_combining {
     history -a || true  # Ensure this session's history file is completed.
 
-    if [ -s "$MY_SESSION_HISTFILE" ]; then
-        command chmod a-w "$MY_SESSION_HISTFILE"  # Protect it as an archive.
+    if [ -s "$MY_BASH_SESSION_HISTFILE" ]; then
+        command chmod a-w "$MY_BASH_SESSION_HISTFILE"  # Protect it as an archive.
 
         if _my_lock_combined_histfile --exclusive > /dev/null
         then
-            [ ! -e ~/.bash_history.d/combined ] && command touch ~/.bash_history.d/combined
-            local PREV_COMBINED=$(command mktemp ~/.bash_history.d/combined-prev-XXXXXXXXXX)
-            command cp ~/.bash_history.d/combined "$PREV_COMBINED"
+            [ ! -e "$MY_BASH_HISTDIR"/combined ] && command touch "$MY_BASH_HISTDIR"/combined
+            local PREV_COMBINED=$(command mktemp "$MY_BASH_HISTDIR"/combined-prev-XXXXXXXXXX)
+            command cp "$MY_BASH_HISTDIR"/combined "$PREV_COMBINED"
 
             if type my-bash_history-combiner >& /dev/null; then
                 local MY_BASH_HISTORY_COMBINER=my-bash_history-combiner
@@ -109,10 +119,10 @@ function _my_histfile_combining {
                 local MY_BASH_HISTORY_COMBINER=~/.nix-profile/bin/my-bash_history-combiner
             fi
 
-            if ! $MY_BASH_HISTORY_COMBINER "$PREV_COMBINED" "$MY_SESSION_HISTFILE" \
-                   > ~/.bash_history.d/combined  # Write to original, to preserve inode.
+            if ! $MY_BASH_HISTORY_COMBINER "$PREV_COMBINED" "$MY_BASH_SESSION_HISTFILE" \
+                   > "$MY_BASH_HISTDIR"/combined  # Write to original, to preserve inode.
             then
-                command cp -f "$PREV_COMBINED" ~/.bash_history.d/combined  # Restore if error.
+                command cp -f "$PREV_COMBINED" "$MY_BASH_HISTDIR"/combined  # Restore if error.
             fi
             command rm -f "$PREV_COMBINED"
 
