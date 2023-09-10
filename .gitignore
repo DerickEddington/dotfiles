@@ -47,6 +47,7 @@
 /.lesshst
 /.lldb/*history
 /.local/share/*
+!/.local/share/my/
 !/.local/share/rust-script
 /.local/state/*
 !/.local/state/my/
