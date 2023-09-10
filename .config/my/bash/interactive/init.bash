@@ -1,4 +1,9 @@
 # This file is executed for interactive Bash shells.
+#
+# (This logic has a lot of `|| return` to be robust by aborting early, and `|| true` to be robust
+#  by continuing, which is helpful when unusual strange circumstances could break this logic,
+#  which is helpful to still allow login to continue with such strangeness, versus exiting the
+#  shell which would prevent login.)
 
 # If not running interactively, don't do anything
 case $- in
@@ -7,11 +12,15 @@ case $- in
 esac
 
 
-MY_BASH_CONFIG=${XDG_CONFIG_HOME:-~/.config}/my/bash
+# All related config files are relative to the current file.
+MYSELF_RELDIR=$(command -p  dirname "${BASH_SOURCE[0]}") || return  # (Must be outside any function.)
+MY_BASH_INTERACTIVE_CONFIG=$(command -p  realpath -m -L -s "$MYSELF_RELDIR") || return
+MY_BASH_CONFIG=$(command -p  dirname "$MY_BASH_INTERACTIVE_CONFIG") || return
+unset MYSELF_RELDIR
 
 
 # Try to use newer bash version if the default one is ancient.
-if [ ${BASH_VERSINFO[0]} -le 3  -a  $SHLVL -eq 1 ]
+if [ "${BASH_VERSINFO[0]}" -le 3 ] && [ $SHLVL -eq 1 ]
 then
     # (The PLATFORM variable is defined in $XDG_CONFIG_HOME/my/env/profile.sh
     # and is available here because that file was source'd before this one.)
@@ -49,12 +58,12 @@ TIMEFORMAT=$'\nreal\t%3lR\nuser\t%3lU\nsys\t%3lS\nCPU%%\t%P'
 
 
 # History
-source "$MY_BASH_CONFIG"/interactive/history/init.bash
+source "$MY_BASH_INTERACTIVE_CONFIG"/history/init.bash || true
 
 
 # My custom prompt.
-if [ ${BASH_VERSINFO[0]} -ge 4 ]; then
-    source "$MY_BASH_CONFIG"/interactive/prompt.bash
+if [ "${BASH_VERSINFO[0]}" -ge 4 ]; then
+    source "$MY_BASH_INTERACTIVE_CONFIG"/prompt.bash || true
 fi
 
 
@@ -62,66 +71,14 @@ fi
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
-if [ -f "$MY_BASH_CONFIG"/interactive/aliases.bash ]; then
-    source "$MY_BASH_CONFIG"/interactive/aliases.bash
+if [ -f "$MY_BASH_INTERACTIVE_CONFIG"/aliases.bash ]; then
+    source "$MY_BASH_INTERACTIVE_CONFIG"/aliases.bash || true
 fi
 
-
-# Wrappers of utils
-
-function du {
-    ( shopt -s dotglob
-      if [ $# -ge 1 ]; then
-          local ARGS=("$@")
-      else
-          local ARGS=(*)
-      fi
-      command du -s -c -h "${ARGS[@]}" | sort -h )
-}
-
-function nix-shell {
-    local IS_INTERACTIVE=true IS_PURE=false GIVEN_COMMAND="" GIVEN_COMMAND_IDX=""
-
-    # Scan the arguments to see what we're dealing with.
-    local I ARGS=("$@")
-    for ((I=0; I < ${#ARGS[@]}; I++)); do
-        # (Note: This is imperfect and will misinterpret if these patterns are
-        #  actually the value of some other option.)
-        case "${ARGS[I]}" in
-            (--command)
-                GIVEN_COMMAND_IDX=$((I + 1))
-                GIVEN_COMMAND="${ARGS[GIVEN_COMMAND_IDX]}"
-                ;;
-            (--run) IS_INTERACTIVE=false ;;
-            (--pure) IS_PURE=true ;;
-        esac
-    done
-
-    if $IS_PURE && $IS_INTERACTIVE; then
-        # Use my custom history-file configuration and handling with `nix-shell
-        # --pure`.  Also, prevent `nix-shell --pure` from clobbering the default
-        # HISTFILE (which is an extra precaution redundantly in addition to
-        # other sessions usually using $MY_BASH_HISTDIR/combined and
-        # HISTFILE=$MY_BASH_SESSION_HISTFILE, just in case that is not in effect
-        # for some reason).  We evaluate $MY_BASH_CONFIG here, because that
-        # variable is not present inside `nix-shell --pure`.
-        local MY_COMMAND=("source '$MY_BASH_CONFIG'/interactive/history/init.bash;")
-
-        if [ "$GIVEN_COMMAND_IDX" ]; then
-            # Allow the given command to control whether it does a "return".
-            # This requires that it be placed at the end of MY_COMMAND.
-            MY_COMMAND+=("$GIVEN_COMMAND")
-            ARGS[GIVEN_COMMAND_IDX]="${MY_COMMAND[*]}"  # Replace the original.
-        else
-            MY_COMMAND+=("return")  # Drop into the interactive shell.
-            ARGS=(--command "${MY_COMMAND[*]}" "${ARGS[@]}")
-        fi
-
-        command nix-shell "${ARGS[@]}"
-    else
-        command nix-shell "$@"  # Don't affect any of the arguments.
-    fi
-}
+# Wrappers of utils.
+if [ -f "$MY_BASH_INTERACTIVE_CONFIG"/wrappers.bash ]; then
+    source "$MY_BASH_INTERACTIVE_CONFIG"/wrappers.bash || true
+fi
 
 
 # Only execute this when a top-level bash is run.  I.e. not for any bash

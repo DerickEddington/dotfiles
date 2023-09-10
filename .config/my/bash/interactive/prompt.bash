@@ -31,6 +31,7 @@ function _my_bash_prompt_command()
     local PREV_EXIT_STATUS=$?
     local DO_COLORS="$1"
 
+    # shellcheck disable=SC2034  # Unused variables left for readability.
     if [ "$DO_COLORS" = yes ]; then
         local RED="\[\e[00;31m\]"
         local GREEN="\[\e[00;32m\]"
