@@ -63,6 +63,13 @@ in
     # Packages available in per-user profile.  Only add to this that which all users should have,
     # because it is inconvenient for them to need to remove elements from this.
     home.packages = with pkgs; [
+      # Useful to each user because each user's home dir is tracked by Git.  Don't use
+      # `programs.git.enable` because that would generate config files (even an empty one), but we
+      # want those to not be managed by HM so they can be tracked in the dotfiles repo so they're
+      # provided in non-HM-managed homes (e.g. when the dotfiles repo is used in FreeBSD, Solaris,
+      # etc.).
+      config.programs.git.package
+
       # $XDG_CONFIG_HOME/my/bash/interactive/history/ needs this `my-bash_history-combiner`
       # utility.
       (import ../../nixpkgs/my/bash_history-combiner.nix { inherit pkgs; })
@@ -107,34 +114,6 @@ in
       initExtra = ''
         source "''${XDG_CONFIG_HOME:-$HOME/.config}/my/bash/interactive/init.bash"
       '';
-    };
-
-    #---------------------------------------------------------------------------
-    # Git
-    #---------------------------------------------------------------------------
-    programs.git = let
-      fetchParallel = 0;  # "some reasonable default"
-    in rec {
-      enable = true;
-      userName  = config.home.username;
-      userEmail = "${userName}@${hostName}";
-      extraConfig = {
-        init = {
-          defaultBranch = "main";
-        };
-        credential = {
-          helper = "cache --timeout ${toString (8 * 60 * 60)}";
-        };
-        fetch = {
-          parallel = fetchParallel;
-        };
-        merge = {
-          conflictStyle = "diff3";
-        };
-        submodule = {
-          fetchJobs = fetchParallel;
-        };
-      };
     };
 
     #---------------------------------------------------------------------------

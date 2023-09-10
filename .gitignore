@@ -76,7 +76,6 @@
 /.config/dconf/
 /.config/environment.d/10-home-manager.conf
 /.config/gdb/my/home-manager-init
-/.config/git/config
 /.config/systemd/
 /.config/user-tmpfiles.d/my-home-*-tmp-debug.conf
 /.config/user-tmpfiles.d/my-home-*-tmp-src.conf

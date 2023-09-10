@@ -1,0 +1,14 @@
+[init]
+	defaultBranch = "main"
+
+[merge]
+	conflictStyle = "diff3"
+
+[credential]
+	helper = "cache --timeout 28800"
+
+[fetch]
+	parallel = 0
+
+[submodule]
+	fetchJobs = 0
