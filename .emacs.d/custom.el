@@ -3,6 +3,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(Man-width-max nil)
  '(adaptive-wrap-extra-indent 2)
  '(after-save-hook '(magit-after-save-refresh-status))
  '(auth-source-save-behavior nil)
@@ -63,7 +64,7 @@
  '(find-file-visit-truename nil)
  '(flycheck-check-syntax-automatically '(save idle-buffer-switch mode-enabled))
  '(flycheck-display-errors-delay 0.5)
- '(flycheck-global-modes '(rust-mode))
+ '(flycheck-global-modes '(rust-mode sh-mode))
  '(flycheck-idle-change-delay 5)
  '(gc-cons-threshold 100000000)
  '(gdb-debug-log-max 2048)
