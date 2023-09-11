@@ -6,20 +6,25 @@
 #  which is helpful to still allow login to continue with such strangeness, versus exiting the
 #  shell which would prevent login.)
 
-if [ ! "${MY_BASH_CONFIG:-}" ]; then
-    # All related config files are relative to the current file.
-    MYSELF_RELDIR=$(command -p  dirname "${BASH_SOURCE[0]}") || return  # (Must be outside any function.)
-    MY_BASH_CONFIG=$(command -p  realpath -m -L -s "$MYSELF_RELDIR"/../..) || return
-    unset MYSELF_RELDIR
-fi
+# shellcheck source=../../../../../.local/share/my/bash/helpers.bash
+source "${XDG_DATA_HOME:-$HOME/.local/share}"/my/bash/helpers.bash || return
 
-MY_BASH_HISTDIR=${XDG_STATE_HOME:-~/.local/state}/my/bash/interactive/history
+# If already source'd, don't do anything.
+_my_bash_sourced_already config/my/bash/interactive/history/init && return
 
-MY_BASH_COMBINED_HISTFILE_LOCK=${XDG_RUNTIME_DIR:-/tmp/user/${USER:-$EUID}}/
-MY_BASH_COMBINED_HISTFILE_LOCK+=my/bash/interactive/history/combined.lock
-command -p  mkdir -p "$(command -p  dirname "$MY_BASH_COMBINED_HISTFILE_LOCK")" || return
+# All related config files are relative to the current file.
+MYSELF_RELDIR=$(std dirname "${BASH_SOURCE[0]}") || return  # (Must be outside any function.)
+MY_BASH_HISTORY_CONFIG=$(std realpath -m -L -s "$MYSELF_RELDIR") || return
+unset MYSELF_RELDIR
 
-MY_BASH_HISTORY_COMBINER_IGNORES=$MY_BASH_CONFIG/interactive/history/ignores.regexes
+[ "${MY_STATE_HOME:-}" ] && [ "${MY_RUNTIME_DIR:-}" ] || return
+
+MY_BASH_HISTDIR=$MY_STATE_HOME/my/bash/interactive/history
+
+MY_BASH_COMBINED_HISTFILE_LOCK=$MY_RUNTIME_DIR/my/bash/interactive/history/combined.lock
+std mkdir -p "$(std dirname "$MY_BASH_COMBINED_HISTFILE_LOCK")" || return
+
+MY_BASH_HISTORY_COMBINER_IGNORES=$MY_BASH_HISTORY_CONFIG/ignores.regexes
 export MY_BASH_HISTORY_COMBINER_IGNORES  # For my-bash_history-combiner utility.
 
 # Append to the history file, don't overwrite it
@@ -38,17 +43,19 @@ shopt -s lithist
 # and so wipe-out the $HISTFILE but that don't source ~/.bashrc (e.g. due to using --rcfile)
 # cannot wipe-out my main history file because those things will use a different HISTFILE value
 # (this is true independently of my extra `nix-shell` shell function).
+is-function-undef _my_unique_histfile || return
 function _my_unique_histfile {
     local - ; set -o nounset +o errexit
     local ID=$1 FILENAME DIRNAME
-    FILENAME=$MY_BASH_HISTDIR/by-time/$(command -p  date +%Y/%m/%d/%T)--${HOSTNAME}${ID:+--}$ID || return
-    DIRNAME="$(command -p  dirname "$FILENAME")" || return
-    command -p  mkdir -p "$DIRNAME" || return
+    FILENAME=$MY_BASH_HISTDIR/by-time/$(std date +%Y/%m/%d/%T)--${HOSTNAME}${ID:+--}$ID || return
+    DIRNAME="$(std dirname "$FILENAME")" || return
+    std mkdir -p "$DIRNAME" || return
     if type -t mktemp >& /dev/null; then
-        FILENAME=$(command -p  mktemp "$FILENAME"--XXXXXXXXXX) || return
+        FILENAME=$(std mktemp "$FILENAME"--XXXXXXXXXX) || return
     fi
     echo "$FILENAME"
 }
+declare-function-readonly _my_unique_histfile
 
 if ! [[ "${HISTFILE:-}" = */by-time/* ]]
 then
@@ -73,11 +80,12 @@ HISTIGNORE=\\:  # The `:` command by itself.
 HISTTIMEFORMAT='%F %T %Z:  '
 
 # Mutex the `combined` file, because multiple sessions access it.
+is-function-undef _my_lock_combined_histfile || return
 function _my_lock_combined_histfile {
     local - ; set -o nounset +o errexit
     local LOCK_FD LOCK_FILE=$MY_BASH_COMBINED_HISTFILE_LOCK
     exec {LOCK_FD}>> "$LOCK_FILE"  # Open a new file descriptor of it.
-    if command -p  flock "${1:-}" --timeout 10 $LOCK_FD ; then
+    if std flock "${1:-}" --timeout 10 $LOCK_FD ; then
         echo $LOCK_FD
     else
         echo "Failed to lock $LOCK_FILE" >&2
@@ -85,7 +93,9 @@ function _my_lock_combined_histfile {
         return 1
     fi
 }
+declare-function-readonly _my_lock_combined_histfile
 
+is-function-undef _my_load_combined_histfile || return
 function _my_load_combined_histfile {
     local - ; set -o nounset +o errexit
     local LOCK_FD
@@ -94,6 +104,7 @@ function _my_load_combined_histfile {
         exec {LOCK_FD}>&-  # Close the FD to release the lock.
     fi
 }
+declare-function-readonly _my_load_combined_histfile
 
 # Start with the past history of combined old sessions.
 _my_load_combined_histfile || return
@@ -104,17 +115,20 @@ PROMPT_COMMAND="${PROMPT_COMMAND:-} ${PROMPT_COMMAND:+;} history -a || true"
 
 # Helper command for when you want a session to not save any of its history.
 # Note that `history -a` etc will do nothing, as desired, without a HISTFILE.
+is-function-undef no-histfile || return
 function no-histfile {
     local - ; set -o nounset +o errexit
-    [ "${MY_BASH_SESSION_HISTFILE:-}" ] && command -p  rm "${1:--i}" "$MY_BASH_SESSION_HISTFILE"
+    [ "${MY_BASH_SESSION_HISTFILE:-}" ] && std rm "${1:--i}" "$MY_BASH_SESSION_HISTFILE"
     unset HISTFILE MY_BASH_SESSION_HISTFILE
 }
+declare-function-readonly no-histfile
 
 # Combine the previous `combined` history with this session's and write that as the new `combined`
 # history with further ignoring and deduplication, so that the `combined` history file is like a
 # database of more-interesting past commands without preserving them all nor their session's
 # sequence, whereas a per-session history file is a complete record of all the session's commands
 # and preserves their sequence.
+is-function-undef _my_histfile_combining || return
 function _my_histfile_combining {
     local - ; set -o nounset +o errexit
 
@@ -123,14 +137,14 @@ function _my_histfile_combining {
     [ "${MY_BASH_SESSION_HISTFILE:-}" ] && [ "${MY_BASH_HISTDIR:-}" ] || return
 
     if [ -s "$MY_BASH_SESSION_HISTFILE" ]; then
-        command -p  chmod a-w "$MY_BASH_SESSION_HISTFILE"  # Protect it as an archive.
+        std chmod a-w "$MY_BASH_SESSION_HISTFILE"  # Protect it as an archive.
 
         if _my_lock_combined_histfile --exclusive > /dev/null
         then
-            [ -e "$MY_BASH_HISTDIR"/combined ] || command -p  touch "$MY_BASH_HISTDIR"/combined || return
+            [ -e "$MY_BASH_HISTDIR"/combined ] || std touch "$MY_BASH_HISTDIR"/combined || return
             local PREV_COMBINED
-            PREV_COMBINED=$(command -p  mktemp "$MY_BASH_HISTDIR"/combined-prev-XXXXXXXXXX) || return
-            command -p  cp "$MY_BASH_HISTDIR"/combined "$PREV_COMBINED" || return
+            PREV_COMBINED=$(std mktemp "$MY_BASH_HISTDIR"/combined-prev-XXXXXXXXXX) || return
+            std cp "$MY_BASH_HISTDIR"/combined "$PREV_COMBINED" || return
 
             if type my-bash_history-combiner >& /dev/null; then
                 local MY_BASH_HISTORY_COMBINER=my-bash_history-combiner
@@ -143,9 +157,9 @@ function _my_histfile_combining {
             if ! $MY_BASH_HISTORY_COMBINER "$PREV_COMBINED" "$MY_BASH_SESSION_HISTFILE" \
                    > "$MY_BASH_HISTDIR"/combined  # Write to original, to preserve inode.
             then
-                command -p  cp -f "$PREV_COMBINED" "$MY_BASH_HISTDIR"/combined  # Restore if error.
+                std cp -f "$PREV_COMBINED" "$MY_BASH_HISTDIR"/combined  # Restore if error.
             fi
-            command -p  rm -f "$PREV_COMBINED"
+            std rm -f "$PREV_COMBINED"
 
             # When the bash process terminates, it will close the lock FD which will release the
             # lock.
@@ -154,10 +168,13 @@ function _my_histfile_combining {
         no-histfile -f  # If this session had no commands entered, delete its empty history file.
     fi
 }
+declare-function-readonly _my_histfile_combining
 
+is-function-undef _my_histfile_combining_ignore_failure || return
 function _my_histfile_combining_ignore_failure {
     _my_histfile_combining || true
 }
+declare-function-readonly _my_histfile_combining_ignore_failure
 
 if [ -v IN_NIX_SHELL ]; then
     # Run it via the exitHandler EXIT trap of $stdenv/setup of nix-shell.

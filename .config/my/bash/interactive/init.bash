@@ -12,10 +12,19 @@ case $- in
 esac
 
 
+# Used by the current and sub init files, and could be useful to the user.
+# shellcheck source=../../../../.local/share/my/bash/helpers.bash
+source "${XDG_DATA_HOME:-$HOME/.local/share}"/my/bash/helpers.bash || return
+
+
+# If already source'd, don't do anything.
+_my_bash_sourced_already config/my/bash/interactive/init && return
+
+
 # All related config files are relative to the current file.
-MYSELF_RELDIR=$(command -p  dirname "${BASH_SOURCE[0]}") || return  # (Must be outside any function.)
-MY_BASH_INTERACTIVE_CONFIG=$(command -p  realpath -m -L -s "$MYSELF_RELDIR") || return
-MY_BASH_CONFIG=$(command -p  dirname "$MY_BASH_INTERACTIVE_CONFIG") || return
+MYSELF_RELDIR=$(std dirname "${BASH_SOURCE[0]}") || return  # (Must be outside any function.)
+MY_BASH_INTERACTIVE_CONFIG=$(std realpath -m -L -s "$MYSELF_RELDIR") || return
+MY_BASH_CONFIG=$(std dirname "$MY_BASH_INTERACTIVE_CONFIG") || return
 unset MYSELF_RELDIR
 
 
