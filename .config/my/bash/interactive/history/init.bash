@@ -1,5 +1,5 @@
-# (Remember: This might also be source'ed by other things or at other times -
-#  e.g. by my `nix-shell --pure` wrapper.)
+# (Remember: This might also be source'ed by other things or at other times - e.g. by my
+#  `nix-shell --pure` wrapper.)
 #
 # (This logic has a lot of `|| return` to be robust by aborting early, and `|| true` to be robust
 #  by continuing, which is helpful when unusual strange circumstances could break this logic,
@@ -9,33 +9,29 @@
 # shellcheck source=../../../../../.local/share/my/bash/helpers.bash
 source "${XDG_DATA_HOME:-$HOME/.local/share}"/my/bash/helpers.bash || return
 
+
 # If already source'd, don't do anything.
 _my_bash_sourced_already config/my/bash/interactive/history/init && return
 
 # All related config files are relative to the current file.
 MYSELF_RELDIR=$(std dirname "${BASH_SOURCE[0]}") || return  # (Must be outside any function.)
 MY_BASH_HISTORY_CONFIG=$(std realpath -m -L -s "$MYSELF_RELDIR") || return
+readonly MY_BASH_HISTORY_CONFIG
 unset MYSELF_RELDIR
 
 [ "${MY_STATE_HOME:-}" ] && [ "${MY_RUNTIME_DIR:-}" ] || return
-
-MY_BASH_HISTDIR=$MY_STATE_HOME/my/bash/interactive/history
-
-MY_BASH_COMBINED_HISTFILE_LOCK=$MY_RUNTIME_DIR/my/bash/interactive/history/combined.lock
-std mkdir -p "$(std dirname "$MY_BASH_COMBINED_HISTFILE_LOCK")" || return
+readonly MY_BASH_HISTDIR=$MY_STATE_HOME/my/bash/interactive/history
+readonly MY_BASH_COMBINED_HISTFILE_LOCK=$MY_RUNTIME_DIR/my/bash/interactive/history/combined.lock
 
 MY_BASH_HISTORY_COMBINER_IGNORES=$MY_BASH_HISTORY_CONFIG/ignores.regexes
-export MY_BASH_HISTORY_COMBINER_IGNORES  # For my-bash_history-combiner utility.
+declare -x MY_BASH_HISTORY_COMBINER_IGNORES  # For my-bash_history-combiner utility.
+
 
 # Append to the history file, don't overwrite it
 shopt -s histappend
-# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-# Don't expand !
-set +o histexpand
 # Save multi-line commands as one entry.
 shopt -s cmdhist
-# Save multi-line commands as multi-line (instead of as a single line converted to have ";").
-shopt -s lithist
+
 
 # Separate history file for each Bash session, for keeping an organized archive, and for assisting
 # the immediate writing of each command without interleaving such with other instances doing the
@@ -66,20 +62,21 @@ else
     # HISTFILE was already setup according to my custom scheme, so keep using that.
     MY_BASH_SESSION_HISTFILE=$HISTFILE
 fi
-# Practically unlimited, but limited against madness.
-HISTFILESIZE=10000000
-# Limit a mad session's history to be small enough to not clobber much of the `combined` file.
-HISTSIZE=$((HISTFILESIZE / 100))
-# Don't put duplicate lines or lines starting with space in the history.
-HISTCONTROL=ignoreboth
-# Don't put commands matching these in the history.
-HISTIGNORE=\\:  # The `:` command by itself.
-# Cause timestamps to be written to the history file, which is also needed for
-# `lithist` to preserve single-entry of a multi-line entry.  Also used when the
-# `history` builtin command displays the history.
-HISTTIMEFORMAT='%F %T %Z:  '
+
+# Cause timestamps to be written to the history file, which is also needed for `lithist` to
+# preserve single-entry of a multi-line entry.  Also used when the `history` builtin command
+# displays the history.
+readonly HISTTIMEFORMAT='%F %T %Z:  '
+
+
+# Aspects that a user might want to customize.
+source "$MY_BASH_HISTORY_CONFIG"/config.bash || true
+
 
 # Mutex the `combined` file, because multiple sessions access it.
+
+std mkdir -p "$(std dirname "$MY_BASH_COMBINED_HISTFILE_LOCK")" || return
+
 is-function-undef _my_lock_combined_histfile || return
 function _my_lock_combined_histfile {
     local - ; set -o nounset +o errexit
@@ -95,6 +92,7 @@ function _my_lock_combined_histfile {
 }
 declare-function-readonly _my_lock_combined_histfile
 
+
 is-function-undef _my_load_combined_histfile || return
 function _my_load_combined_histfile {
     local - ; set -o nounset +o errexit
@@ -109,9 +107,11 @@ declare-function-readonly _my_load_combined_histfile
 # Start with the past history of combined old sessions.
 _my_load_combined_histfile || return
 
+
 # Immediately write each command to the history file, in case this Bash session has some problem
 # and fails to do so when it exits.
 PROMPT_COMMAND="${PROMPT_COMMAND:-} ${PROMPT_COMMAND:+;} history -a || true"
+
 
 # Helper command for when you want a session to not save any of its history.
 # Note that `history -a` etc will do nothing, as desired, without a HISTFILE.
@@ -122,6 +122,7 @@ function no-histfile {
     unset HISTFILE MY_BASH_SESSION_HISTFILE
 }
 declare-function-readonly no-histfile
+
 
 # Combine the previous `combined` history with this session's and write that as the new `combined`
 # history with further ignoring and deduplication, so that the `combined` history file is like a
