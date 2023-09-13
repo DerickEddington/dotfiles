@@ -15,7 +15,7 @@ _my_bash_sourced_already config/my/bash/interactive/history/init && return
 
 # All related config files are relative to the current file.
 MYSELF_RELDIR=$(std dirname "${BASH_SOURCE[0]}") || return  # (Must be outside any function.)
-MY_BASH_HISTORY_CONFIG=$(std realpath -m -L -s "$MYSELF_RELDIR") || return
+MY_BASH_HISTORY_CONFIG=$(gnu realpath -m -L -s "$MYSELF_RELDIR") || return
 readonly MY_BASH_HISTORY_CONFIG
 unset MYSELF_RELDIR
 
@@ -46,9 +46,7 @@ function _my_unique_histfile {
     FILENAME=$MY_BASH_HISTDIR/by-time/$(std date +%Y/%m/%d/%T)--${HOSTNAME}${ID:+--}$ID || return
     DIRNAME="$(std dirname "$FILENAME")" || return
     std mkdir -p "$DIRNAME" || return
-    if type -t mktemp >& /dev/null; then
-        FILENAME=$(std mktemp "$FILENAME"--XXXXXXXXXX) || return
-    fi
+    FILENAME=$(gnu mktemp "$FILENAME"--XXXXXXXXXX) || return
     echo "$FILENAME"
 }
 declare-function-readonly _my_unique_histfile
@@ -82,7 +80,7 @@ function _my_lock_combined_histfile {
     local - ; set -o nounset +o errexit
     local LOCK_FD LOCK_FILE=$MY_BASH_COMBINED_HISTFILE_LOCK
     exec {LOCK_FD}>> "$LOCK_FILE"  # Open a new file descriptor of it.
-    if std flock "${1:-}" --timeout 10 $LOCK_FD ; then
+    if _my_flock "${1:-}" --timeout 10 $LOCK_FD ; then
         echo $LOCK_FD
     else
         echo "Failed to lock $LOCK_FILE" >&2

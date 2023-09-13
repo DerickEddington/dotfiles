@@ -85,6 +85,7 @@ in
       sessionVariables = rec {
         VISUAL = "emacs --no-window-system";
         EDITOR = VISUAL;
+        VAGRANT_EXPERIMENTAL = "disks";
       };
     };
 

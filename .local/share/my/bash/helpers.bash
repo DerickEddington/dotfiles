@@ -64,10 +64,7 @@ declare-function-readonly declare-function-readonly
 
 # For robustness
 
-is-function-undef std || return
-function std {
-    command -p -- "$@"
-}
+# Already defined in ../sh/helpers.sh.
 declare-function-readonly std
 
 is-function-undef split-on-words || return

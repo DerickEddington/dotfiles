@@ -59,6 +59,10 @@ assert_all_nonexistent() {
     done
 }
 
+std() {
+    command -p -- "$@"  # TODO: Is the `--` portable enough?
+}
+
 
 # Any source'ing of sub files must be done below here, so that the above are all defined for such.
 

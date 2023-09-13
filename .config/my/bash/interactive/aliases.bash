@@ -8,7 +8,28 @@ if [ -n "$LS_COLORS" ]; then
     alias egrep='egrep --color=auto'
 fi
 
-alias ls='ls -CFhv --group-directories-first --quoting-style=c-maybe --color=tty'
+_my_gnu_ls_alias='ls -CFhv --group-directories-first --quoting-style=c-maybe --color=tty'
+
+case "$MY_PLATFORM"
+in
+    (Linux/*)
+        # shellcheck disable=SC2139  # Want this to be expanded when defined.
+        alias ls="$_my_gnu_ls_alias"
+        alias free='free -h'
+        alias ps="ps fxu"
+        ;;
+    (FreeBSD/*)
+        if [ -x /usr/local/bin/gls ]; then  # GNU ls
+            # shellcheck disable=SC2139  # Want this to be expanded when defined.
+            alias ls=g"$_my_gnu_ls_alias"
+        else
+            alias ls='ls -CFhG'
+        fi
+        alias ps="ps dxu"
+        ;;
+esac
+unset _my_gnu_ls_alias
+
 alias l='ls -A -l'
 alias ll='ls -l'
 alias la='ls -A'
@@ -21,9 +42,7 @@ alias rm="rm -i -r"
 alias rmdir="rm -i -r"
 alias pstree="pstree -a -l -n"
 alias nano="nano -w"
-alias ps="ps fxu"
 alias df="df -h"
-alias free='free -h'
 alias objdump='objdump -M intel-mnemonic'
 alias emacs='emacs --no-window-system'
 alias root='sudo su -l'

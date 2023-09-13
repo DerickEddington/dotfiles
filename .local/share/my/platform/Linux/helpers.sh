@@ -39,6 +39,14 @@ readonly MY_PLATFORM MY_PLATFORM_ARCH
 
 # Functions
 
+gnu() {
+    std "$@"  # Assume that GNU utilities are the default.
+}
+
 _my_terminal_supports_colors() {
     std tput setaf 1 > /dev/null 2>&1  # TODO: Is this portable enough across Linux distros?
+}
+
+_my_flock() {
+    std flock "$@"
 }
