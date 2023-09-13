@@ -61,6 +61,12 @@ if [ "${BASH_VERSINFO[0]}" -ge 4 ]; then
     source "$MY_BASH_INTERACTIVE_CONFIG"/prompt.bash || true
 fi
 
+# Platform-specific.
+if [ -f "$MY_BASH_INTERACTIVE_CONFIG"/platform/"$(uname)"/init.bash ]; then
+    # shellcheck source=./platform/FreeBSD/init.bash  #  (Just one of many, to have something.)
+    source "$MY_BASH_INTERACTIVE_CONFIG"/platform/"$(uname)"/init.bash || true
+fi
+
 # Wrappers of utils, before source'ing aliases.bash (because those can use these).
 if [ -f "$MY_BASH_INTERACTIVE_CONFIG"/wrappers.bash ]; then
     source "$MY_BASH_INTERACTIVE_CONFIG"/wrappers.bash || true

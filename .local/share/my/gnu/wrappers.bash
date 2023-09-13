@@ -19,22 +19,27 @@ function _my_gnu_generate_wrappers
             local gnuUtilName
             gnuUtilName=$(std basename "$gnuUtilExec") || return
 
-            # Sanity check that each name is a single word.
-            if ! is-single-word "$gnuUtilName"; then
-                error "GNU-utility name ${gnuUtilName@Q} is not a single word!"
-                return 2
-            fi
+            if [ "$(type -t "$gnuUtilName")" != builtin ]
+            then
+                # Sanity check that each name is a single word.
+                if ! is-single-word "$gnuUtilName"; then
+                    error "GNU-utility name ${gnuUtilName@Q} is not a single word!"
+                    return 2
+                fi
 
-            # Sanity check that each executable pathname is absolute.
-            if ! [[ "$gnuUtilExec" = /* ]]; then
-                error "GNU-utility executable pathname is not absolute!"
-                return 3
-            fi
+                # Sanity check that each executable pathname is absolute.
+                if ! [[ "$gnuUtilExec" = /* ]]; then
+                    error "GNU-utility executable pathname is not absolute!"
+                    return 3
+                fi
 
-            if is-function-undef "$gnuUtilName"; then
-                eval "function $gnuUtilName { ${gnuUtilExec@Q} \"\$@\" ;}"
+                if is-function-undef "$gnuUtilName"; then
+                    eval "function $gnuUtilName { ${gnuUtilExec@Q} \"\$@\" ;}"
+                else
+                    warn "Already defined function ${gnuUtilName@Q}. Not redefining."
+                fi
             else
-                warn "Already defined function ${gnuUtilName@Q}. Not redefining."
+                : # Do not override Bash's builtins (that'd break things).
             fi
         done
     fi

@@ -12,13 +12,17 @@
 # the provisioning is run.
 #
 readonly MY_PLATFORM_PACKAGES_DESIRED=(
+    gnu-coreutils  # Install first, because it's used for installing others by my various scripts.
+    bash-completion
    #clangd
     fd-find
     git
     htop
     most
+    nano
     ripgrep
     screen
+    util-linux  # Needed by _my_lock_combined_histfile to have `flock`.
     # TODO: more by default in main branch for all users
    #gcc
     # TODO: more by commented-out possibilities in main branch for all users to choose to uncomment.
