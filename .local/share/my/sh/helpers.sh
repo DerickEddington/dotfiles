@@ -14,8 +14,9 @@ _MY_SH_SOURCED_ALREADY__HELPERS=true
 
 
 warn() {
-    echo "Warning${1:+: $1}"
-} 1>&2
+    echo "Warning${1:+: $1}" 1>&2
+    return "${2:-0}"
+}
 
 
 # XDG Base Directory Specification
@@ -35,10 +36,17 @@ else
 fi
 
 
+# Functions
+
+error() {
+    echo "Error${1:+: $1}" 1>&2
+    return "${2:-0}"
+}
+
 fail() {
-    echo "Error${1:+: $1}"
+    error "${1:-}" || true
     exit "${2:-1}"
-} 1>&2
+}
 
 assert_nonexistent() {
     [ ! -e "${1:-}" ] || fail "$1 already exists!"
@@ -53,3 +61,14 @@ assert_all_nonexistent() {
 
 
 # Any source'ing of sub files must be done below here, so that the above are all defined for such.
+
+
+# Platform-specific identification
+#
+MY_PLATFORM=$(uname)/$(uname -r)           # This is often changed by next `source` to be better.
+MY_PLATFORM_ARCH=$MY_PLATFORM/$(uname -m)  # Ditto.
+if [ -e "$MY_DATA_HOME"/my/platform/"$(uname)"/helpers.sh ]; then
+    # shellcheck source=../platform/Linux/helpers.sh  #  (Just one of many, to have something.)
+    . "$MY_DATA_HOME"/my/platform/"$(uname)"/helpers.sh
+fi
+readonly MY_PLATFORM MY_PLATFORM_ARCH

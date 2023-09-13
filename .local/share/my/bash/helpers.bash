@@ -70,6 +70,27 @@ function std {
 }
 declare-function-readonly std
 
+is-function-undef split-on-words || return
+function split-on-words {
+    (( $# == 1 || $# == 2 )) || return
+    IFS=" " read -r -a "${2:-WORDS_SPLITTED}" <<< "$1"
+}
+declare-function-readonly split-on-words
+
+is-function-undef is-var-attr || return
+function is-var-attr {
+    local - ; set +o nounset
+    (( $# == 2 )) || return 2
+    [[ "${!1@a}" = *$2* ]]
+}
+declare-function-readonly is-var-attr
+
+is-function-undef is-var-assoc-array || return
+function is-var-assoc-array {
+    is-var-attr "$1" A
+}
+declare-function-readonly is-var-assoc-array
+
 
 # Miscellaneous
 

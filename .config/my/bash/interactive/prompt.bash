@@ -4,7 +4,11 @@ _my_bash_prompt_sep_with_time+=" \D{%F %T %Z} ---"
 
 function _my_bash_prompt_setup()
 {
-    local DO_COLORS="$1"
+    if _my_terminal_supports_colors; then
+        local DO_COLORS=yes
+    else
+        local DO_COLORS=no
+    fi
 
     if [ "$DO_COLORS" = yes ]; then
         # Note: PS0 does not like having \[ \].
@@ -90,9 +94,6 @@ function _my_bash_prompt_command()
     esac
 }
 
-# NixOS
-[ -n "$PROMPT_COLOR" ] && color_prompt=yes
-
-_my_bash_prompt_setup "$color_prompt"
+_my_bash_prompt_setup
 
 # unset -f _my_bash_prompt_setup
