@@ -20,6 +20,9 @@ in
         ;;
     (FreeBSD/*)
         if [ -x /usr/local/bin/gls ]; then  # GNU ls
+            # Use the "g"-prefixed name, instead of assuming that `ls` is the wrapper from
+            # my/gnu/wrappers.bash, in case that wrapper is missing/broken, so that this critical
+            # alias is more robust.
             # shellcheck disable=SC2139  # Want this to be expanded when defined.
             alias ls=g"$_my_gnu_ls_alias"
         else
