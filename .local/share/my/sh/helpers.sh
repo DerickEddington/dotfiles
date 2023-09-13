@@ -71,8 +71,8 @@ std() {
 #
 MY_PLATFORM=$(uname)/$(uname -r)           # This is often changed by next `source` to be better.
 MY_PLATFORM_ARCH=$MY_PLATFORM/$(uname -m)  # Ditto.
-if [ -e "$MY_DATA_HOME"/my/platform/"$(uname)"/helpers.sh ]; then
-    # shellcheck source=../platform/Linux/helpers.sh  #  (Just one of many, to have something.)
-    . "$MY_DATA_HOME"/my/platform/"$(uname)"/helpers.sh
+if [ -e "$MY_DATA_HOME"/my/sh/platform/"$(uname)"/helpers.sh ]; then
+    # shellcheck source=./platform/Linux/helpers.sh  #  (Just one of many, to have something.)
+    . "$MY_DATA_HOME"/my/sh/platform/"$(uname)"/helpers.sh
 fi
 readonly MY_PLATFORM MY_PLATFORM_ARCH
