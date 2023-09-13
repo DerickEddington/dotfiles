@@ -13,9 +13,15 @@
 _MY_SH_SOURCED_ALREADY__HELPERS=true
 
 
+# Functions used immediately below.
+
 warn() {
     echo "Warning${1:+: $1}" 1>&2
     return "${2:-0}"
+}
+
+std() {
+    command -p -- "$@"  # TODO: Is the `--` portable enough?
 }
 
 
@@ -31,8 +37,10 @@ if [ "${XDG_RUNTIME_DIR:-}" ]; then
 else
     MY_RUNTIME_DIR=${TMPDIR:-/tmp}/user/${USER:-$(id -u)}
     warn "XDG_RUNTIME_DIR is undefined. Will try to use $MY_RUNTIME_DIR/."
-    mkdir -m a=rwXt "$(dirname "$MY_RUNTIME_DIR")" > /dev/null 2>&1 || true
-    mkdir -m u=rwX,g=,o= "$MY_RUNTIME_DIR"
+    # shellcheck disable=SC2174
+    mkdir -p -m a=rwXt "$(std dirname "$MY_RUNTIME_DIR")"
+    # shellcheck disable=SC2174
+    mkdir -p -m u=rwX,g=,o= "$MY_RUNTIME_DIR"
 fi
 
 
@@ -57,10 +65,6 @@ assert_all_nonexistent() {
         assert_nonexistent "$1"
         shift
     done
-}
-
-std() {
-    command -p -- "$@"  # TODO: Is the `--` portable enough?
 }
 
 
