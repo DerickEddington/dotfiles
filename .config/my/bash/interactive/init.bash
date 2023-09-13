@@ -61,14 +61,14 @@ if [ "${BASH_VERSINFO[0]}" -ge 4 ]; then
     source "$MY_BASH_INTERACTIVE_CONFIG"/prompt.bash || true
 fi
 
+# Wrappers of utils, before source'ing aliases.bash (because those can use these).
+if [ -f "$MY_BASH_INTERACTIVE_CONFIG"/wrappers.bash ]; then
+    source "$MY_BASH_INTERACTIVE_CONFIG"/wrappers.bash || true
+fi
+
 # Alias definitions.
 if [ -f "$MY_BASH_INTERACTIVE_CONFIG"/aliases.bash ]; then
     source "$MY_BASH_INTERACTIVE_CONFIG"/aliases.bash || true
-fi
-
-# Wrappers of utils.
-if [ -f "$MY_BASH_INTERACTIVE_CONFIG"/wrappers.bash ]; then
-    source "$MY_BASH_INTERACTIVE_CONFIG"/wrappers.bash || true
 fi
 
 

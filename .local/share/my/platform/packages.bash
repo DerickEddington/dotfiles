@@ -27,8 +27,7 @@ function my-platform-install-packages
 
     for name in "${names[@]}"; do
         # Sanity check that each name is a single word.
-        split-on-words "$name"
-        if (( ${#WORDS_SPLITTED[@]} >= 2 )); then
+        if ! is-single-word "$name"; then
             error "Package name ${name@Q} is not a single word!"
             return 2
         fi

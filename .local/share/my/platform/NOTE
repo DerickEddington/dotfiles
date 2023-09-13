@@ -1,0 +1,1 @@
+Every directory in ./ must be a $(uname) of a platform.  No other directories should be present.

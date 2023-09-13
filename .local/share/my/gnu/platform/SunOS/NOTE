@@ -1,0 +1,2 @@
+Solaris (or at least OpenIndiana) does not need a helper to populate a directory with the GNU
+utilities without the "g" or "gnu" prefix (unlike FreeBSD).

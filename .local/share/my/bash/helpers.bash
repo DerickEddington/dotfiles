@@ -74,6 +74,16 @@ function split-on-words {
 }
 declare-function-readonly split-on-words
 
+is-function-undef is-single-word || return
+function is-single-word {
+    local - ; set -o nounset
+    local splitted
+    (( $# == 1 )) || return
+    split-on-words "$1" splitted
+    (( ${#splitted[@]} == 1 ))
+}
+declare-function-readonly is-single-word
+
 is-function-undef is-var-attr || return
 function is-var-attr {
     local - ; set +o nounset

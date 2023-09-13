@@ -1,6 +1,12 @@
 # Wrappers of utils
 
 
+# shellcheck source=../../../../.local/share/my/gnu/wrappers.bash
+if [ -f "$MY_DATA_HOME"/my/gnu/wrappers.bash ]; then
+    source "$MY_DATA_HOME"/my/gnu/wrappers.bash || return
+fi
+
+
 function du
 {
     ( shopt -s dotglob
