@@ -2,6 +2,7 @@
 
 
 # Shell options
+shopt -s assoc_expand_once  # Critical for correctness of associative-array keys! Insane!
 shopt -s autocd
 shopt -s cdspell
 shopt -s checkhash
