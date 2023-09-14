@@ -70,3 +70,42 @@ function my-platform-install-packages
         }
     done
 }
+
+
+function my-cargo-install-user-local
+{
+    local - ; set -o nounset
+    (( $# >= 1 )) || return
+    local -r crate="$1" opts=("${@:2}")
+    local via=()
+
+    if ! is-command-extant cargo ; then
+        my-platform-install-packages rust cargo || return  # Ensure they're installed.
+    fi
+
+    case "$crate" in
+        (http*://*) via=(--git) ;;
+        (file:*)    via=(--path) ; crate=${crate#file:} ;;  # TODO: Keep the "file:" prefix?
+        (*:*)       error "Unsupported URI scheme!" ; return 2 ;;
+        (*)         via=() ;;  # From a registry (usually Crates.io).
+    esac
+
+    # Install executables into ~/.local/bin/ (the XDG-BDS dir that should already be in PATH).
+    #
+    cargo install --root ~/.local "${opts[@]}" "${via[@]}" "$crate" || return
+}
+
+function my-cargo-install-user-local-from-my-repo
+{
+    local - ; set -o nounset
+    (( $# >= 1 )) || return
+    local -r specName="$1" opts=("${@:2}")
+
+    if ! [ "${MY_PERSONAL_GIT_REPOSITORY:-}" ]; then
+        error "MY_PERSONAL_GIT_REPOSITORY not defined!"
+        return 2
+    fi
+    local -r crate=$MY_PERSONAL_GIT_REPOSITORY/$(printf %s.git "$specName")
+
+    my-cargo-install-user-local "$crate" "${opts[@]}"
+}

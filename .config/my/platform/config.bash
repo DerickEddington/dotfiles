@@ -19,6 +19,7 @@ readonly MY_PLATFORM_PACKAGES_DESIRED=(
     git
     htop
     most
+    my-bash-history-combiner  # Needed by _my_histfile_combining.
     nano
     ripgrep
     screen
@@ -27,3 +28,8 @@ readonly MY_PLATFORM_PACKAGES_DESIRED=(
    #gcc
     # TODO: more by commented-out possibilities in main branch for all users to choose to uncomment.
 )
+
+
+# Where my external personal packages are installed from.
+#
+MY_PERSONAL_GIT_REPOSITORY=https://github.com/DerickEddington

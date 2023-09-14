@@ -14,17 +14,20 @@ _my_bash_sourced_already local/share/my/platform/FreeBSD/13/packages && return
 # Maps my own convention of a package name to its platform-specific package name.
 #
 readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
-    [bash-completion]=bash-completion
-             [clangd]=llvm16
-            [fd-find]=fd-find
-                [git]=git
-      [gnu-coreutils]=coreutils
-               [htop]=htop
-               [most]=most
-               [nano]=nano
-            [ripgrep]=ripgrep
-             [screen]=screen
-         [util-linux]=devel/util-linux
+             [bash-completion]=bash-completion
+                       [cargo]=TODO
+                      [clangd]=llvm16
+                     [fd-find]=fd-find
+                         [git]=git
+               [gnu-coreutils]=coreutils
+                        [htop]=htop
+                        [most]=most
+    [my-bash-history-combiner]=my_bash_history_combiner
+                        [nano]=nano
+                     [ripgrep]=ripgrep
+                        [rust]=TODO
+                      [screen]=screen
+                  [util-linux]=devel/util-linux
     # TODO: the others
 )
 
@@ -32,24 +35,28 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
 # value (a command) may be multiple words quoted (e.g. to pass options to a command).
 #
 readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
-     [bash-completion]=my-pkg-install
-           [coreutils]=my-pkg-install
-              [llvm16]=my-pkg-install
-             [fd-find]=my-pkg-install
-                 [git]=my-pkg-install
-                [htop]=my-pkg-install
-                [most]=my-pkg-install
-                [nano]=my-pkg-install
-             [ripgrep]=my-pkg-install
-              [screen]=my-pkg-install
-                       # `flock` is needed by _my_lock_combined_histfile.  Might as well enable
-                       # all the other "options" since we're building it anyway and I'm more
-                       # familiar with these Linux utilities.  Some of their executable names are
-                       # the same as some of FreeBSD's standard utilities, but FreeBSD's default
-                       # PATH places /usr/local/bin with lower precedence and so its standard
-                       # utilities will still be the ones used by default.  I could arrange some
-                       # other way(s) to use the util-linux ones by default, if I want.
-    [devel/util-linux]='my-single-port-install WITH="CAL FLOCK GETOPT HARDLINK UUID"'
+             [bash-completion]=my-pkg-install
+                       [cargo]=TODO
+                   [coreutils]=my-pkg-install
+                      [llvm16]=my-pkg-install
+                     [fd-find]=my-pkg-install
+                         [git]=my-pkg-install
+                        [htop]=my-pkg-install
+                        [most]=my-pkg-install
+    [my_bash_history_combiner]=my-cargo-install-user-local-from-my-repo
+                        [nano]=my-pkg-install
+                     [ripgrep]=my-pkg-install
+                        [rust]=TODO
+                      [screen]=my-pkg-install
+                               # `flock` is needed by _my_lock_combined_histfile.  Might as well
+                               # enable all the other "options" since we're building it anyway and
+                               # I'm more familiar with these Linux utilities.  Some of their
+                               # executable names are the same as some of FreeBSD's standard
+                               # utilities, but FreeBSD's default PATH places /usr/local/bin with
+                               # lower precedence and so its standard utilities will still be the
+                               # ones used by default.  I could arrange some other way(s) to use
+                               # the util-linux ones by default, if I want.
+            [devel/util-linux]='my-single-port-install WITH="CAL FLOCK GETOPT HARDLINK UUID"'
     # TODO: the others
 )
 
@@ -106,7 +113,7 @@ function _my_freebsd_install_ports_collection {
     if ! [ -d /usr/ports ]
     then
         if ! is-command-extant git ; then
-            my-pkg-install git || return  # Ensure it's installed.
+            my-platform-install-packages git || return  # Ensure it's installed.
         fi
 
         # Using the latest "Quarterly" branch releases, when `pkg` does also (which is the usual
