@@ -28,7 +28,7 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
 )
 
 # Maps a platform-specific package name to its platform-specific command for installing it.  Each
-# value (a command) may be multiple words quoted (e.g. to pass options to a command).
+# value (an eval'ed command) may be multiple words quoted (e.g. to pass options to a command).
 #
 readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
                        [cargo]=TODO

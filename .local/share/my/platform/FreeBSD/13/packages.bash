@@ -15,7 +15,7 @@ _my_bash_sourced_already local/share/my/platform/FreeBSD/13/packages && return
 #
 readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
              [bash-completion]=bash-completion
-                       [cargo]=TODO
+                       [cargo]=rust
                       [clangd]=llvm16
                      [fd-find]=fd-find
                          [git]=git
@@ -25,18 +25,17 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
     [my-bash-history-combiner]=my_bash_history_combiner
                         [nano]=nano
                      [ripgrep]=ripgrep
-                        [rust]=TODO
+                        [rust]=rust
                       [screen]=screen
                   [util-linux]=devel/util-linux
     # TODO: the others
 )
 
 # Maps a platform-specific package name to its platform-specific command for installing it.  Each
-# value (a command) may be multiple words quoted (e.g. to pass options to a command).
+# value (an eval'ed command) may be multiple words quoted (e.g. to pass options to a command).
 #
 readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
              [bash-completion]=my-pkg-install
-                       [cargo]=TODO
                    [coreutils]=my-pkg-install
                       [llvm16]=my-pkg-install
                      [fd-find]=my-pkg-install
@@ -46,17 +45,21 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
     [my_bash_history_combiner]=my-cargo-install-user-local-from-my-repo
                         [nano]=my-pkg-install
                      [ripgrep]=my-pkg-install
-                        [rust]=TODO
+                        [rust]=my-pkg-install
                       [screen]=my-pkg-install
                                # `flock` is needed by _my_lock_combined_histfile.  Might as well
-                               # enable all the other "options" since we're building it anyway and
-                               # I'm more familiar with these Linux utilities.  Some of their
-                               # executable names are the same as some of FreeBSD's standard
-                               # utilities, but FreeBSD's default PATH places /usr/local/bin with
-                               # lower precedence and so its standard utilities will still be the
-                               # ones used by default.  I could arrange some other way(s) to use
-                               # the util-linux ones by default, if I want.
-            [devel/util-linux]='my-single-port-install WITH="CAL FLOCK GETOPT HARDLINK UUID"'
+                               # enable most of the other "options" since we're building it
+                               # anyway, and I'm more familiar with using these Linux utilities
+                               # than FreeBSD's analogues.  But don't enable the "UUID" option
+                               # because it attempts to install /usr/local/bin/uuidgen which
+                               # conflicts with e2fsprogs-libuuid having already installed that
+                               # file.  Some of the executable names are the same as some of
+                               # FreeBSD's standard utilities, but FreeBSD's default PATH places
+                               # /usr/local/bin with lower precedence and so its standard
+                               # utilities will still be the ones used by default.  I could
+                               # arrange some other way(s) to use the util-linux ones by default,
+                               # if I want.
+            [devel/util-linux]='my-single-port-install WITH="CAL FLOCK GETOPT HARDLINK"'
     # TODO: the others
 )
 
@@ -64,6 +67,16 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
 function my-pkg-install {
     sudo pkg install --yes "$@"
 }
+
+function is-pkg-installed {
+    pkg info "$@" > /dev/null 2>&1
+}
+
+
+# Install GNU `coreutils` immediately, because it's used for installing other packages.
+if ! is-pkg-installed coreutils ; then
+    my-pkg-install coreutils
+fi
 
 
 function _my_freebsd_quarterly {
@@ -149,7 +162,7 @@ function my-single-port-install {
         return 2
     fi
 
-    ( cd /usr/ports"$portName"
+    ( cd /usr/ports/"$portName"
 
       local -r envVars=(
          #PREFIX=  # Where to install this port.  Defaults to /usr/local/.

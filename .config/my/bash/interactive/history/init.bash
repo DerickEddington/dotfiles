@@ -145,12 +145,16 @@ function _my_histfile_combining {
             PREV_COMBINED=$(std mktemp "$MY_BASH_HISTDIR"/combined-prev-XXXXXXXXXX) || return
             std cp "$MY_BASH_HISTDIR"/combined "$PREV_COMBINED" || return
 
-            if type my-bash_history-combiner >& /dev/null; then
+            if is-command-extant my-bash_history-combiner ; then
+                # Use it wherever it currently is from.
                 local MY_BASH_HISTORY_COMBINER=my-bash_history-combiner
-            else
+            elif [[ "$MY_PLATFORM" = Linux/NixOS/* ]]; then
                 # When it's not in the PATH (e.g. when inside `nix-shell --pure`), assume it's
                 # here:
                 local MY_BASH_HISTORY_COMBINER=~/.nix-profile/bin/my-bash_history-combiner
+            else
+                # For all other platforms, asssume it's hopefully in the XDG-BDS location:
+                local MY_BASH_HISTORY_COMBINER=~/.local/bin/my-bash_history-combiner
             fi
 
             if ! $MY_BASH_HISTORY_COMBINER "$PREV_COMBINED" "$MY_BASH_SESSION_HISTFILE" \

@@ -12,11 +12,11 @@
 # the provisioning is run.
 #
 readonly MY_PLATFORM_PACKAGES_DESIRED=(
-    gnu-coreutils  # Install first, because it's used for installing others by my various scripts.
     bash-completion
    #clangd
     fd-find
     git
+    gnu-coreutils
     htop
     most
     my-bash-history-combiner  # Needed by _my_histfile_combining.
