@@ -67,6 +67,12 @@ declare-function-readonly declare-function-readonly
 # Already defined in ../sh/helpers.sh.
 declare-function-readonly std
 
+is-function-undef is-command-extant || return
+function is-command-extant {
+    command -v "${1:-}" > /dev/null 1>&2
+}
+declare-function-readonly is-command-extant
+
 is-function-undef split-on-words || return
 function split-on-words {
     (( $# == 1 || $# == 2 )) || return
