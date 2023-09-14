@@ -73,6 +73,20 @@ function is-command-extant {
 }
 declare-function-readonly is-command-extant
 
+is-function-undef is-var-attr || return
+function is-var-attr {
+    local - ; set +o nounset
+    (( $# == 2 )) || return 2
+    [[ "${!1@a}" = *$2* ]]
+}
+declare-function-readonly is-var-attr
+
+is-function-undef is-var-assoc-array || return
+function is-var-assoc-array {
+    is-var-attr "$1" A
+}
+declare-function-readonly is-var-assoc-array
+
 is-function-undef split-on-words || return
 function split-on-words {
     (( $# == 1 || $# == 2 )) || return
@@ -90,19 +104,47 @@ function is-single-word {
 }
 declare-function-readonly is-single-word
 
-is-function-undef is-var-attr || return
-function is-var-attr {
-    local - ; set +o nounset
-    (( $# == 2 )) || return 2
-    [[ "${!1@a}" = *$2* ]]
-}
-declare-function-readonly is-var-attr
+is-function-undef unprefix-cmd || return
+function unprefix-cmd {
+    local - ; set -o nounset
+    local prefix=${1:-} cmd=${2:-}  # (Ignore ${@:3})
 
-is-function-undef is-var-assoc-array || return
-function is-var-assoc-array {
-    is-var-attr "$1" A
+    if [[ "$cmd" =~ ^[[:space:]]*([[:alnum:]].*)$ ]]; then
+        cmd=${BASH_REMATCH[1]}
+        [[ "$cmd" =~ (.*[^[:space:]]+)[[:space:]]*$ ]] || exit  # Trim trailing whitespace.
+        cmd=${BASH_REMATCH[1]}
+
+        if (( $# >= 3 )); then  # Given command is multiple arguments.
+            if [ "$prefix" = "$cmd" ]; then
+                if [ "${3:-}" ]; then
+                    echo "${@:3}"  # Without the prefix.
+                    return 0
+                else
+                    return 2  # Invalid. No output.
+                fi
+            else
+                echo "${@:2}"  # Unaltered, because it didn't match.
+                return 1
+            fi
+        else  # Given command is single-string argument.
+            if [[ "$cmd" =~ ^$prefix([[:space:]]+(.*))?$ ]]; then
+                cmd=${BASH_REMATCH[2]}
+                if [ "$cmd" ]; then
+                    echo "$cmd"  # Without the prefix.
+                    return 0
+                else
+                    return 2  # Invalid. No output.
+                fi
+            else
+                echo "$cmd"  # Unaltered, because it didn't match.
+                return 1
+            fi
+        fi
+    else
+        return 2  # Invalid. No output.
+    fi
 }
-declare-function-readonly is-var-assoc-array
+declare-function-readonly unprefix-cmd
 
 
 # Miscellaneous

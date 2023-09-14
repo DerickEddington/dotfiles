@@ -42,7 +42,7 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
                          [git]=my-pkg-install
                         [htop]=my-pkg-install
                         [most]=my-pkg-install
-    [my_bash_history_combiner]=my-cargo-install-user-local-from-my-repo
+    [my_bash_history_combiner]="single my-cargo-install-user-local-from-my-repo"
                         [nano]=my-pkg-install
                      [ripgrep]=my-pkg-install
                         [rust]=my-pkg-install
@@ -59,7 +59,7 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
                                # utilities will still be the ones used by default.  I could
                                # arrange some other way(s) to use the util-linux ones by default,
                                # if I want.
-            [devel/util-linux]='my-single-port-install WITH="CAL FLOCK GETOPT HARDLINK"'
+            [devel/util-linux]='single my-port-install WITH="CAL FLOCK GETOPT HARDLINK"'
     # TODO: the others
 )
 
@@ -150,7 +150,7 @@ function _my_freebsd_install_ports_collection {
     fi
 }
 
-function my-single-port-install {
+function my-port-install {
     local - ; set -o nounset
     local -r args=("$@")
     local -r portName="${args[-1]}" opts=("${args[@]:0:${#args[@]}-1}")
