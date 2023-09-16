@@ -14,16 +14,20 @@ _my_bash_sourced_already local/share/my/platform/Linux/Ubuntu/22.04/packages && 
 # Maps my own convention of a package name to its platform-specific package name.
 #
 readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
-                       [cargo]=TODO
+             [bash-completion]=bash-completion
+                       [cargo]=cargo
                       [clangd]=clangd-15
                      [fd-find]=fd-find
                          [git]=git
+               [gnu-coreutils]=coreutils
                         [htop]=htop
                         [most]=most
     [my-bash-history-combiner]=my_bash_history_combiner
+                        [nano]=nano
                      [ripgrep]=ripgrep
-                        [rust]=TODO
+                        [rust]=rustc
                       [screen]=screen
+                  [util-linux]=util-linux
     # TODO: the others
 )
 
@@ -31,16 +35,20 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
 # value (an eval'ed command) may be multiple words quoted (e.g. to pass options to a command).
 #
 readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
-                       [cargo]=TODO
+             [bash-completion]=my-apt-install
+                       [cargo]=my-apt-install
                    [clangd-15]=my-apt-install
+                   [coreutils]=my-apt-install
                      [fd-find]=my-apt-install
                          [git]=my-apt-install
                         [htop]=my-apt-install
                         [most]=my-apt-install
     [my_bash_history_combiner]="single my-cargo-install-user-local-from-my-repo"
+                        [nano]=my-apt-install
                      [ripgrep]=my-apt-install
-                        [rust]=TODO
+                       [rustc]=my-apt-install
                       [screen]=my-apt-install
+                  [util-linux]=my-apt-install
     # TODO: the others
 )
 
