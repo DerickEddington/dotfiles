@@ -1,0 +1,22 @@
+#! /usr/bin/env bash
+set -o errexit -o nounset
+(( "${VERBOSE:=0}" >= 3 )) && set -o xtrace
+(( "${VERBOSE:=0}" >= 4 )) && set -o verbose
+
+# Simply wraps `vagrant ssh` to coalesce a given command from multiple arguments into a single
+# one.  Especially useful with the git-remote-ext "remote helper program" of Git as invoked via a
+# URL of the form <transport>::<address> like `ext::vagrant-ssh-coalesce-cmd $MACHINE %S
+# $PATH_TO_REPO`.
+
+readonly machine=$1 command=${*:2}
+
+sshOptsExtra=(
+    -T  # `-T` to separate stdout & stderr.
+)
+if (( "$VERBOSE" >= 5 )); then
+    for (( i = VERBOSE - 4 ; i > 0 ; i-- )); do
+        sshOptsExtra+=(-v)
+    done
+fi
+
+exec vagrant ssh -c "$command" "$machine" -- "${sshOptsExtra[@]}"

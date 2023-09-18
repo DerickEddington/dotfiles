@@ -1,6 +1,13 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+
+# # nix-shell -p rubyPackages.pry{,-byebug}
+# require "pry"
+# require "pry-byebug"
+# # ... ; binding.pry ; ...  # Place breakpoint wherever desired.
+
+
 def set_vm_magnitude(config)
   config.vm.provider "virtualbox" do |vb|
     vb.cpus = Etc.nprocessors / 2  # Assume hyper-threading is 2*amount-cores.
@@ -8,9 +15,24 @@ def set_vm_magnitude(config)
   end
   # Some boxes' (e.g. freebsd/*) default disk size is too small (or too large) for my needs.
   # Changing this requires VAGRANT_EXPERIMENTAL="... disks ..." to be set in the environment of
-  # the `vagrant up freebsd` command executed in the host, because this Vagrant feature is
+  # the `vagrant up ...` command executed in the host, because this Vagrant feature is
   # experimental.
   config.vm.disk :disk, size: "32GB", primary: true
+end
+
+def set_trigger_remote_setup(config)
+  config.trigger.after :up do |trigger|
+    trigger.name = "my-remote-setup"
+    trigger.ruby do |env, machine|
+      setup_prog = ENV.fetch("MY_REMOTE_SETUP", "$HOME/.local/bin/my-remote-setup")
+      system("#{setup_prog} 'vagrant://#{machine.index_uuid}'")
+    end
+  end
+end
+
+def setup_my_way(config)
+  set_vm_magnitude(config)
+  set_trigger_remote_setup(config)
 end
 
 
@@ -41,7 +63,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "ubu22", autostart: false do |ubu22|
     ubu22.vm.box = "ubuntu/jammy64"
-    set_vm_magnitude(ubu22)
+    setup_my_way(ubu22)
     ubu22.vm.provision "apt-update", type: "shell", privileged: true,
                        inline: "apt-get update"
     ubu22.vm.provision "apt-upgrade", type: "shell", privileged: true,
