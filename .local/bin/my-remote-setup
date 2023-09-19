@@ -6,9 +6,10 @@ shopt -s assoc_expand_once extglob
 
 
 # Capture arguments, before anything else could mess with them.
-#
+
+self=$(basename "$0") ; readonly self
+
 (( $# == 1 )) || {
-    self=$(basename "$0")
     echo "Usage: $self ssh://[USER@]HOSTNAME[:PORT]"
     echo "   or: $self vagrant://[NAME|ID]"
     exit 1
@@ -276,13 +277,48 @@ function setup-dotfiles
     return $retCode
 }
 
-function setup-home {
+function change-gitignore {
+    local -r hmComment='# Things managed by home-manager'
+
+    if rshc-in-home 'grep -q -F -e '"${hmComment@Q}"' .gitignore'
+    then
+        # This deletes (d) all lines starting from the comment one to the end of file ($).
+        local -r sedScript="/$hmComment/,\$d"
+        rshc-in-home '
+            sed -e '"${sedScript@Q}"' .gitignore > .gitignore-changed
+            mv .gitignore-changed .gitignore
+        '
+    fi
+}
+
+function setup-home
+{
     setup-dotfiles || warn "Failed to setup ~/.dotfiles completely."
+
+    # Change .gitignore to not ignore files that are of interest in the remote home.
+    #
+    change-gitignore || warn 'Failed to change .gitignore.'
+
+    # Ensure permissions on and in ~/ are good
+    #
     # shellcheck disable=SC2016
     rshc-in-home '
         chmod o-rwx .
         chmod -R go-rwx .ssh
-    ' || warn 'Failed to chmod something(s) in $HOME/.'
+    ' || warn 'Failed to chmod something(s) in ~/.'
+
+    # Stage any of the changes to ~/ resulting from the above.
+    #
+    stage-changes-in-home "at end of setup-home" || true
+}
+
+function stage-changes-in-home {
+    local va=${gitVerbosity[add]:-}
+
+    rshc-in-home 'git --git-dir=.dotfiles add '"$va"' --all --ignore-errors' || {
+        warn "Failed to stage changes to ~/${1:+ $1}."
+        return 11
+    }
 }
 
 function setup-packages
@@ -311,17 +347,82 @@ function setup-packages
     # Stage any changes to ~/ resulting from the above installing.  (E.g. `cargo install` might
     # add/update its metadata files.)
     #
-    local va=${gitVerbosity[add]:-}
-    rshc-in-home 'git --git-dir=.dotfiles add '"$va"' --all --ignore-errors' \
-        || warn "Failed to stage changes to ~/ after install-desired-packages."
+    stage-changes-in-home "after install-desired-packages" || true
 }
+
+# shellcheck disable=SC2016
+function setup-login
+{
+    # Make user's login shell be Bash, if not already
+    #
+    rshc 'sudo chsh -s $(command -v bash) $(logname)'  # TODO: Portable enough?
+
+    # Include user's shell-init customizations from the standard locations
+
+    if rshc-in-home '! grep -q -F -e "my/env/profile.sh" .profile'; then
+        rshc-in-home '
+            cat >> .profile <<-"EOF"
+		
+		# Include my customizations.
+		. "${XDG_CONFIG_HOME:-$HOME/.config}"/my/env/profile.sh
+		EOF
+        '
+    fi
+
+    if rshc-in-home '! grep -q -F -e ".profile" .bash_profile'; then
+        rshc-in-home '
+            cat >> .bash_profile <<-"EOF"
+		
+		# For login shell, both interactive and non-.
+		[ -f ~/.profile ] && source ~/.profile
+		EOF
+        '
+    fi
+
+    if rshc-in-home '! grep -q -F -e "my/bash/interactive/init.bash" .bashrc'; then
+        rshc-in-home '
+            cat >> .bashrc <<-"EOF"
+		
+		# Include my customizations.
+		source "${XDG_CONFIG_HOME:-$HOME/.config}"/my/bash/interactive/init.bash
+		EOF
+        '
+    fi
+
+    if rshc-in-home '! grep -q -F -e ".bashrc" .bash_profile'; then
+        rshc-in-home '
+            cat >> .bash_profile <<-"EOF"
+		
+		# For interactive login shell.  (Non-interactive will do nothing.)
+		[ -f ~/.bashrc ] && source ~/.bashrc
+		EOF
+        '
+    fi
+
+    # Stage any of the changes to ~/ resulting from the above.
+    #
+    stage-changes-in-home "after extending shell-init files" || true
+}
+
+function commit-staged-changes {
+    vc=${gitVerbosity[commit]:-}
+
+    rshc-in-home '
+        export GIT_DIR=.dotfiles
+
+        if git status --porcelain | grep -q -E -e "^A " ; then
+            git commit '"$vc"' --message="Changes made by "'"${self@Q}"'"."
+        else
+            : # Nothing was added, so, to avoid error, do not try to commit.
+        fi
+    '
+}
+
 
 # Operations
 
 process-vars
 setup-home
 setup-packages
-
-
-# TODO: Further setup and running of provisioning (e.g. installing the packages that I like), or
-# should that be a separate script-program?
+setup-login
+commit-staged-changes

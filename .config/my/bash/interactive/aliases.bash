@@ -1,3 +1,5 @@
+unalias -a  # Remove all alias definitions done by previous other sections of init.
+
 # enable color support with aliases
 if [ -n "$LS_COLORS" ]; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)"
