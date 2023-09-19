@@ -128,17 +128,19 @@ function has-dotfiles {
     rshc '[ -e "$HOME"/.dotfiles ]'
 }
 
-function has-git {
-    rshc 'command -v git > /dev/null 2>&1'
+function has-command {
+    rshc "command -v ${1@Q} > /dev/null 2>&1"
 }
+function has-git { has-command git ;}
+function has-bash { has-command bash ;}
 
 function todo {
     error "TODO: Need support for: ${1}."
     return 2
 }
 
-function install-git {
-    local os cmd
+function install-pkg {
+    local pkg=$1 os cmd
     os=$(rshc 'uname') || return
 
     case "$os" in
@@ -147,7 +149,7 @@ function install-git {
             variant=$(rshc 'lsb_release -s -i') || return
             case "$variant" in
                 (Ubuntu)
-                    cmd='sudo apt-get install --yes git'
+                    cmd="sudo apt-get install --yes ${pkg@Q}"
                     ;;
                 (*)
                     todo "Linux variant: ${variant@Q}"
@@ -156,10 +158,10 @@ function install-git {
             esac
             ;;
         (FreeBSD)
-            cmd='sudo pkg install --yes git'
+            cmd="sudo pkg install --yes ${pkg@Q}"
             ;;
         (SunOS)
-            cmd='sudo pkg install git'  # TODO: whatever for automatic "yes"
+            cmd="sudo pkg install ${pkg@Q}"  # TODO: whatever for automatic "yes"
             ;;
         (*)
             todo "OS: ${os@Q}"
@@ -169,6 +171,8 @@ function install-git {
 
     rshc "$cmd"
 }
+function install-git { install-pkg git ;}
+function install-bash { install-pkg bash ;}
 
 function start-dotfiles-repo {
     local -r vi=${gitVerbosity[init]:-} va=${gitVerbosity[add]:-} vc=${gitVerbosity[commit]:-}
@@ -238,7 +242,7 @@ function setup-dotfiles
         return 0  #  Considered a success.
     }
 
-    # Install Git if needed
+    # Install Git if not already
     #
     has-git || {
         install-git || fail "Failed to install Git!" 3
@@ -273,7 +277,7 @@ function setup-dotfiles
 }
 
 function setup-home {
-    setup-dotfiles
+    setup-dotfiles || warn "Failed to setup ~/.dotfiles completely."
     # shellcheck disable=SC2016
     rshc-in-home '
         chmod o-rwx .
@@ -281,11 +285,42 @@ function setup-home {
     ' || warn 'Failed to chmod something(s) in $HOME/.'
 }
 
+function setup-packages
+{
+    # Install Bash if not already
+    #
+    has-bash || {
+        install-bash || fail "Failed to install Bash!" 9
+    }
+
+    # Install the packages that are specified by the user's configuration.
+    #
+    # shellcheck disable=SC2016
+    rshc '(set -e
+        cd "${TMPDIR:-/tmp}"  # Not needed, but might as well.
+
+        XDG_DATA_HOME=$HOME/.local/share                            \
+        XDG_CONFIG_HOME=$HOME/.config                               \
+        VERBOSE='"${VERBOSE@Q}"'                                    \
+            $HOME/.local/share/my/platform/install-desired-packages
+    )' || {
+        error "Failed to install-desired-packages."
+        return 10
+    }
+
+    # Stage any changes to ~/ resulting from the above installing.  (E.g. `cargo install` might
+    # add/update its metadata files.)
+    #
+    local va=${gitVerbosity[add]:-}
+    rshc-in-home 'git --git-dir=.dotfiles add '"$va"' --all --ignore-errors' \
+        || warn "Failed to stage changes to ~/ after install-desired-packages."
+}
 
 # Operations
 
 process-vars
 setup-home
+setup-packages
 
 
 # TODO: Further setup and running of provisioning (e.g. installing the packages that I like), or
