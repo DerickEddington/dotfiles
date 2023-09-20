@@ -17,6 +17,11 @@ readonly MY_PLATFORM_VERSION
 
 # Functions
 
+# For bootstrapping my setup independently of my other more-involved package-installing modules.
+#
+my_install_bash()                       { sudo pkg install --yes bash ;}
+my_install_git()                        { sudo pkg install --yes git ;}
+
 gnu() {
     [ $# -ge 1 ] || return 1
 

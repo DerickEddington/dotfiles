@@ -147,6 +147,52 @@ function unprefix-cmd {
 declare-function-readonly unprefix-cmd
 
 
+# Remote hosts
+
+is-function-undef remote-shell || return
+function remote-shell
+{
+    local - ; set -o nounset
+    (( $# >= 1 )) || return
+    local -r remoteUrl=$1 schemeOpts=("${@:3}")
+    if [ "${2:-}" ]; then
+        local -r cmd=("${@:2:1}")
+    else
+        local -r cmd=()
+    fi
+
+    if [[ "$remoteUrl" =~ ^ssh://[^/]+$ ]]
+    then
+        # shellcheck disable=SC2029  # Want these expanded client-side.
+        ssh "${schemeOpts[@]}" "$remoteUrl" "${cmd[@]}"
+
+    elif [[ "$remoteUrl" =~ ^vagrant://([^/]+)$ ]]
+    then
+        local -r machine=${BASH_REMATCH[1]}
+        local i vagOpts=() sshOpts=()
+
+        if (( ${#cmd[@]} >= 1 )); then
+            vagOpts+=(-c "${cmd[*]}")
+        fi
+        for (( i = 0; i < ${#schemeOpts[@]}; i++ )); do
+            local o="${schemeOpts[i]}"
+            if [ "$o" = "--" ]; then
+                sshOpts=("${schemeOpts[@]:i}")
+                break
+            else
+                vagOpts+=("$o")
+            fi
+        done
+
+        vagrant ssh "${vagOpts[@]}" "$machine" "${sshOpts[@]}"
+    else
+        error "remote-shell: Unsupported URL: ${remoteUrl@Q}"
+        return 1
+    fi
+}
+declare-function-readonly remote-shell
+
+
 # Miscellaneous
 
 function git-clone-into-nonempty

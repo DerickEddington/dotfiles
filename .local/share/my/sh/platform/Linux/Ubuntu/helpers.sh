@@ -1,1 +1,4 @@
-# Just to have a file for ShellCheck.  (This file could actually have something, if ever desired.)
+# For bootstrapping my setup independently of my other more-involved package-installing modules.
+#
+my_install_bash()                       { sudo apt-get install --yes bash ;}
+my_install_git()                        { sudo apt-get install --yes git ;}

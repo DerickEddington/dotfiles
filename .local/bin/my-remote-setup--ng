@@ -1,0 +1,66 @@
+#! /usr/bin/env bash
+set -o errexit -o nounset
+shopt -s assoc_expand_once extglob
+(( "${VERBOSE:=0}" >= 3 )) && set -o xtrace
+(( "${VERBOSE:=0}" >= 4 )) && set -o verbose
+
+
+# TODO: Rename this file to ./my-remote-setup, replacing the previous version.
+
+
+# Capture arguments, before anything else could mess with them.
+
+self=$(basename "$0") ; readonly self
+
+(( $# == 1 )) || {
+    echo "Usage: $self ssh://[USER@]HOSTNAME[:PORT]"
+    echo "   or: $self vagrant://[NAME|ID]"
+    exit 1
+} 1>&2
+
+readonly remoteUrl=$1
+
+
+# shellcheck source=../share/my/bash/helpers.bash
+source "${XDG_DATA_HOME:-$HOME/.local/share}"/my/bash/helpers.bash
+
+
+# TODO: Function to factor-out the `remote-shell ... pattern` that is the same with all the below.
+# TODO: Functions for each operation.
+
+
+readonly baseDirToCopyForBootstrap="$MY_DATA_HOME"/.local/share/my
+readonly dirsNeededForBootstrap=(sh bash platform)
+
+remoteTmpDir=$(gnu mktemp -u XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX); readonly remoteTmpDir
+
+gnu tar --directory="$baseDirToCopyForBootstrap" \
+    --create --transform="s,^,$remoteTmpDir/," --dereference \
+    "${dirsNeededForBootstrap[@]}" \
+| \
+remote-shell "$remoteUrl" '
+    cd "${TMPDIR:-/tmp}" < /dev/null && \
+    tar xf -
+' -T
+
+
+readonly localDotfilesRepo=${MY_REMOTE_SETUP_DOTFILES_FROM_REPO:-$HOME/.dotfiles}
+bundleRefs=${MY_REMOTE_SETUP_DOTFILES_FROM_REFS:-HEAD main}
+split-on-words "$bundleRefs" bundleRefs ; readonly bundleRefs
+
+# As bundle is created, immediately output it over the connection to the remote without having an
+# intermediate local file.
+#
+git --git-dir="$localDotfilesRepo" bundle create - "${bundleRefs[@]}" \
+| \
+remote-shell "$remoteUrl" '
+    cd "${TMPDIR:-/tmp}"/'"${remoteTmpDir@Q}"' < /dev/null && \
+    cat > dotfiles.bundle
+' -T
+
+
+remote-shell "$remoteUrl" '
+    cd "${TMPDIR:-/tmp}"/'"${remoteTmpDir@Q}"' < /dev/null && \
+    XDG_DATA_HOME="$PWD"/.local/share XDG_CONFIG_HOME="$PWD"/.config \
+        /bin/sh ./.local/share/my/platform/bootstrap.sh
+'  # Note: Do not have `-T`, because we might need to interact with other side.
