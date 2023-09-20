@@ -20,6 +20,23 @@ warn() {
     return "${2:-0}"
 }
 
+error() {
+    echo "Error${1:+: $1}" 1>&2
+    return "${2:-0}"
+}
+
+fail() {
+    error "${1:-}" || true
+    exit "${2:-1}"
+}
+
+assert_nonnull() {
+    while [ $# -ge 1 ]; do
+        eval "[ \"\${${1}:-}\" ]" || fail "Parameter '$1' is null or unset!"
+        shift
+    done
+}
+
 std() {
     command -p -- "$@"  # TODO: Is the `--` portable enough?
 }
@@ -42,19 +59,11 @@ else
     # shellcheck disable=SC2174
     mkdir -p -m u=rwX,g=,o= "$MY_RUNTIME_DIR"
 fi
+readonly MY_CONFIG_HOME MY_DATA_HOME MY_STATE_HOME MY_CACHE_HOME MY_RUNTIME_DIR
+assert_nonnull MY_CONFIG_HOME MY_DATA_HOME MY_STATE_HOME MY_CACHE_HOME MY_RUNTIME_DIR
 
 
 # Functions
-
-error() {
-    echo "Error${1:+: $1}" 1>&2
-    return "${2:-0}"
-}
-
-fail() {
-    error "${1:-}" || true
-    exit "${2:-1}"
-}
 
 assert_nonexistent() {
     [ ! -e "${1:-}" ] || fail "$1 already exists!"
@@ -72,11 +81,39 @@ assert_all_nonexistent() {
 
 
 # Platform-specific identification
-#
-MY_PLATFORM=$(uname)/$(uname -r)           # This is often changed by next `source` to be better.
-MY_PLATFORM_ARCH=$MY_PLATFORM/$(uname -m)  # Ditto.
-if [ -e "$MY_DATA_HOME"/my/sh/platform/"$(uname)"/helpers.sh ]; then
-    # shellcheck source=./platform/Linux/helpers.sh  #  (Just one of many, to have something.)
-    . "$MY_DATA_HOME"/my/sh/platform/"$(uname)"/helpers.sh
+
+MY_PLATFORM_OS=$(std uname)       # 1 component. E.g.: Linux, FreeBSD, SunOS, etc.
+MY_PLATFORM_ARCH=$(std uname -m)  # 1 component. E.g.: x86_64, amd64, i86pc, etc.
+readonly MY_PLATFORM_OS MY_PLATFORM_ARCH
+assert_nonnull MY_PLATFORM_OS MY_PLATFORM_ARCH
+
+# These must be defined by the next `source`:
+#   MY_PLATFORM_VARIANT  # 0 or 1 component. E.g.: Ubuntu, OpenIndiana, or empty for FreeBSD.
+#   MY_PLATFORM_VERSION  # 1 component. E.g.: 22.04, 13, etc.
+
+# These will be automatically defined:
+#   MY_PLATFORM_OS_VARIANT  # 1 or 2 component. E.g.: Linux/Ubuntu, SunOS/OpenIndiana, or FreeBSD.
+#   MY_PLATFORM_OS_VAR_VER  # 2 or 3 component. E.g.: Linux/Ubuntu/22.04, or FreeBSD/13.
+
+if [ -e "$MY_DATA_HOME"/my/sh/platform/"$MY_PLATFORM_OS"/helpers.sh ]; then
+    # shellcheck source=./platform/Linux/helpers.sh  # (Just one of many, to have something.)
+    . "$MY_DATA_HOME"/my/sh/platform/"$MY_PLATFORM_OS"/helpers.sh
 fi
-readonly MY_PLATFORM MY_PLATFORM_ARCH
+readonly MY_PLATFORM_VARIANT MY_PLATFORM_VERSION
+assert_nonnull MY_PLATFORM_VERSION
+
+readonly MY_PLATFORM_OS_VARIANT="$MY_PLATFORM_OS${MY_PLATFORM_VARIANT:+/$MY_PLATFORM_VARIANT}"
+readonly MY_PLATFORM_OS_VAR_VER="$MY_PLATFORM_OS_VARIANT/$MY_PLATFORM_VERSION"
+assert_nonnull MY_PLATFORM_OS_VARIANT MY_PLATFORM_OS_VAR_VER
+
+if [ "${MY_PLATFORM_VARIANT:-}" ]; then
+    if [ -e "$MY_DATA_HOME"/my/sh/platform/"$MY_PLATFORM_OS_VARIANT"/helpers.sh ]; then
+        # shellcheck source=./platform/Linux/Ubuntu/helpers.sh  #  (Just to have something.)
+        . "$MY_DATA_HOME"/my/sh/platform/"$MY_PLATFORM_OS_VARIANT"/helpers.sh
+    fi
+fi
+
+if [ -e "$MY_DATA_HOME"/my/sh/platform/"$MY_PLATFORM_OS_VAR_VER"/helpers.sh ]; then
+    # shellcheck source=./platform/Linux/Ubuntu/22.04/helpers.sh  #  (Just to have something.)
+    . "$MY_DATA_HOME"/my/sh/platform/"$MY_PLATFORM_OS_VAR_VER"/helpers.sh
+fi

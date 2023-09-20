@@ -4,19 +4,23 @@
 # shellcheck disable=SC2034  # These variables are used by what `source`s this file.
 
 
-source "$(dirname "${BASH_SOURCE[0]}")"/../../../../bash/helpers.bash
+source "$(dirname "${BASH_SOURCE[0]}")"/../../../bash/helpers.bash
 
 
 # If already source'd, don't do anything.
-_my_bash_sourced_already local/share/my/platform/Linux/Ubuntu/22.04/packages && return
+_my_bash_sourced_already local/share/my/platform/Linux/Ubuntu/packages && return
 
+
+function _my_clangd_greatest {
+    apt-cache search --names-only clangd | grep -E -o '^clangd(-[0-9]+)?' | sort -V | tail -n1
+}
 
 # Maps my own convention of a package name to its platform-specific package name.
 #
 readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
              [bash-completion]=bash-completion
                        [cargo]=cargo
-                      [clangd]=clangd-15
+                      [clangd]="$(_my_clangd_greatest)"
                      [fd-find]=fd-find
                          [git]=git
                [gnu-coreutils]=coreutils
@@ -37,7 +41,7 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
 readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
              [bash-completion]=my-apt-install
                        [cargo]=my-apt-install
-                   [clangd-15]=my-apt-install
+    ["$(_my_clangd_greatest)"]=my-apt-install
                    [coreutils]=my-apt-install
                      [fd-find]=my-apt-install
                          [git]=my-apt-install
@@ -51,6 +55,8 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
                   [util-linux]=my-apt-install
     # TODO: the others
 )
+
+unset -f _my_clangd_greatest
 
 
 function my-apt-install {

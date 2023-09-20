@@ -12,15 +12,15 @@ fi
 
 _my_gnu_ls_alias='ls -CFhv --group-directories-first --quoting-style=c-maybe --color=tty'
 
-case "$MY_PLATFORM"
+case "$MY_PLATFORM_OS"
 in
-    (Linux/*)
+    (Linux)
         # shellcheck disable=SC2139  # Want this to be expanded when defined.
         alias ls="$_my_gnu_ls_alias"
         alias free='free -h'
         alias ps="ps fxu"
         ;;
-    (FreeBSD/*)
+    (FreeBSD)
         if [ -x /usr/local/bin/gls ]; then  # GNU ls
             # Use the "g"-prefixed name, instead of assuming that `ls` is the wrapper from
             # my/gnu/wrappers.bash, in case that wrapper is missing/broken, so that this critical

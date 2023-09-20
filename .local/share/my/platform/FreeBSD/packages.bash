@@ -4,19 +4,23 @@
 # shellcheck disable=SC2034  # These variables are used by what `source`s this file.
 
 
-source "$(dirname "${BASH_SOURCE[0]}")"/../../../bash/helpers.bash
+source "$(dirname "${BASH_SOURCE[0]}")"/../../bash/helpers.bash
 
 
 # If already source'd, don't do anything.
-_my_bash_sourced_already local/share/my/platform/FreeBSD/13/packages && return
+_my_bash_sourced_already local/share/my/platform/FreeBSD/packages && return
 
+
+function _my_llvm_greatest {
+    pkg search llvm | grep -E -o '^llvm[0-9]+' | uniq | sort -V | tail -n1
+}
 
 # Maps my own convention of a package name to its platform-specific package name.
 #
 readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
              [bash-completion]=bash-completion
                        [cargo]=rust
-                      [clangd]=llvm16
+                      [clangd]="$(_my_llvm_greatest)"
                      [fd-find]=fd-find
                          [git]=git
                [gnu-coreutils]=coreutils
@@ -37,7 +41,7 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
 readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
              [bash-completion]=my-pkg-install
                    [coreutils]=my-pkg-install
-                      [llvm16]=my-pkg-install
+      ["$(_my_llvm_greatest)"]=my-pkg-install
                      [fd-find]=my-pkg-install
                          [git]=my-pkg-install
                         [htop]=my-pkg-install
@@ -62,6 +66,8 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
             [devel/util-linux]='single my-port-install WITH="CAL FLOCK GETOPT HARDLINK"'
     # TODO: the others
 )
+
+unset -f _my_llvm_greatest
 
 
 function my-pkg-install {

@@ -10,13 +10,9 @@ _MY_SH_SOURCED_ALREADY__PLATFORM_HELPERS=true
 
 # Platform-specific identification
 
-MY_PLATFORM=$(uname -r)
-MY_PLATFORM=${MY_PLATFORM%%.*}  # TODO: Proper for FreeBSD's release ID format?
-MY_PLATFORM=$(uname)/$MY_PLATFORM
-
-MY_PLATFORM_ARCH=$MY_PLATFORM/$(uname -m)
-
-readonly MY_PLATFORM MY_PLATFORM_ARCH
+MY_PLATFORM_VERSION=$(uname -r)
+MY_PLATFORM_VERSION=${MY_PLATFORM_VERSION%%.*}  # TODO: Proper for FreeBSD's release ID format?
+readonly MY_PLATFORM_VERSION
 
 
 # Functions

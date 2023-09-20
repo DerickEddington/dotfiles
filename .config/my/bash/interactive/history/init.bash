@@ -148,7 +148,7 @@ function _my_histfile_combining {
             if is-command-extant my-bash_history-combiner ; then
                 # Use it wherever it currently is from.
                 local MY_BASH_HISTORY_COMBINER=my-bash_history-combiner
-            elif [[ "$MY_PLATFORM" = Linux/NixOS/* ]]; then
+            elif [[ "$MY_PLATFORM_OS_VARIANT" = Linux/NixOS ]]; then
                 # When it's not in the PATH (e.g. when inside `nix-shell --pure`), assume it's
                 # here:
                 local MY_BASH_HISTORY_COMBINER=~/.nix-profile/bin/my-bash_history-combiner

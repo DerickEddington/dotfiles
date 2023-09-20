@@ -27,14 +27,11 @@ then
     #   $ eval "echo $(lsb_release -s -i)/$(lsb_release -s -r)"
     #   Ubuntu/22.04
     #
-    eval "MY_PLATFORM=Linux/$(lsb_release -s -i)/$(lsb_release -s -r)"
-else
-    MY_PLATFORM=Linux  # TODO: Maybe something else could be done to make it more specific?
+    eval "MY_PLATFORM_VARIANT=$(lsb_release -s -i)"
+    eval "MY_PLATFORM_VERSION=$(lsb_release -s -r)"
 fi
 
-MY_PLATFORM_ARCH=$MY_PLATFORM/$(uname -m)
-
-readonly MY_PLATFORM MY_PLATFORM_ARCH
+readonly MY_PLATFORM_VARIANT MY_PLATFORM_VERSION
 
 
 # Functions

@@ -8,15 +8,15 @@ source "$(dirname "${BASH_SOURCE[0]}")"/../bash/helpers.bash
 _my_bash_sourced_already local/share/my/platform/packages && return
 
 
-# shellcheck source=./Linux/Ubuntu/22.04/packages.bash  #  (Just one of many, to have something.)
-source "$(dirname "${BASH_SOURCE[0]}")"/"$MY_PLATFORM"/packages.bash
+# shellcheck source=./Linux/Ubuntu/packages.bash  #  (Just one of many, to have something.)
+source "$(dirname "${BASH_SOURCE[0]}")"/"$MY_PLATFORM_OS_VARIANT"/packages.bash
 
 
 function my-platform-install-packages
 {
     local - ; set -o nounset
     local -r names=("$@")
-    local name method errPlatform=${MY_PLATFORM:-Unknown}
+    local name method errPlatform=${MY_PLATFORM_OS_VARIANT:-Unknown}
 
     if ! is-var-assoc-array MY_PLATFORM_SPECIFIC_PACKAGES_NAMES \
     || ! is-var-assoc-array MY_PLATFORM_SPECIFIC_PACKAGES_METHODS
