@@ -29,6 +29,7 @@ function _my_bash_prompt_setup()
 function _my_bash_prompt_command()
 {
     local PREV_EXIT_STATUS=$?
+    local - ; set +o xtrace +o verbose  # When user has these enabled, don't want for prompt.
     local DO_COLORS="$1"
 
     # shellcheck disable=SC2034  # Unused variables left for readability.
