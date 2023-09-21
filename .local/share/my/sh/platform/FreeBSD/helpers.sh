@@ -32,7 +32,7 @@ gnu() {
     elif [ -x /usr/local/bin/g"$1" ]; then
         /usr/local/bin/g"$@"
     else
-        error "No 'gnu' nor 'g' prefixed utility found for '$1'!"
+        error "No 'gnu' nor 'g' prefixed utility found for $(quote "$1")!"
         return 2
     fi
 }

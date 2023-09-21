@@ -41,7 +41,7 @@ fail() {
 
 assert_nonnull() {
     while [ $# -ge 1 ]; do
-        eval "[ \"\${${1}:-}\" ]" || fail "Parameter '$1' is null or unset!"
+        eval "[ \"\${${1}:-}\" ]" || fail "Parameter $(quote "$1") is null or unset!"
         shift
     done
 }
@@ -79,10 +79,10 @@ is_command_found() {
         if [ "${2:-}" = '-p' ]
         then
             command -v "${1:-}" > /dev/null 1>&2 \
-                && warn "Command '${1:-}' found in current PATH but not default PATH."
+                && warn "Command $(quote "${1:-}") found in current PATH but not default PATH."
         else
             command -p -v "${1:-}" > /dev/null 1>&2 \
-                && warn "Command '${1:-}' found in default PATH but not current PATH."
+                && warn "Command $(quote "${1:-}") found in default PATH but not current PATH."
         fi
         return 1
     fi

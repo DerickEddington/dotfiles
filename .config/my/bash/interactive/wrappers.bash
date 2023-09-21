@@ -46,7 +46,7 @@ function nix-shell
         # HISTFILE=$MY_BASH_SESSION_HISTFILE, just in case that is not in effect
         # for some reason).  We evaluate $MY_BASH_INTERACTIVE_CONFIG here,
         # because that variable is not present inside `nix-shell --pure`.
-        local MY_COMMAND=("source '$MY_BASH_INTERACTIVE_CONFIG'/history/init.bash;")
+        local MY_COMMAND=("source $(quote "$MY_BASH_INTERACTIVE_CONFIG")/history/init.bash;")
 
         if [ "$GIVEN_COMMAND_IDX" ]; then
             # Allow the given command to control whether it does a "return".
