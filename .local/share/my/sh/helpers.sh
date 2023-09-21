@@ -66,7 +66,21 @@ assert_nonnull MY_CONFIG_HOME MY_DATA_HOME MY_STATE_HOME MY_CACHE_HOME MY_RUNTIM
 # Functions
 
 is_command_extant() {
-    command -v "${1:-}" > /dev/null 1>&2
+    [ "${2--p}" = '-p' ] || exit
+
+    if command ${2:-} -v "${1:-}" > /dev/null 1>&2 ; then
+        return 0
+    else
+        if [ "${2:-}" = '-p' ]
+        then
+            command -v "${1:-}" > /dev/null 1>&2 \
+                && warn "Command '${1:-}' found in current PATH but not default PATH."
+        else
+            command -p -v "${1:-}" > /dev/null 1>&2 \
+                && warn "Command '${1:-}' found in default PATH but not current PATH."
+        fi
+        return 1
+    fi
 }
 
 # POSIX-Shell-quoted form of arbitrary string (http://www.etalabs.net/sh_tricks.html).

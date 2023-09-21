@@ -10,7 +10,7 @@ _MY_SH_SOURCED_ALREADY__PLATFORM_HELPERS=true
 
 # Platform-specific identification
 
-if type lsb_release > /dev/null 2>&1
+if is_command_extant lsb_release
 then
     # TODO: Maybe there's a better/safer way that does not use `eval`?
     # Use `eval` to remove any quote syntax that some platforms output.
