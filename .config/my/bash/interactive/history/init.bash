@@ -47,7 +47,7 @@ function _my_unique_histfile {
     DIRNAME="$(std dirname "$FILENAME")" || return
     std mkdir -p "$DIRNAME" || return
     FILENAME=$(gnu mktemp "$FILENAME"--XXXXXXXXXX) || return
-    echo "$FILENAME"
+    print "$FILENAME"
 }
 declare-function-readonly _my_unique_histfile
 
@@ -81,9 +81,9 @@ function _my_lock_combined_histfile {
     local LOCK_FD LOCK_FILE=$MY_BASH_COMBINED_HISTFILE_LOCK
     exec {LOCK_FD}>> "$LOCK_FILE"  # Open a new file descriptor of it.
     if _my_flock "${1:-}" --timeout 10 $LOCK_FD ; then
-        echo $LOCK_FD
+        print $LOCK_FD
     else
-        echo "Failed to lock $LOCK_FILE" >&2
+        warn "Failed to lock $LOCK_FILE"
         exec {LOCK_FD}>&-  # Close the FD to clean-up.
         return 1
     fi
@@ -185,5 +185,5 @@ if [ -v IN_NIX_SHELL ]; then
 elif [ -z "$(trap -p EXIT)" ]; then  # Don't replace any preexisting trap.
     trap _my_histfile_combining_ignore_failure EXIT
 else
-    echo "Note: Unable to setup _my_histfile_combining for exit." 1>&2
+    warn "Unable to setup _my_histfile_combining for exit."
 fi

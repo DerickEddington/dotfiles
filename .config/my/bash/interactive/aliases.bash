@@ -35,6 +35,7 @@ in
 esac
 unset _my_gnu_ls_alias
 
+alias p='println'
 alias l='ls -A -l'
 alias ll='ls -l'
 alias la='ls -A'

@@ -15,13 +15,22 @@ _MY_SH_SOURCED_ALREADY__HELPERS=true
 
 # Functions used immediately below.
 
+std() {
+    command -p -- "$@"  # TODO: Is the `--` portable enough?
+}
+
+print()    { std printf '%s'   "$*" ;}
+println()  { std printf '%s\n' "$*" ;}
+eprint()   { print   "$@" 1>&2 ;}
+eprintln() { println "$@" 1>&2 ;}
+
 warn() {
-    echo "Warning${1:+: $1}" 1>&2
+    eprintln "Warning${1:+: $1}"
     return "${2:-0}"
 }
 
 error() {
-    echo "Error${1:+: $1}" 1>&2
+    eprintln "Error${1:+: $1}"
     return "${2:-0}"
 }
 
@@ -35,10 +44,6 @@ assert_nonnull() {
         eval "[ \"\${${1}:-}\" ]" || fail "Parameter '$1' is null or unset!"
         shift
     done
-}
-
-std() {
-    command -p -- "$@"  # TODO: Is the `--` portable enough?
 }
 
 
@@ -82,6 +87,24 @@ is_command_found() {
         return 1
     fi
 }
+
+is_shell_interactive() {
+    case "$-" in
+        (*i*) return 0 ;;
+        (*)   return 1 ;;
+    esac
+}
+
+if is_shell_interactive ; then
+    :  # Can't change it.  Doing so would break many tab-completion functions' use of it.
+else
+    # Prevent my scripts from using it.  (http://www.etalabs.net/sh_tricks.html)
+    echo() {
+        # shellcheck disable=SC2016
+        error 'Don'\''t use `echo`! It'\''s unportable and unreliable! Use my `println` (etc).'
+        if is_shell_interactive; then return 42; else exit 42; fi
+    }
+fi
 
 # POSIX-Shell-quoted form of arbitrary string (http://www.etalabs.net/sh_tricks.html).
 # (Note: Transformations like Bash's `${var@Q}` or `printf %q` are not suitable for

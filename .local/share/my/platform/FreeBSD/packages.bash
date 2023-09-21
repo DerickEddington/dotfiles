@@ -95,7 +95,7 @@ function _my_freebsd_quarterly {
     (( ${#splitted[@]} == 2 )) || return
     year=${splitted[0]}
     month=${splitted[1]}
-    month=$(shopt -s extglob; echo "${month##+(0)}")  # Don't try to interpret as octal.
+    month=$(shopt -s extglob; print "${month##+(0)}")  # Don't try to interpret as octal.
 
     if (( month <= 3 )); then
         quarter=1
@@ -106,7 +106,7 @@ function _my_freebsd_quarterly {
     else
         quarter=4
     fi
-    echo "${year}Q$quarter"
+    print "${year}Q$quarter"
 }
 
 function _my_freebsd_clone_ports_collection {

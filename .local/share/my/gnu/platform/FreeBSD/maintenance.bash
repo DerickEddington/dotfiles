@@ -29,7 +29,7 @@ function _my_freebsd_populate_gnu_utils_unprefixed
       # A directory to have them without the prefix.
       mkdir -p "$destDir"
       ( cd "$destDir"
-        echo "Setting-up $destDir"
+        println "Setting-up $destDir"
 
         # Symlink them from our dir as their non-prefixed names.
         local gUtil

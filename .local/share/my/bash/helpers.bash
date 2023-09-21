@@ -116,26 +116,26 @@ function unprefix-cmd {
         if (( $# >= 3 )); then  # Given command is multiple arguments.
             if [ "$prefix" = "$cmd" ]; then
                 if [ "${3:-}" ]; then
-                    echo "${@:3}"  # Without the prefix.
+                    print "${@:3}"  # Without the prefix.
                     return 0
                 else
                     return 2  # Invalid. No output.
                 fi
             else
-                echo "${@:2}"  # Unaltered, because it didn't match.
+                print "${@:2}"  # Unaltered, because it didn't match.
                 return 1
             fi
         else  # Given command is single-string argument.
             if [[ "$cmd" =~ ^$prefix([[:space:]]+(.*))?$ ]]; then
                 cmd=${BASH_REMATCH[2]}
                 if [ "$cmd" ]; then
-                    echo "$cmd"  # Without the prefix.
+                    print "$cmd"  # Without the prefix.
                     return 0
                 else
                     return 2  # Invalid. No output.
                 fi
             else
-                echo "$cmd"  # Unaltered, because it didn't match.
+                print "$cmd"  # Unaltered, because it didn't match.
                 return 1
             fi
         fi

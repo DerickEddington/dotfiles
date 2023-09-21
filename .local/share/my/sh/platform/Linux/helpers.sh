@@ -15,16 +15,16 @@ then
     # TODO: Maybe there's a better/safer way that does not use `eval`?
     # Use `eval` to remove any quote syntax that some platforms output.
     # E.g.:
-    #   $ echo "$(lsb_release -s -i)/$(lsb_release -s -r)"
+    #   $ println "$(lsb_release -s -i)/$(lsb_release -s -r)"
     #   "NixOS"/"23.05"
     # Versus:
-    #   $ echo "$(lsb_release -s -i)/$(lsb_release -s -r)"
+    #   $ println "$(lsb_release -s -i)/$(lsb_release -s -r)"
     #   Ubuntu/22.04
     # Whereas:
-    #   $ eval "echo $(lsb_release -s -i)/$(lsb_release -s -r)"
+    #   $ eval "println $(lsb_release -s -i)/$(lsb_release -s -r)"
     #   NixOS/23.05
     # And:
-    #   $ eval "echo $(lsb_release -s -i)/$(lsb_release -s -r)"
+    #   $ eval "println $(lsb_release -s -i)/$(lsb_release -s -r)"
     #   Ubuntu/22.04
     #
     eval "MY_PLATFORM_VARIANT=$(lsb_release -s -i)"
