@@ -67,10 +67,10 @@ declare-function-readonly declare-function-readonly
 # Already defined in ../sh/helpers.sh.
 declare-function-readonly std
 
-is-function-def is_command_extant && declare-function-readonly is_command_extant
-is-function-undef is-command-extant || return
-function is-command-extant { is_command_extant "$@" ;}
-declare-function-readonly is-command-extant
+is-function-def is_command_found && declare-function-readonly is_command_found
+is-function-undef is-command-found || return
+function is-command-found { is_command_found "$@" ;}
+declare-function-readonly is-command-found
 
 is-function-undef is-var-attr || return
 function is-var-attr {

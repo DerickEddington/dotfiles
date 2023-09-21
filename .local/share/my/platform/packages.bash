@@ -117,7 +117,7 @@ function my-cargo-install-user-local
     local -r crate="${args[-1]}" opts=("${args[@]:0:${#args[@]}-1}")
     local via=()
 
-    if ! is-command-extant cargo ; then
+    if ! is-command-found cargo ; then
         my-platform-install-packages rust cargo || return  # Ensure they're installed.
     fi
 

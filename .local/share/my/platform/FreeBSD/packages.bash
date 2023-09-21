@@ -131,7 +131,7 @@ function _my_freebsd_install_ports_collection {
 
     if ! [ -d /usr/ports ]
     then
-        if ! is-command-extant git ; then
+        if ! is-command-found git ; then
             my-platform-install-packages git || return  # Ensure it's installed.
         fi
 

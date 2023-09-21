@@ -145,7 +145,7 @@ function _my_histfile_combining {
             PREV_COMBINED=$(std mktemp "$MY_BASH_HISTDIR"/combined-prev-XXXXXXXXXX) || return
             std cp "$MY_BASH_HISTDIR"/combined "$PREV_COMBINED" || return
 
-            if is-command-extant my-bash_history-combiner ; then
+            if is-command-found my-bash_history-combiner ; then
                 # Use it wherever it currently is from.
                 local MY_BASH_HISTORY_COMBINER=my-bash_history-combiner
             elif [[ "$MY_PLATFORM_OS_VARIANT" = Linux/NixOS ]]; then

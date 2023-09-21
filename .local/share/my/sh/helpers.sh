@@ -65,7 +65,7 @@ assert_nonnull MY_CONFIG_HOME MY_DATA_HOME MY_STATE_HOME MY_CACHE_HOME MY_RUNTIM
 
 # Functions
 
-is_command_extant() {
+is_command_found() {
     [ "${2--p}" = '-p' ] || exit
 
     if command ${2:-} -v "${1:-}" > /dev/null 1>&2 ; then
@@ -103,8 +103,8 @@ assert_all_nonexistent() {
 }
 
 _my_install_critical_util_if_needed() {
-    if ! is_command_extant "${1:?}" ; then
-        if is_command_extant _my_install_"$1" ; then
+    if ! is_command_found "${1:?}" ; then
+        if is_command_found _my_install_"$1" ; then
             _my_install_"$1" || fail "Failed to install ${1:-}!" 64
         else
             fail "Missing _my_install_$1 for platform ${MY_PLATFORM_OS_VARIANT}!" 65
