@@ -67,10 +67,9 @@ declare-function-readonly declare-function-readonly
 # Already defined in ../sh/helpers.sh.
 declare-function-readonly std
 
+is-function-def is_command_extant && declare-function-readonly is_command_extant
 is-function-undef is-command-extant || return
-function is-command-extant {
-    command -v "${1:-}" > /dev/null 1>&2
-}
+function is-command-extant { is_command_extant "$@" ;}
 declare-function-readonly is-command-extant
 
 is-function-undef is-var-attr || return
@@ -156,7 +155,7 @@ function remote-shell
     (( $# >= 1 )) || return
     local -r remoteUrl=$1 schemeOpts=("${@:3}")
     if [ "${2:-}" ]; then
-        local -r cmd=("${@:2:1}")
+        local -r cmd=("$2")
     else
         local -r cmd=()
     fi
@@ -191,6 +190,45 @@ function remote-shell
     fi
 }
 declare-function-readonly remote-shell
+
+is-function-undef _remote-shell-specific || return
+function _remote-shell-specific {
+    local shCmd=("${1:?}") ; [ "${3:-}" ] && shCmd+=(-c "$(quote "$3")")
+    remote-shell "${2?}" "${shCmd[*]}" "${@:4}"
+}
+declare-function-readonly _remote-shell-specific
+
+is-function-undef remote-sh || return
+function remote-sh { _remote-shell-specific sh "$@" ;}
+declare-function-readonly remote-sh
+
+is-function-undef remote-bash || return
+function remote-bash { _remote-shell-specific bash "$@" ;}
+declare-function-readonly remote-bash
+
+is-function-undef _remote-shell-specific-cd || return
+function _remote-shell-specific-cd {
+    # shellcheck disable=SC2016
+    local -r dirExpr=${3-'"$HOME"'} inDirCmd=${4:-}
+    # Note: Some shells, like tcsh of FreeBSD, require \-line-continuations even inside
+    # single-quoted strings (which $cdCmd becomes when quoted next).  This is why $cdCmd has them
+    # so that it works with both Bourne and C shells.  Note: The user must ensure that $inDirCmd
+    # also has such line-continuations, when it contains multi-line commands, when it's passed to
+    # such a shell.
+    local -r cdCmd='( cd '"$dirExpr"' < /dev/null > /dev/null || exit ; \
+                      '"$inDirCmd"' \
+                    )'
+    _remote-shell-specific "$1" "$2" "$cdCmd" "${@:5}"
+}
+declare-function-readonly _remote-shell-specific-cd
+
+is-function-undef remote-sh-cd || return
+function remote-sh-cd { _remote-shell-specific-cd sh "$@" ;}
+declare-function-readonly remote-sh-cd
+
+is-function-undef remote-bash-cd || return
+function remote-bash-cd { _remote-shell-specific-cd bash "$@" ;}
+declare-function-readonly remote-bash-cd
 
 
 # Miscellaneous

@@ -65,6 +65,18 @@ assert_nonnull MY_CONFIG_HOME MY_DATA_HOME MY_STATE_HOME MY_CACHE_HOME MY_RUNTIM
 
 # Functions
 
+is_command_extant() {
+    command -v "${1:-}" > /dev/null 1>&2
+}
+
+# POSIX-Shell-quoted form of arbitrary string (http://www.etalabs.net/sh_tricks.html).
+# (Note: Transformations like Bash's `${var@Q}` or `printf %q` are not suitable for
+# POSIX-Shell-conformance portability, because those can produce forms like `$'...\n...'` which
+# are not valid POSIX-Shell syntax.)
+quote() {
+    std printf '%s' "${1:-}" | std sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"
+}
+
 assert_nonexistent() {
     [ ! -e "${1:-}" ] || fail "$1 already exists!"
 }
@@ -75,6 +87,19 @@ assert_all_nonexistent() {
         shift
     done
 }
+
+_my_install_critical_util_if_needed() {
+    if ! is_command_extant "${1:?}" ; then
+        if is_command_extant _my_install_"$1" ; then
+            _my_install_"$1" || fail "Failed to install ${1:-}!" 64
+        else
+            fail "Missing _my_install_$1 for platform ${MY_PLATFORM_OS_VARIANT}!" 65
+        fi
+    fi
+}
+
+_my_install_bash_if_needed()            { _my_install_critical_util_if_needed bash ;}
+_my_install_git_if_needed()             { _my_install_critical_util_if_needed git ;}
 
 
 # Any source'ing of sub files must be done below here, so that the above are all defined for such.
@@ -108,12 +133,12 @@ assert_nonnull MY_PLATFORM_OS_VARIANT MY_PLATFORM_OS_VAR_VER
 
 if [ "${MY_PLATFORM_VARIANT:-}" ]; then
     if [ -e "$MY_DATA_HOME"/my/sh/platform/"$MY_PLATFORM_OS_VARIANT"/helpers.sh ]; then
-        # shellcheck source=./platform/Linux/Ubuntu/helpers.sh  #  (Just to have something.)
+        # shellcheck source=/dev/null  # (Don't care if there isn't one.)
         . "$MY_DATA_HOME"/my/sh/platform/"$MY_PLATFORM_OS_VARIANT"/helpers.sh
     fi
 fi
 
 if [ -e "$MY_DATA_HOME"/my/sh/platform/"$MY_PLATFORM_OS_VAR_VER"/helpers.sh ]; then
-    # shellcheck source=./platform/Linux/Ubuntu/22.04/helpers.sh  #  (Just to have something.)
+    # shellcheck source=/dev/null  # (Don't care if there isn't one.)
     . "$MY_DATA_HOME"/my/sh/platform/"$MY_PLATFORM_OS_VAR_VER"/helpers.sh
 fi

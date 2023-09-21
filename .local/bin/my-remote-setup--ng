@@ -25,23 +25,55 @@ readonly remoteUrl=$1
 source "${XDG_DATA_HOME:-$HOME/.local/share}"/my/bash/helpers.bash
 
 
-# TODO: Function to factor-out the `remote-shell ... pattern` that is the same with all the below.
+# Functions
+
+function rsh { rsh-cd . "$@" ;}
+
+function rsh-cd {
+    local shOpts=('set -e;')
+    (( VERBOSE >= 3 )) && shOpts+=('set -x;')
+    (( VERBOSE >= 4 )) && shOpts+=('set -v;')
+    remote-sh-cd "$remoteUrl" "$1" "${shOpts[*]} $2" "${@:3}"
+}
+
+function rsh-in-bd { rsh-cd "$remoteBootstrapDir" "$@" ;}
+
+
 # TODO: Functions for each operation.
 
 
 readonly baseDirToCopyForBootstrap="$MY_DATA_HOME"/.local/share/my
-readonly dirsNeededForBootstrap=(sh bash platform)
+readonly dirsNeededForBootstrap=(sh bash platform/bootstrap-dotfiles)
 
-remoteTmpDir=$(gnu mktemp -u XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX); readonly remoteTmpDir
+attempts=5
+while (( attempts-- >= 1 )); do
+    # (Use `mktemp` in the local host, because it might not be available in the remote host.)
+    remoteBootstrapDir=$(gnu mktemp -u XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX)
+
+    if remoteBootstrapDir=$(rsh '
+                                bootstrapDir="${TMPDIR:-/tmp}"/'"$(quote "$remoteBootstrapDir")"'
+                                if mkdir -m u=rwx,g=,o= "$bootstrapDir" > /dev/null 2>&1 ; then
+                                    printf "%s" "$bootstrapDir"
+                                else
+                                    exit 1
+                                fi
+                            ')
+    then
+        break
+    else
+        unset remoteBootstrapDir
+    fi
+done
+readonly remoteBootstrapDir
+
+[ "$remoteBootstrapDir" ] || fail "TODO" 3
+
 
 gnu tar --directory="$baseDirToCopyForBootstrap" \
-    --create --transform="s,^,$remoteTmpDir/," --dereference \
+    --create --transform="s,^,$remoteBootstrapDir/," --dereference \
     "${dirsNeededForBootstrap[@]}" \
 | \
-remote-shell "$remoteUrl" '
-    cd "${TMPDIR:-/tmp}" < /dev/null && \
-    tar xf -
-' -T
+rsh-in-bd 'tar xf -'
 
 
 readonly localDotfilesRepo=${MY_REMOTE_SETUP_DOTFILES_FROM_REPO:-$HOME/.dotfiles}
@@ -53,14 +85,11 @@ split-on-words "$bundleRefs" bundleRefs ; readonly bundleRefs
 #
 git --git-dir="$localDotfilesRepo" bundle create - "${bundleRefs[@]}" \
 | \
-remote-shell "$remoteUrl" '
-    cd "${TMPDIR:-/tmp}"/'"${remoteTmpDir@Q}"' < /dev/null && \
-    cat > dotfiles.bundle
-' -T
+rsh-in-bd 'cat > ./dotfiles.bundle'
 
 
-remote-shell "$remoteUrl" '
-    cd "${TMPDIR:-/tmp}"/'"${remoteTmpDir@Q}"' < /dev/null && \
+rsh-in-bd '
     XDG_DATA_HOME="$PWD"/.local/share XDG_CONFIG_HOME="$PWD"/.config \
-        /bin/sh ./.local/share/my/platform/bootstrap.sh
+    VERBOSE='"$VERBOSE"' \
+        sh ./.local/share/my/platform/bootstrap-dotfiles/phase0.sh
 '  # Note: Do not have `-T`, because we might need to interact with other side.

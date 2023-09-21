@@ -115,7 +115,7 @@ function rshc {
     if (( VERBOSE >= 3 )); then shOptsExtra+=('set -x; '); fi
     if (( VERBOSE >= 4 )); then shOptsExtra+=('set -v; '); fi
 
-    "${remoteCmd[@]}" "/bin/sh -c '${shOptsExtra[*]}'${1@Q}"
+    "${remoteCmd[@]}" "sh -c '${shOptsExtra[*]}'${1@Q}"
 }
 
 function rshc-in-home {
@@ -355,7 +355,7 @@ function setup-login
 {
     # Make user's login shell be Bash, if not already
     #
-    rshc 'sudo chsh -s $(command -v bash) $(logname)'  # TODO: Portable enough?
+    rshc 'sudo chsh -s "$(command -v bash)" "$(logname)"'  # TODO: Portable enough?
 
     # Include user's shell-init customizations from the standard locations
 
