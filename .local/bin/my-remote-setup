@@ -5,6 +5,9 @@ shopt -s assoc_expand_once extglob
 (( "${VERBOSE:=0}" >= 4 )) && set -o verbose
 
 
+# TODO: Delete this file.
+
+
 # Capture arguments, before anything else could mess with them.
 
 self=$(basename "$0") ; readonly self

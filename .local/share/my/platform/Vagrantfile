@@ -20,11 +20,11 @@ def set_vm_magnitude(config)
   config.vm.disk :disk, size: "32GB", primary: true
 end
 
-def set_trigger_remote_setup(config)
+def set_trigger_deploy_setup(config)
   config.trigger.after :up do |trigger|
-    trigger.name = "my-remote-setup"
+    trigger.name = "my-deploy-setup"
     trigger.ruby do |env, machine|
-      setup_prog = ENV.fetch("MY_REMOTE_SETUP", "$HOME/.local/bin/my-remote-setup")
+      setup_prog = ENV.fetch("MY_DEPLOY_SETUP", "$HOME/.local/bin/my-deploy-setup")
       system("#{setup_prog} 'vagrant://#{machine.index_uuid}'")
     end
   end
@@ -32,7 +32,7 @@ end
 
 def setup_my_way(config)
   set_vm_magnitude(config)
-  set_trigger_remote_setup(config)
+  set_trigger_deploy_setup(config)
 end
 
 

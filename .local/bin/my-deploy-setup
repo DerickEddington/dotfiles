@@ -5,9 +5,6 @@ shopt -s assoc_expand_once extglob
 (( "${VERBOSE:=0}" >= 4 )) && set -o verbose
 
 
-# TODO: Rename this file to ./my-remote-setup, replacing the previous version.
-
-
 # Capture arguments, before anything else could mess with them.
 
 self=$(basename "$0"); readonly self
@@ -64,7 +61,7 @@ function process-args
 
 function process-env-vars
 {
-    localDotfilesRepo=${MY_REMOTE_SETUP_DOTFILES_FROM_REPO:-$HOME/.dotfiles}
+    localDotfilesRepo=${MY_DEPLOY_SETUP_DOTFILES_FROM_REPO:-$HOME/.dotfiles}
     if ! [[ "$localDotfilesRepo" = */@(.git|.dotfiles) ]]; then
         localDotfilesRepo+=/.git
     fi
@@ -72,7 +69,7 @@ function process-env-vars
 
     [ -r "$localDotfilesRepo" ] || error "Invalid dotfiles repo: $(quote "$localDotfilesRepo")" 4
 
-    bundleRefs=${MY_REMOTE_SETUP_DOTFILES_FROM_REFS:-HEAD main}
+    bundleRefs=${MY_DEPLOY_SETUP_DOTFILES_FROM_REFS:-HEAD main}
     split-on-words "$bundleRefs" bundleRefs
 
     primaryDotfilesBranch=${bundleRefs[0]}  # The first ref is considered the primary.
