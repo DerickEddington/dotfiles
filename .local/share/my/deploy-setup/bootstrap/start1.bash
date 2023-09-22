@@ -30,7 +30,7 @@ source "${XDG_DATA_HOME:?}"/my/bash/helpers.bash
 split-on-words "$bootstrapDotfilesRefs" dotfilesRefs
 readonly dotfilesRefs
 
-userName=$(std logname || std id -u -n || std echo unknown)
+userName=$(userName_given || print unknown)
 userEmail=${userName:?}@${HOSTNAME:-$(std uname -n)}
 readonly userName userEmail
 

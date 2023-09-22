@@ -52,10 +52,10 @@ function process-args
     targetHomeDirExpr='"${HOME:?}"'
 
     if [[ "$targetUrl" =~ ^dir:(.*)$ ]]; then
-        targetLocalDir=${BASH_REMATCH[1]}
+        local targetLocalDir=${BASH_REMATCH[1]}
         if [ "$targetLocalDir" ]; then
-            targetLocalDir=$(gnu realpath -m -L -s "$targetLocalDir") || return
-            if ! [ -e "$targetLocalDir" ]; then
+            targetLocalDir=$(norm_abs_path "$targetLocalDir") || true
+            if ! [ -e "$targetLocalDir" ] && [ "$targetLocalDir" ]; then
                 std mkdir -p "$targetLocalDir" || return
             fi
             if [ -d "$targetLocalDir" ] \
@@ -80,7 +80,7 @@ function process-env-vars
     if ! [[ "$localDotfilesRepo" = */@(.git|.dotfiles) ]]; then
         localDotfilesRepo+=/.git
     fi
-    localDotfilesRepo=$(gnu realpath -m -L -s "$localDotfilesRepo") || return
+    localDotfilesRepo=$(abs_path "$localDotfilesRepo") || return
 
     [ -r "$localDotfilesRepo" ] || error "Invalid dotfiles repo: $(quote "$localDotfilesRepo")" 4
 

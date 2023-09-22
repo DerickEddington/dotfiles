@@ -26,7 +26,7 @@ _my_bash_sourced_already config/my/bash/interactive/init && return
 
 # All related config files are relative to the current file.
 MYSELF_RELDIR=$(std dirname "${BASH_SOURCE[0]}") || return  # (Must be outside any function.)
-MY_BASH_INTERACTIVE_CONFIG=$(gnu realpath -m -L -s "$MYSELF_RELDIR") || return
+MY_BASH_INTERACTIVE_CONFIG=$(abs_path "$MYSELF_RELDIR") || return
 MY_BASH_CONFIG=$(std dirname "$MY_BASH_INTERACTIVE_CONFIG") || return
 readonly MY_BASH_INTERACTIVE_CONFIG MY_BASH_CONFIG
 unset MYSELF_RELDIR

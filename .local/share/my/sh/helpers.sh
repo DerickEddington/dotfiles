@@ -16,7 +16,7 @@ _MY_SH_SOURCED_ALREADY__HELPERS=true
 # Functions used immediately below.
 
 std() {
-    command -p -- "$@"  # TODO: Is the `--` portable enough?
+    command -p -- "$@"
 }
 
 print()    { std printf '%s'   "$*" ;}
@@ -46,15 +46,30 @@ assert_nonnull() {
     done
 }
 
+userName_canon() { ( set -e -u
+    std id -u > /dev/null || exit  # Ensure this is working at least.
+    u=$(std logname || std id -u -n || std id -u)  # Return error code (via `set -e`) if error.
+    print "$u"
+) }
+
+userName_given() { ( set -e -u
+    if [ "${USER:-}" ]; then
+        print "$USER"
+    else
+        u=$(userName_canon)  # Return error code (via `set -e`) if error.
+        print "$u"
+    fi
+) }
+
 # shellcheck disable=SC2174
-_my_make_runtime_dir_in_tmp() {
-    { std id -u || return  # Ensure this is working at least.
-      set -- "${TMPDIR:-/tmp}"/user/"$(std logname || std id -u -n || std id -u)" || return  # $1
-      std mkdir -p -m a=rwXt "$(std dirname "$1")" || return
-      std mkdir -p -m u=rwX,g=,o= "$1" || return
+_my_make_runtime_dir_in_tmp() { ( set -u -e  # Return error code if any command errors.
+    { tmpUsersDir=${TMPDIR:-/tmp}/user
+      dir=$tmpUsersDir/$(userName_canon)
+      std mkdir -p -m a=rwXt "$tmpUsersDir"
+      std mkdir -p -m u=rwX,g=,o= "$dir"
     } > /dev/null
-    print "$1"
-}
+    print "$dir"
+) }
 
 
 # XDG Base Directory Specification
@@ -119,6 +134,42 @@ fi
 quote() {
     std printf '%s' "${1:-}" | std sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"
 }
+
+abs_path() { ( set -u -e
+    case "${1:?}" in
+        (/*)
+            print "$1" ;;
+        (*)
+            absCurDir=$(std pwd -L)
+            if [ "$absCurDir" = '/' ]; then absCurDir=''; fi
+            print "$absCurDir"/"$1"  # Keeps symlinks (if possible)
+            ;;
+    esac
+) }
+
+norm_abs_path() { ( set -u -e
+    n=$(abs_path "$1")  # Also avoids `cd`'s special interpretation of '-' if $1 is '-'.
+    unset CDPATH  # Avoid `cd`'s use of this.
+
+    if [ -d "$n" ]; then
+        # To normalize '.' & '..' components, do `cd`.
+        # To be consistent with `[ -d` and with normal pathname resolution, do `cd -P`.
+        # To normalize to have symlink components resolved, do `pwd -P`.
+        n=$(std cd -P -- "$n" && std pwd -P)
+    else
+        dir=$(std dirname "$n")
+        base=$(std basename "$n")
+        if [ -d "$dir" ]; then
+            n=$(std cd -P -- "$dir" && std pwd -P)
+            if [ "$n" = '/' ]; then n=''; fi
+            n=$n/$base
+        else
+            exit 1  # It can't exist with non-existent parent.
+        fi
+    fi
+
+    print "$n"
+) }
 
 assert_nonexistent() {
     [ ! -e "${1:-}" ] || fail "$1 already exists!"

@@ -9,7 +9,7 @@ function _my_gnu_generate_wrappers
     local myselfDir platformDir gnuUtilExec
 
     myselfDir=$(std dirname "${BASH_SOURCE[0]}") || return
-    myselfDir=$(gnu realpath "$myselfDir") || return
+    myselfDir=$(abs_path "$myselfDir") || return
     platformDir=$myselfDir/platform/$(uname) || return
 
     if [ -d "$platformDir"/bin ]
