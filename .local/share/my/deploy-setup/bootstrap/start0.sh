@@ -5,6 +5,7 @@ set -e -u
 
 # Capture these before anything else could mess with them.
 #
+readonly HOME  # Guarantee this remains the same for `start1.bash`.
 selfDir=$(command -p dirname "$0")
 selfDir=$(cd "$selfDir" && pwd)  # Absolute pathname via `pwd`.
 readonly selfDir
@@ -67,6 +68,8 @@ cd "$XDG_RUNTIME_DIR"/my/deploy-setup/bootstrap/tmp
 #
 _my_install_bash_if_needed
 
-# Use Bash for the rest.
+# Use Bash for the rest.  Remove SHELL from the environment, so that Bash will set it to the
+# user's login shell.
 #
+unset -v SHELL
 exec bash "$selfDir"/start1.bash "$@"

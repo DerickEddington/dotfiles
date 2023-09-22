@@ -6,20 +6,31 @@ shopt -s assoc_expand_once extglob
 
 
 # Capture arguments, before anything else could mess with them.
-
-self=$(basename "$0"); readonly self
+#
+readonly selfFull=$0
 readonly args=("$@")
-
-(( $# == 1 )) || {
-    echo "Usage: $self ssh://[USER@]HOSTNAME[:PORT]"
-    echo "   or: $self vagrant://[NAME|ID]"
-    echo "   or: $self dir:LOCALDIR"
-    exit 1
-} 1>&2
 
 
 # shellcheck source=../share/my/bash/helpers.bash
 source "${XDG_DATA_HOME:-$HOME/.local/share}"/my/bash/helpers.bash
+
+
+self=$(std basename "$selfFull"); readonly self
+
+if (( ${#args[@]} != 1 )); then
+    std cat 1>&2 <<-EOF
+	Usage: $self ssh://[USER@]HOSTNAME[:PORT]
+	   or: $self vagrant://[NAME|ID]
+	   or: $self dir:LOCALDIR
+	EOF
+    exit 1
+fi
+
+
+# Defaults
+
+readonly defaultDotfilesRepo=$HOME/.dotfiles
+readonly defaultDotfilesRefs='HEAD main'
 
 
 # Functions
@@ -29,8 +40,9 @@ function process-vars
     process-args
     process-env-vars
 
-    readonly baseDirToCopyForBootstrap="${MY_DATA_HOME:?}"/.local/share/my
-    readonly dirsNeededForBootstrap=(sh bash deploy-setup)
+    readonly baseDirOfNeededByBootstrap="${MY_DATA_HOME:?}"/my
+    readonly dirsNeededByBootstrap=(sh bash deploy-setup)
+    readonly prefixNeededByBootstrap=.local/share/my
 }
 
 function process-args
@@ -42,9 +54,12 @@ function process-args
     if [[ "$targetUrl" =~ ^dir:(.*)$ ]]; then
         targetLocalDir=${BASH_REMATCH[1]}
         if [ "$targetLocalDir" ]; then
-            targetLocalDir=$(gnu realpath -m -L -s "$targetLocalDir")
+            targetLocalDir=$(gnu realpath -m -L -s "$targetLocalDir") || return
+            if ! [ -e "$targetLocalDir" ]; then
+                std mkdir -p "$targetLocalDir" || return
+            fi
             if [ -d "$targetLocalDir" ] \
-                   && [ -r "$targetLocalDir" ] && [ -w "$targetLocalDir" ] && [ -x "$targetLocalDir" ]
+            && [ -r "$targetLocalDir" ] && [ -w "$targetLocalDir" ] && [ -x "$targetLocalDir" ]
             then
                 targetHomeDirExpr=$(quote "$targetLocalDir")
                 targetUrl=shell://localhost
@@ -61,7 +76,7 @@ function process-args
 
 function process-env-vars
 {
-    localDotfilesRepo=${MY_DEPLOY_SETUP_DOTFILES_FROM_REPO:-$HOME/.dotfiles}
+    localDotfilesRepo=${MY_DEPLOY_SETUP_DOTFILES_FROM_REPO:-$defaultDotfilesRepo}
     if ! [[ "$localDotfilesRepo" = */@(.git|.dotfiles) ]]; then
         localDotfilesRepo+=/.git
     fi
@@ -69,7 +84,7 @@ function process-env-vars
 
     [ -r "$localDotfilesRepo" ] || error "Invalid dotfiles repo: $(quote "$localDotfilesRepo")" 4
 
-    bundleRefs=${MY_DEPLOY_SETUP_DOTFILES_FROM_REFS:-HEAD main}
+    bundleRefs=${MY_DEPLOY_SETUP_DOTFILES_FROM_REFS:-$defaultDotfilesRefs}
     split-on-words "$bundleRefs" bundleRefs
 
     primaryDotfilesBranch=${bundleRefs[0]}  # The first ref is considered the primary.
@@ -83,10 +98,18 @@ function rsh-cd {
     local shOpts=('set -e;')
     (( VERBOSE >= 3 )) && shOpts+=('set -x;')
     (( VERBOSE >= 4 )) && shOpts+=('set -v;')
+
     remote-sh-cd "$targetUrl" "$1" "${shOpts[*]} $2" "${@:3}"
 }
 
 function rsh-in-bd { rsh-cd "$targetBootstrapDir" "$@" ;}
+
+function check-can-command-target
+{
+    # Basic sanity check before the looping in `make-bootstrap-dir`.
+    #
+    rsh 'true' || error "Cannot execute a simple shell command in the target host!" 5
+}
 
 function make-bootstrap-dir
 {
@@ -114,7 +137,7 @@ function make-bootstrap-dir
     done
     readonly targetBootstrapDir
 
-    [ "$targetBootstrapDir" ] || fail "Failed to prepare bootstrap directory in target host!" 5
+    [ "${targetBootstrapDir:-}" ] || fail "Failed to make bootstrap directory in target host!" 6
 }
 
 function copy-bootstrap-scripts
@@ -123,8 +146,9 @@ function copy-bootstrap-scripts
 
     make-bootstrap-dir
 
-    gnu tar --create --directory="$baseDirToCopyForBootstrap" --dereference \
-        "${dirsNeededForBootstrap[@]}" \
+    gnu tar --create --directory="$baseDirOfNeededByBootstrap" --dereference \
+        --transform="s,^,$prefixNeededByBootstrap/," \
+        "${dirsNeededByBootstrap[@]}" \
     | \
     rsh-in-bd 'tar xf -'  # (Any `tar` implementation, not only GNU's, should work this way.)
 }
@@ -160,5 +184,6 @@ function run-bootstrap
 # Operations
 
 process-vars
+check-can-command-target
 copy-bootstrap-files
 run-bootstrap
