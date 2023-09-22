@@ -84,12 +84,11 @@ function process-env-vars
 
     [ -r "$localDotfilesRepo" ] || error "Invalid dotfiles repo: $(quote "$localDotfilesRepo")" 4
 
+    # The first ref is considered the primary.
     bundleRefs=${MY_DEPLOY_SETUP_DOTFILES_FROM_REFS:-$defaultDotfilesRefs}
     split-on-words "$bundleRefs" bundleRefs
 
-    primaryDotfilesBranch=${bundleRefs[0]}  # The first ref is considered the primary.
-
-    readonly localDotfilesRepo bundleRefs primaryDotfilesBranch
+    readonly localDotfilesRepo bundleRefs
 }
 
 function rsh { rsh-cd . "$@" ;}
@@ -174,9 +173,11 @@ function copy-bootstrap-files
 function run-bootstrap
 {
     rsh-in-bd "
-        HOME=$targetHomeDirExpr         \
-        VERBOSE=$(quote "$VERBOSE")     \
-            ./.local/share/my/deploy-setup/bootstrap/start0.sh $(quote "$primaryDotfilesBranch")
+        HOME=$targetHomeDirExpr                                 \\
+        VERBOSE=$(quote "$VERBOSE")                             \\
+            ./.local/share/my/deploy-setup/bootstrap/start0.sh  \\
+                $(quote "${bundleRefs[*]}")                     \\
+                ./dotfiles.git.bundle
     "
 }
 

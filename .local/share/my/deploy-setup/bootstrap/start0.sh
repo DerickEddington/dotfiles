@@ -6,7 +6,7 @@ set -e -u
 # Capture these before anything else could mess with them.
 #
 readonly HOME  # Guarantee this remains the same for `start1.bash`.
-selfDir=$(command -p dirname "$0")
+selfDir=$(command -p  dirname "$0")
 selfDir=$(cd "$selfDir" && pwd)  # Absolute pathname via `pwd`.
 readonly selfDir
 topDir=$(cd "$selfDir"/../../../../.. && pwd)  # Normalized pathname via `cd`.
@@ -54,12 +54,6 @@ prepare_special_xdg_bds() {
 # These environment variables must be set before source'ing helpers.sh.
 #
 prepare_special_xdg_bds
-
-# Just in case something inadvertently writes files in the current working directory.
-#
-# shellcheck disable=2174
-command -p  mkdir -p -m u=rwX,g=,o= "$XDG_RUNTIME_DIR"/my/deploy-setup/bootstrap/tmp
-cd "$XDG_RUNTIME_DIR"/my/deploy-setup/bootstrap/tmp
 
 # shellcheck source=../../sh/helpers.sh
 . "${XDG_DATA_HOME:?}"/my/sh/helpers.sh

@@ -3,25 +3,43 @@ shopt -s assoc_expand_once extglob
 (( "${VERBOSE:=0}" >= 3 )) && set -o xtrace
 (( "${VERBOSE:=0}" >= 4 )) && set -o verbose
 
+readonly defaultDotfilesRefs='HEAD main'
+
 # Capture arguments, before anything else could mess with them.
 #
-readonly args=("$@")
-readonly primaryDotfilesBranch=${1:?}
+selfDir=$(command -p  dirname "$0")
+selfDir=$(cd "$selfDir" && pwd)  # Absolute pathname via `pwd`.
+readonly selfDir
+topDir=$(cd "$selfDir"/../../../../.. && pwd)  # Normalized pathname via `cd`.
+readonly topDir
+readonly bootstrapDotfilesRefs=${1:-$defaultDotfilesRefs}
+readonly bootstrapDotfilesRepo=${2:-$topDir/.git}
 readonly currentLoginShell=${SHELL:-}
 readonly HOME  # Guarantee this remains the same throughout.
 readonly targetHome=${HOME:?}
 
 # Might as well.
+# shellcheck disable=SC2034
 readonly XDG_DATA_HOME XDG_CONFIG_HOME XDG_RUNTIME_DIR XDG_STATE_HOME XDG_CACHE_HOME
+
 
 # shellcheck source=../../bash/helpers.bash
 source "${XDG_DATA_HOME:?}"/my/bash/helpers.bash
 
 
-# TODO: Remember the various situations this can be run for:
-# - From minimal bootstrap collection of files, when ~/.dotfiles does not exist yet.
-# - From a separate temp checkout of the dotfiles repo, when ~/.dotfiles does not exist yet.
-# - Any other(s) desired?
+split-on-words "$bootstrapDotfilesRefs" dotfilesRefs
+readonly dotfilesRefs
+
+userName=$(std logname || std id -u -n || std echo unknown)
+userEmail=${userName:?}@${HOSTNAME:-$(std uname -n)}
+readonly userName userEmail
+
+if (( ${#dotfilesRefs[@]} >= 1 )); then
+    readonly primaryDotfilesRef=${dotfilesRefs[0]}  # The first ref is considered the primary.
+    readonly userBranch=user/$userName
+else
+    fail "No refs given!"
+fi
 
 
 # Functions
@@ -43,8 +61,6 @@ function failed-to-dotfiles {
 }
 
 function start-dotfiles-repo {
-    local -r userName=$(std logname || std id -u -n || std echo unknown)
-    local -r userEmail=${userName:?}@${HOSTNAME:-$(std uname -n)}
     do-in-home "
         git init --initial-branch=preexisting .
         git add --ignore-errors .
@@ -59,6 +75,17 @@ function start-dotfiles-repo {
     "
 }
 
+function fetch-into-dotfiles-repo
+{
+    local refSpecs=("${dotfilesRefs[@]/*/&:&}")  # Construct refspec from ref.
+    refSpecs=("${primaryDotfilesRef}:${userBranch}" "${refSpecs[@]:1}")
+
+    # Don't `do-in-home`, but instead use absolute pathname for --git-dir, so that we don't change
+    # directory because $bootstrapDotfilesRepo might be (and often is) a relative pathname.
+    #
+    git --git-dir="$targetHome"/.dotfiles fetch "$bootstrapDotfilesRepo" "${refSpecs[@]}"
+}
+
 function merge-dotfiles {
     # shellcheck disable=SC2016
     do-in-home '
@@ -67,10 +94,10 @@ function merge-dotfiles {
 
         git checkout -b "$mergeBranch"
 
-        if git merge --allow-unrelated-histories --no-edit '"${primaryDotfilesBranch@Q}"'
+        if git merge --allow-unrelated-histories --no-edit '"${userBranch@Q}"'
         then
-            git fetch --no-write-fetch-head . "$mergeBranch":'"${primaryDotfilesBranch@Q}"'
-            git checkout '"${primaryDotfilesBranch@Q}"'
+            git fetch --no-write-fetch-head . "$mergeBranch":'"${userBranch@Q}"'
+            git checkout '"${userBranch@Q}"'
             git branch --delete --force "$mergeBranch"
         else
             git merge --abort
@@ -107,7 +134,7 @@ function setup-dotfiles
 
     # Fetch host user's designated branch
     #
-    fetch-into-dotfiles-repo || failed-to-dotfiles "push to" 5
+    fetch-into-dotfiles-repo || failed-to-dotfiles "fetch into" 5
 
     # Merge the `preexisting` branch with the user's dotfiles branch, while keeping the
     # preexisting files checked-out.  Done this way so that ~/.ssh/authorized_keys never goes
@@ -116,7 +143,7 @@ function setup-dotfiles
     # is checked-out.
     #
     merge-dotfiles || {
-        warn "Failed to merge ${primaryDotfilesBranch@Q} with preexisting! You should manually do."
+        warn "Failed to merge ${userBranch@Q} with preexisting! You should manually do."
         retCode=7
     }
 
@@ -146,7 +173,7 @@ function setup-home
 {
     setup-dotfiles || warn "Failed to setup ~/.dotfiles completely."
 
-    # Change .gitignore to not ignore files that are of interest in the remote home.
+    # Change .gitignore to not ignore files that are of interest in the target home.
     #
     change-gitignore || warn 'Failed to change .gitignore.'
 
@@ -170,6 +197,14 @@ function stage-changes-in-home {
 }
 
 
+# Operations
+
+setup-home
+fail "Unimplemented"
+setup-packages
+setup-login
+commit-staged-changes
+
 
 
 
@@ -186,11 +221,3 @@ fi
 #       Must be done after setting-up the user's home,
 #       because some packages need to install into home along with their metadata,
 #       and we want these changes to home to be captured by the user's dotfiles branch.
-
-
-# Operations
-
-setup-home
-setup-packages
-setup-login
-commit-staged-changes
