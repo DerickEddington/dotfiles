@@ -29,4 +29,4 @@ source "${XDG_DATA_HOME:?}"/my/bash/helpers.bash
 sudo chsh -s "$(command -v bash)" "$(logname)" || warn "Failed to change login shell to Bash."
 
 
-# TODO: All of what my-remote-setup old version did, but as running in the target remote host.
+# TODO: All of what my-remote-setup old version did, but as running in the target host.

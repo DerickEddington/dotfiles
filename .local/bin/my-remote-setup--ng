@@ -38,28 +38,28 @@ function process-vars
 
 function process-args
 {
-    remoteUrl="${args[0]}"
+    targetUrl="${args[0]}"
     # shellcheck disable=SC2016
-    remoteHomeDirExpr='"${HOME:?}"'
+    targetHomeDirExpr='"${HOME:?}"'
 
-    if [[ "$remoteUrl" =~ ^dir:(.*)$ ]]; then
+    if [[ "$targetUrl" =~ ^dir:(.*)$ ]]; then
         targetLocalDir=${BASH_REMATCH[1]}
         if [ "$targetLocalDir" ]; then
             targetLocalDir=$(gnu realpath -m -L -s "$targetLocalDir")
             if [ -d "$targetLocalDir" ] \
                    && [ -r "$targetLocalDir" ] && [ -w "$targetLocalDir" ] && [ -x "$targetLocalDir" ]
             then
-                remoteHomeDirExpr=$(quote "$targetLocalDir")
-                remoteUrl=shell://localhost
+                targetHomeDirExpr=$(quote "$targetLocalDir")
+                targetUrl=shell://localhost
             else
                 error "Invalid directory: $(quote "$targetLocalDir")" 2
             fi
         else
-            error "Missing directory name in URL: $(quote "$remoteUrl")!" 3
+            error "Missing directory name in URL: $(quote "$targetUrl")!" 3
         fi
     fi
 
-    readonly remoteUrl remoteHomeDirExpr
+    readonly targetUrl targetHomeDirExpr
 }
 
 function process-env-vars
@@ -86,22 +86,22 @@ function rsh-cd {
     local shOpts=('set -e;')
     (( VERBOSE >= 3 )) && shOpts+=('set -x;')
     (( VERBOSE >= 4 )) && shOpts+=('set -v;')
-    remote-sh-cd "$remoteUrl" "$1" "${shOpts[*]} $2" "${@:3}"
+    remote-sh-cd "$targetUrl" "$1" "${shOpts[*]} $2" "${@:3}"
 }
 
-function rsh-in-bd { rsh-cd "$remoteBootstrapDir" "$@" ;}
+function rsh-in-bd { rsh-cd "$targetBootstrapDir" "$@" ;}
 
 function make-bootstrap-dir
 {
     local attempts=5
     while (( attempts-- >= 1 )); do
         # (Use `mktemp` in the local host, because it might not be available in a remote host.)
-        remoteBootstrapDir=$(gnu mktemp -u XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX)
+        targetBootstrapDir=$(gnu mktemp -u XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX)
 
         # shellcheck disable=SC2016
-        if remoteBootstrapDir=$(rsh '
+        if targetBootstrapDir=$(rsh '
                                     tmpDir=${TMPDIR:-/tmp}
-                                    bootstrapDir=$tmpDir/'"$(quote "$remoteBootstrapDir")"'
+                                    bootstrapDir=$tmpDir/'"$(quote "$targetBootstrapDir")"'
 
                                     if mkdir -m u=rwx,g=,o= "$bootstrapDir" ; then
                                         printf "%s" "$bootstrapDir"
@@ -112,12 +112,12 @@ function make-bootstrap-dir
         then
             break
         else
-            unset remoteBootstrapDir
+            unset targetBootstrapDir
         fi
     done
-    readonly remoteBootstrapDir
+    readonly targetBootstrapDir
 
-    [ "$remoteBootstrapDir" ] || fail "Failed to prepare bootstrap directory in target host!" 5
+    [ "$targetBootstrapDir" ] || fail "Failed to prepare bootstrap directory in target host!" 5
 }
 
 function copy-bootstrap-scripts
@@ -136,8 +136,8 @@ function copy-dotfiles-bundle
 {
     local - ; set -o pipefail
 
-    # As bundle is created, immediately output it over the connection to the remote without having
-    # an intermediate local file.
+    # As bundle is created, immediately output it over the connection to the target host without
+    # having an intermediate local file.
     #
     git --git-dir="$localDotfilesRepo" bundle create - "${bundleRefs[@]}" \
     | \
@@ -153,7 +153,7 @@ function copy-bootstrap-files
 function run-bootstrap
 {
     rsh-in-bd "
-        HOME=$remoteHomeDirExpr         \
+        HOME=$targetHomeDirExpr         \
         VERBOSE=$(quote "$VERBOSE")     \
             ./.local/share/my/deploy-setup/bootstrap/start0.sh $(quote "$primaryDotfilesBranch")
     "
