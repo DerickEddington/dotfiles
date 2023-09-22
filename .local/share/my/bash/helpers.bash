@@ -184,6 +184,14 @@ function remote-shell
         done
 
         vagrant ssh "${vagOpts[@]}" "$machine" "${sshOpts[@]}"
+
+    elif [ "$remoteUrl" = shell://localhost ]  # Occasionally useful (e.g. for testing).
+    then
+        local shellCmd=()
+        if (( ${#cmd[@]} >= 1 )); then
+            shellCmd=(-c "${cmd[*]}")
+        fi
+        "${SHELL:?}" "${schemeOpts[@]}" "${shellCmd[@]}"
     else
         error "remote-shell: Unsupported URL: ${remoteUrl@Q}"
         return 1

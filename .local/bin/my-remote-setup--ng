@@ -10,15 +10,15 @@ shopt -s assoc_expand_once extglob
 
 # Capture arguments, before anything else could mess with them.
 
-self=$(basename "$0") ; readonly self
+self=$(basename "$0"); readonly self
+readonly args=("$@")
 
 (( $# == 1 )) || {
     echo "Usage: $self ssh://[USER@]HOSTNAME[:PORT]"
     echo "   or: $self vagrant://[NAME|ID]"
+    echo "   or: $self dir:LOCALDIR"
     exit 1
 } 1>&2
-
-readonly remoteUrl=$1
 
 
 # shellcheck source=../share/my/bash/helpers.bash
@@ -26,6 +26,59 @@ source "${XDG_DATA_HOME:-$HOME/.local/share}"/my/bash/helpers.bash
 
 
 # Functions
+
+function process-vars
+{
+    process-args
+    process-env-vars
+
+    readonly baseDirToCopyForBootstrap="${MY_DATA_HOME:?}"/.local/share/my
+    readonly dirsNeededForBootstrap=(sh bash deploy-setup)
+}
+
+function process-args
+{
+    remoteUrl="${args[0]}"
+    # shellcheck disable=SC2016
+    remoteHomeDirExpr='"${HOME:?}"'
+
+    if [[ "$remoteUrl" =~ ^dir:(.*)$ ]]; then
+        targetLocalDir=${BASH_REMATCH[1]}
+        if [ "$targetLocalDir" ]; then
+            targetLocalDir=$(gnu realpath -m -L -s "$targetLocalDir")
+            if [ -d "$targetLocalDir" ] \
+                   && [ -r "$targetLocalDir" ] && [ -w "$targetLocalDir" ] && [ -x "$targetLocalDir" ]
+            then
+                remoteHomeDirExpr=$(quote "$targetLocalDir")
+                remoteUrl=shell://localhost
+            else
+                error "Invalid directory: $(quote "$targetLocalDir")" 2
+            fi
+        else
+            error "Missing directory name in URL: $(quote "$remoteUrl")!" 3
+        fi
+    fi
+
+    readonly remoteUrl remoteHomeDirExpr
+}
+
+function process-env-vars
+{
+    localDotfilesRepo=${MY_REMOTE_SETUP_DOTFILES_FROM_REPO:-$HOME/.dotfiles}
+    if ! [[ "$localDotfilesRepo" = */@(.git|.dotfiles) ]]; then
+        localDotfilesRepo+=/.git
+    fi
+    localDotfilesRepo=$(gnu realpath -m -L -s "$localDotfilesRepo") || return
+
+    [ -r "$localDotfilesRepo" ] || error "Invalid dotfiles repo: $(quote "$localDotfilesRepo")" 4
+
+    bundleRefs=${MY_REMOTE_SETUP_DOTFILES_FROM_REFS:-HEAD main}
+    split-on-words "$bundleRefs" bundleRefs
+
+    primaryDotfilesBranch=${bundleRefs[0]}  # The first ref is considered the primary.
+
+    readonly localDotfilesRepo bundleRefs primaryDotfilesBranch
+}
 
 function rsh { rsh-cd . "$@" ;}
 
@@ -38,58 +91,77 @@ function rsh-cd {
 
 function rsh-in-bd { rsh-cd "$remoteBootstrapDir" "$@" ;}
 
+function make-bootstrap-dir
+{
+    local attempts=5
+    while (( attempts-- >= 1 )); do
+        # (Use `mktemp` in the local host, because it might not be available in a remote host.)
+        remoteBootstrapDir=$(gnu mktemp -u XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX)
 
-# TODO: Functions for each operation.
+        # shellcheck disable=SC2016
+        if remoteBootstrapDir=$(rsh '
+                                    tmpDir=${TMPDIR:-/tmp}
+                                    bootstrapDir=$tmpDir/'"$(quote "$remoteBootstrapDir")"'
+
+                                    if mkdir -m u=rwx,g=,o= "$bootstrapDir" ; then
+                                        printf "%s" "$bootstrapDir"
+                                    else
+                                        exit 1
+                                    fi
+                                ')
+        then
+            break
+        else
+            unset remoteBootstrapDir
+        fi
+    done
+    readonly remoteBootstrapDir
+
+    [ "$remoteBootstrapDir" ] || fail "Failed to prepare bootstrap directory in target host!" 5
+}
+
+function copy-bootstrap-scripts
+{
+    local - ; set -o pipefail
+
+    make-bootstrap-dir
+
+    gnu tar --create --directory="$baseDirToCopyForBootstrap" --dereference \
+        "${dirsNeededForBootstrap[@]}" \
+    | \
+    rsh-in-bd 'tar xf -'  # (Any `tar` implementation, not only GNU's, should work this way.)
+}
+
+function copy-dotfiles-bundle
+{
+    local - ; set -o pipefail
+
+    # As bundle is created, immediately output it over the connection to the remote without having
+    # an intermediate local file.
+    #
+    git --git-dir="$localDotfilesRepo" bundle create - "${bundleRefs[@]}" \
+    | \
+    rsh-in-bd 'cat > ./dotfiles.git.bundle'
+}
+
+function copy-bootstrap-files
+{
+    copy-bootstrap-scripts
+    copy-dotfiles-bundle
+}
+
+function run-bootstrap
+{
+    rsh-in-bd "
+        HOME=$remoteHomeDirExpr         \
+        VERBOSE=$(quote "$VERBOSE")     \
+            ./.local/share/my/deploy-setup/bootstrap/start0.sh $(quote "$primaryDotfilesBranch")
+    "
+}
 
 
-readonly baseDirToCopyForBootstrap="$MY_DATA_HOME"/.local/share/my
-readonly dirsNeededForBootstrap=(sh bash platform/bootstrap-dotfiles)
+# Operations
 
-attempts=5
-while (( attempts-- >= 1 )); do
-    # (Use `mktemp` in the local host, because it might not be available in the remote host.)
-    remoteBootstrapDir=$(gnu mktemp -u XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX)
-
-    if remoteBootstrapDir=$(rsh '
-                                bootstrapDir="${TMPDIR:-/tmp}"/'"$(quote "$remoteBootstrapDir")"'
-                                if mkdir -m u=rwx,g=,o= "$bootstrapDir" > /dev/null 2>&1 ; then
-                                    printf "%s" "$bootstrapDir"
-                                else
-                                    exit 1
-                                fi
-                            ')
-    then
-        break
-    else
-        unset remoteBootstrapDir
-    fi
-done
-readonly remoteBootstrapDir
-
-[ "$remoteBootstrapDir" ] || fail "TODO" 3
-
-
-gnu tar --directory="$baseDirToCopyForBootstrap" \
-    --create --transform="s,^,$remoteBootstrapDir/," --dereference \
-    "${dirsNeededForBootstrap[@]}" \
-| \
-rsh-in-bd 'tar xf -'
-
-
-readonly localDotfilesRepo=${MY_REMOTE_SETUP_DOTFILES_FROM_REPO:-$HOME/.dotfiles}
-bundleRefs=${MY_REMOTE_SETUP_DOTFILES_FROM_REFS:-HEAD main}
-split-on-words "$bundleRefs" bundleRefs ; readonly bundleRefs
-
-# As bundle is created, immediately output it over the connection to the remote without having an
-# intermediate local file.
-#
-git --git-dir="$localDotfilesRepo" bundle create - "${bundleRefs[@]}" \
-| \
-rsh-in-bd 'cat > ./dotfiles.bundle'
-
-
-rsh-in-bd '
-    XDG_DATA_HOME="$PWD"/.local/share XDG_CONFIG_HOME="$PWD"/.config \
-    VERBOSE='"$VERBOSE"' \
-        sh ./.local/share/my/platform/bootstrap-dotfiles/phase0.sh
-'  # Note: Do not have `-T`, because we might need to interact with other side.
+process-vars
+copy-bootstrap-files
+run-bootstrap

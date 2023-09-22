@@ -3,6 +3,18 @@ shopt -s assoc_expand_once extglob
 (( "${VERBOSE:=0}" >= 3 )) && set -o xtrace
 (( "${VERBOSE:=0}" >= 4 )) && set -o verbose
 
+# Capture arguments, before anything else could mess with them.
+#
+readonly args=("$@")
+readonly primaryDotfilesBranch="${args[0]}"
+
+# Might as well.
+readonly XDG_DATA_HOME XDG_CONFIG_HOME XDG_RUNTIME_DIR XDG_STATE_HOME XDG_CACHE_HOME
+
+# shellcheck source=../../bash/helpers.bash
+source "${XDG_DATA_HOME:?}"/my/bash/helpers.bash
+
+
 
 # TODO: invoke install-desired-packages, or something
 #       Doing this first has the advantage that Git should be installed by it (if not already),

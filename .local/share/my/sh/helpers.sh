@@ -46,6 +46,16 @@ assert_nonnull() {
     done
 }
 
+# shellcheck disable=SC2174
+_my_make_runtime_dir_in_tmp() {
+    { std id -u || return  # Ensure this is working at least.
+      set -- "${TMPDIR:-/tmp}"/user/"$(std logname || std id -u -n || std id -u)" || return  # $1
+      std mkdir -p -m a=rwXt "$(std dirname "$1")" || return
+      std mkdir -p -m u=rwX,g=,o= "$1" || return
+    } > /dev/null
+    print "$1"
+}
+
 
 # XDG Base Directory Specification
 # https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
@@ -57,12 +67,8 @@ MY_CACHE_HOME=${XDG_CACHE_HOME:-$HOME/.cache}
 if [ "${XDG_RUNTIME_DIR:-}" ]; then
     MY_RUNTIME_DIR=$XDG_RUNTIME_DIR
 else
-    MY_RUNTIME_DIR=${TMPDIR:-/tmp}/user/${USER:-$(id -u)}
+    MY_RUNTIME_DIR=$(_my_make_runtime_dir_in_tmp) || return
     warn "XDG_RUNTIME_DIR is undefined. Will try to use $MY_RUNTIME_DIR/."
-    # shellcheck disable=SC2174
-    mkdir -p -m a=rwXt "$(std dirname "$MY_RUNTIME_DIR")"
-    # shellcheck disable=SC2174
-    mkdir -p -m u=rwX,g=,o= "$MY_RUNTIME_DIR"
 fi
 readonly MY_CONFIG_HOME MY_DATA_HOME MY_STATE_HOME MY_CACHE_HOME MY_RUNTIME_DIR
 assert_nonnull MY_CONFIG_HOME MY_DATA_HOME MY_STATE_HOME MY_CACHE_HOME MY_RUNTIME_DIR
