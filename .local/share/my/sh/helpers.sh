@@ -161,6 +161,7 @@ _my_script_prelude() {
     readonly selfBase selfDir selfDirAbs selfDirNorm
     [ "${VERBOSE:=0}" -ge 5 ] && set -x
     [ "${VERBOSE:=0}" -ge 6 ] && set -v
+    true
 }
 
 _my_install_critical_util_if_needed() {

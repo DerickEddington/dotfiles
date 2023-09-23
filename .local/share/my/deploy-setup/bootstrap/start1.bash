@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 readonly args=("$@")
-readonly HOME  # Guarantee this remains the same throughout.
+readonly HOME SHELL  # Guarantee these remain the same throughout.
 # shellcheck source=../../bash/helpers.bash
 source "${XDG_DATA_HOME:-$HOME/.local/share}"/my/bash/helpers.bash
 _my-script-prelude
@@ -15,7 +15,7 @@ readonly topDir
 # Defaults
 
 readonly defaultBootstrapDotfilesRepo=$topDir/.git
-readonly defaultDotfilesRefs='HEAD main'
+readonly defaultDotfilesRefspecs=("HEAD:user/\$USER" "main")
 
 
 # Functions
@@ -42,23 +42,29 @@ function process-env-vars
 
 function process-args
 {
-    # TODO: Reverse the order of these args, so ${@:2} can be multiple refspecs
-    readonly bootstrapDotfilesRefs=${args[0]:-$defaultDotfilesRefs}
-    readonly bootstrapDotfilesRepo=${args[1]:-$defaultBootstrapDotfilesRepo}
+    readonly bootstrapDotfilesRepo=${args[0]:-$defaultBootstrapDotfilesRepo}
 
-    split-on-words "$bootstrapDotfilesRefs" dotfilesRefs
-    readonly dotfilesRefs
-
-    if (( ${#dotfilesRefs[@]} >= 1 )); then
-        readonly primaryDotfilesRef=${dotfilesRefs[0]}  # The first ref is considered the primary.
-        readonly userBranch=user/$userName
+    if (( ${#args[@]} >= 2 )); then
+        readonly dotfilesRefspecs=("${args[@]:1}")
     else
-        fail "No refs given!"
+        readonly dotfilesRefspecs=("${defaultDotfilesRefspecs[@]}")
+    fi
+
+    if (( ${#dotfilesRefspecs[@]} >= 1 )); then
+        # The first refspec is considered the primary.
+        readonly primaryDotfilesRef=${dotfilesRefspecs[0]%:*}
+        userBranch=${dotfilesRefspecs[0]##*:}
+        userBranch=${userBranch//\$USER/$userName}
+        readonly userBranch
+    else
+        fail "No refspecs given!"
     fi
 }
 
-function has-dotfiles {
-    [ -e "$targetHome"/.dotfiles ]
+function has-repo-already {
+    ( cd "$targetHome"
+      [ -e .dotfiles ] || [ -e .git ] || [ -e .git-hidden ]
+    )
 }
 
 function failed-to-dotfiles {
@@ -80,15 +86,17 @@ function start-dotfiles-repo
 
 function fetch-into-dotfiles-repo
 {
-    # TODO: Will take refspecs instead, but will need to substitute special '$USER' placeholder
-    # with actual userNameGiven as computed by this script.
-    local refSpecs=("${dotfilesRefs[@]/*/&:&}")  # Construct refspec from ref.
-    refSpecs=("${primaryDotfilesRef}:${userBranch}" "${refSpecs[@]:1}")
+    local refspecs=("${primaryDotfilesRef}:${userBranch}" "${dotfilesRefspecs[@]:1}") i
+    for i in "${!refspecs[@]}"; do
+        if ! [[ "${refspecs[i]}" = *:* ]]; then
+            refspecs[i]="${refspecs[i]/*/&:&}"  # Construct refspec from ref.
+        fi
+    done
 
     # We don't change directory because $bootstrapDotfilesRepo might be (and often is) a relative
     # pathname.
     #
-    git fetch "$bootstrapDotfilesRepo" "${refSpecs[@]}"
+    git fetch "$bootstrapDotfilesRepo" "${refspecs[@]}"
 }
 
 function merge-dotfiles
@@ -105,7 +113,7 @@ function merge-dotfiles
     else
         git merge --abort
         # Leave the $mergeBranch for the user to manually do the merge.
-        exit 6
+        return 6
     fi
 }
 
@@ -125,9 +133,9 @@ function setup-dotfiles
     # Check if we don't need to do anything.  Doing nothing is critical for being idempotent when
     # this script is applied to the same home multiple times (e.g. via a `vagrant up` trigger).
     #
-    has-dotfiles && {
-        println "Info: Already has \`.dotfiles\` in ${targetHome@Q}. Skipping."
-        return 0  #  Considered a success.
+    has-repo-already && {
+        println "Info: Already have a repository in ${targetHome@Q}. Skipping."
+        exit 0  #  Considered a success.
     }
 
     # Install Git if not already
@@ -196,8 +204,9 @@ function setup-home
     stage-changes-in-home "at end of setup-home" || true
 }
 
-function stage-changes-in-home {
-    git --git-dir="$targetHome"/.git --work-tree="$targetHome" add --all --ignore-errors || {
+function stage-changes-in-home
+{
+    git --git-dir="$targetHome"/.dotfiles --work-tree="$targetHome" add --all --ignore-errors || {
         warn "Failed to stage changes to ~/${1:+ $1}."
         return 11
     }

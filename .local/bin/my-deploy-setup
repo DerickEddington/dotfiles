@@ -19,7 +19,7 @@ fi
 # Defaults
 
 readonly defaultDotfilesRepo=$HOME/.dotfiles
-readonly defaultDotfilesRefs='HEAD main'
+readonly defaultDotfilesRefspecs="HEAD:user/\$USER main"
 
 
 # Functions
@@ -73,11 +73,11 @@ function process-env-vars
 
     [ -r "$localDotfilesRepo" ] || error "Invalid dotfiles repo: $(quote "$localDotfilesRepo")" 4
 
-    # The first ref is considered the primary.
-    bundleRefs=${MY_DEPLOY_SETUP_DOTFILES_FROM_REFS:-$defaultDotfilesRefs}
-    split-on-words "$bundleRefs" bundleRefs
+    # The first refspec is considered the primary.
+    dotfilesRefspecs=${MY_DEPLOY_SETUP_DOTFILES_FROM_REFSPECS:-$defaultDotfilesRefspecs}
+    split-on-words "$dotfilesRefspecs" dotfilesRefspecs
 
-    readonly localDotfilesRepo bundleRefs
+    readonly localDotfilesRepo dotfilesRefspecs
 }
 
 function rsh { rsh-cd . "$@" ;}
@@ -144,6 +144,7 @@ function copy-bootstrap-scripts
 function copy-dotfiles-bundle
 {
     local - ; set -o pipefail
+    local -r bundleRefs=("${dotfilesRefspecs[@]%:*}")
 
     # As bundle is created, immediately output it over the connection to the target host without
     # having an intermediate local file.
@@ -161,12 +162,17 @@ function copy-bootstrap-files
 
 function run-bootstrap
 {
+    local quotedDotfilesRefspecs=() rs
+    for rs in "${dotfilesRefspecs[@]}"; do
+        quotedDotfilesRefspecs+=("$(quote "$rs")")
+    done
+
     rsh-in-bd "
         HOME=$targetHomeDirExpr                                 \\
         VERBOSE=$(quote "$VERBOSE")                             \\
             ./.local/share/my/deploy-setup/bootstrap/start0.sh  \\
-                $(quote "${bundleRefs[*]}")                     \\
-                ./dotfiles.git.bundle
+                ./dotfiles.git.bundle                           \\
+                ${quotedDotfilesRefspecs[*]}
     "
 }
 
