@@ -127,7 +127,7 @@ function hide-dotfiles-gitdir
     unset GIT_DIR GIT_WORK_TREE
 }
 
-function setup-dotfiles
+function install-dotfiles
 {
     local retCode=0
 
@@ -185,9 +185,9 @@ function change-gitignore {
     fi
 }
 
-function setup-home
+function prepare-home
 {
-    setup-dotfiles || warn "Failed to setup ~/.dotfiles completely."
+    install-dotfiles || warn "Failed to install ~/.dotfiles completely."
 
     # Change .gitignore to not ignore files that are of interest in the target home.
     #
@@ -202,7 +202,7 @@ function setup-home
 
     # Stage any of the changes to ~/ resulting from the above.
     #
-    stage-changes-in-home "at end of setup-home" || true
+    stage-changes-in-home "at end of prepare-home" || true
 }
 
 function stage-changes-in-home
@@ -217,10 +217,10 @@ function stage-changes-in-home
 # Operations
 
 process-vars
-setup-home
+prepare-home
 fail "Unimplemented"
-setup-packages
-setup-login
+install-packages
+prepare-login
 commit-staged-changes
 
 
