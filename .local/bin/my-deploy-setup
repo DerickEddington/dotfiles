@@ -171,6 +171,7 @@ function run-bootstrap
         HOME=$targetHomeDirExpr                                 \\
         VERBOSE=$(quote "$VERBOSE")                             \\
             ./.local/share/my/deploy-setup/bootstrap/start0.sh  \\
+                $targetHomeDirExpr                              \\
                 ./dotfiles.git.bundle                           \\
                 ${quotedDotfilesRefspecs[*]}
     "

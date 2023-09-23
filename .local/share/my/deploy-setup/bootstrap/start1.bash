@@ -28,24 +28,25 @@ function process-vars
 
 function process-env-vars
 {
-    readonly targetHome=${HOME:?}
     readonly currentLoginShell=${SHELL:-}
 
     userName=$(userName_given || print unknown)
     userEmail=${userName:?}@${HOSTNAME:-$(std uname -n || print unknown)}
     readonly userName userEmail
-
-    # Exporting these enables not needing to change our current working directory.
-    #
-    export GIT_DIR=$targetHome/.git GIT_WORK_TREE=$targetHome
 }
 
 function process-args
 {
-    readonly bootstrapDotfilesRepo=${args[0]:-$defaultBootstrapDotfilesRepo}
+    readonly targetHome=${args[0]}
 
-    if (( ${#args[@]} >= 2 )); then
-        readonly dotfilesRefspecs=("${args[@]:1}")
+    # Exporting these enables not needing to change our current working directory.
+    #
+    export GIT_DIR=$targetHome/.git GIT_WORK_TREE=$targetHome
+
+    readonly bootstrapDotfilesRepo=${args[1]:-$defaultBootstrapDotfilesRepo}
+
+    if (( ${#args[@]} >= 3 )); then
+        readonly dotfilesRefspecs=("${args[@]:2}")
     else
         readonly dotfilesRefspecs=("${defaultDotfilesRefspecs[@]}")
     fi
