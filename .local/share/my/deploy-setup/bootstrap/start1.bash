@@ -12,37 +12,49 @@ topDir=$(norm_abs_path "$selfDirNorm"/../../../../..)
 readonly topDir
 
 
+# Defaults
+
+readonly defaultBootstrapDotfilesRepo=$topDir/.git
 readonly defaultDotfilesRefs='HEAD main'
-
-# TODO: Reverse the order of these args, so ${@:2} can be multiple refs
-readonly bootstrapDotfilesRefs=${args[0]:-$defaultDotfilesRefs}
-readonly bootstrapDotfilesRepo=${args[1]:-$topDir/.git}
-readonly currentLoginShell=${SHELL:-}
-readonly targetHome=${HOME:?}
-
-split-on-words "$bootstrapDotfilesRefs" dotfilesRefs
-readonly dotfilesRefs
-
-userName=$(userName_given || print unknown)
-userEmail=${userName:?}@${HOSTNAME:-$(std uname -n || print unknown)}
-readonly userName userEmail
-
-if (( ${#dotfilesRefs[@]} >= 1 )); then
-    readonly primaryDotfilesRef=${dotfilesRefs[0]}  # The first ref is considered the primary.
-    readonly userBranch=user/$userName
-else
-    fail "No refs given!"
-fi
 
 
 # Functions
 
-function do-in-home {
-    (( $# == 1 ))  # Else: errexit.
-    # shellcheck disable=2217  # Redirecting stdin just to be extra safe.
-    ( cd "$targetHome" < /dev/null > /dev/null || exit
-      eval "$1"
-    )
+function process-vars
+{
+    process-env-vars
+    process-args
+}
+
+function process-env-vars
+{
+    readonly targetHome=${HOME:?}
+    readonly currentLoginShell=${SHELL:-}
+
+    userName=$(userName_given || print unknown)
+    userEmail=${userName:?}@${HOSTNAME:-$(std uname -n || print unknown)}
+    readonly userName userEmail
+
+    # Exporting these enables not needing to change our current working directory.
+    #
+    export GIT_DIR=$targetHome/.git GIT_WORK_TREE=$targetHome
+}
+
+function process-args
+{
+    # TODO: Reverse the order of these args, so ${@:2} can be multiple refspecs
+    readonly bootstrapDotfilesRefs=${args[0]:-$defaultDotfilesRefs}
+    readonly bootstrapDotfilesRepo=${args[1]:-$defaultBootstrapDotfilesRepo}
+
+    split-on-words "$bootstrapDotfilesRefs" dotfilesRefs
+    readonly dotfilesRefs
+
+    if (( ${#dotfilesRefs[@]} >= 1 )); then
+        readonly primaryDotfilesRef=${dotfilesRefs[0]}  # The first ref is considered the primary.
+        readonly userBranch=user/$userName
+    else
+        fail "No refs given!"
+    fi
 }
 
 function has-dotfiles {
@@ -53,55 +65,57 @@ function failed-to-dotfiles {
     fail "Failed to $1 ~/.dotfiles repository!" "${@:2}"
 }
 
-function start-dotfiles-repo {
-    do-in-home "
-        git init --initial-branch=preexisting .
-        git add --ignore-errors .
-        git init --separate-git-dir=.dotfiles .  # After, to avoid adding .dotfiles/.
-        git config user.name ${userName@Q}
-        git config user.email ${userEmail@Q}
-        if git status --porcelain | std grep -q -E -e '^A ' ; then
-            git commit --message='As was.'
-        else
-            : # Nothing was added, so, to avoid error, do not try to commit.
-        fi
-    "
+function start-dotfiles-repo
+{
+    git init --initial-branch=preexisting
+    git add --all --ignore-errors
+    git config user.name "$userName"
+    git config user.email "$userEmail"
+    if git status --porcelain | std grep -q -E -e '^A ' ; then
+        git commit --message='As was.'
+    else
+        : # Nothing was added, so, to avoid error, do not try to commit.
+    fi
 }
 
 function fetch-into-dotfiles-repo
 {
+    # TODO: Will take refspecs instead, but will need to substitute special '$USER' placeholder
+    # with actual userNameGiven as computed by this script.
     local refSpecs=("${dotfilesRefs[@]/*/&:&}")  # Construct refspec from ref.
     refSpecs=("${primaryDotfilesRef}:${userBranch}" "${refSpecs[@]:1}")
 
-    # Don't `do-in-home`, but instead use absolute pathname for --git-dir, so that we don't change
-    # directory because $bootstrapDotfilesRepo might be (and often is) a relative pathname.
+    # We don't change directory because $bootstrapDotfilesRepo might be (and often is) a relative
+    # pathname.
     #
-    git --git-dir="$targetHome"/.dotfiles fetch "$bootstrapDotfilesRepo" "${refSpecs[@]}"
+    git fetch "$bootstrapDotfilesRepo" "${refSpecs[@]}"
 }
 
-function merge-dotfiles {
-    # shellcheck disable=SC2016
-    do-in-home '
-        export GIT_DIR=.dotfiles
-        mergeBranch=merge-dotfiles-into-$(git branch --show-current)
+function merge-dotfiles
+{
+    local -r mergeBranch=merge-dotfiles-into-$(git branch --show-current)
 
-        git checkout -b "$mergeBranch"
+    git checkout -b "$mergeBranch"
 
-        if git merge --allow-unrelated-histories --no-edit '"${userBranch@Q}"'
-        then
-            git fetch --no-write-fetch-head . "$mergeBranch":'"${userBranch@Q}"'
-            git checkout '"${userBranch@Q}"'
-            git branch --delete --force "$mergeBranch"
-        else
-            git merge --abort
-            # Leave the $mergeBranch for the user to manually do the merge.
-            exit 6
-        fi
-    '
+    if git merge --allow-unrelated-histories --no-edit "$userBranch"
+    then
+        git fetch --no-write-fetch-head "$targetHome"/.git "$mergeBranch":"$userBranch"
+        git checkout "$userBranch"
+        git branch --delete --force "$mergeBranch"
+    else
+        git merge --abort
+        # Leave the $mergeBranch for the user to manually do the merge.
+        exit 6
+    fi
 }
 
-function hide-dotfiles-gitdir {
-    do-in-home 'std mv .git .git-hidden'
+function hide-dotfiles-gitdir
+{
+    # After the previous operations, to avoid adding and tracking .dotfiles/, and to avoid having
+    # .dotfiles/ until now.
+    git init --separate-git-dir="$targetHome"/.dotfiles
+    unset GIT_DIR GIT_WORK_TREE
+    std mv "$targetHome"/.git{,-hidden}
 }
 
 function setup-dotfiles
@@ -151,14 +165,14 @@ function setup-dotfiles
 function change-gitignore {
     local -r hmComment='# Things managed by home-manager'
 
-    if do-in-home "std grep -q -F -e ${hmComment@Q} .gitignore"
+    if std grep -q -F -e "$hmComment" "$targetHome"/.gitignore
     then
         # This deletes (d) all lines starting from the comment one to the end of file ($).
         local -r sedScript="/$hmComment/,\$d"
-        do-in-home "
-            std sed -e ${sedScript@Q} .gitignore > .gitignore-changed
-            std mv .gitignore-changed .gitignore
-        "
+        ( cd "$targetHome"
+          std sed -e "$sedScript" .gitignore > .gitignore-changed
+          std mv .gitignore-changed .gitignore
+        )
     fi
 }
 
@@ -172,10 +186,10 @@ function setup-home
 
     # Ensure permissions on and in ~/ are good
     #
-    do-in-home '
-        std chmod o-rwx .
-        std chmod -R go-rwx .ssh
-    ' || warn 'Failed to chmod something(s) in ~/.'
+    ( cd "$targetHome"
+      std chmod o-rwx .
+      std chmod -R go-rwx .ssh
+    ) || warn 'Failed to chmod something(s) in ~/.'
 
     # Stage any of the changes to ~/ resulting from the above.
     #
@@ -183,7 +197,7 @@ function setup-home
 }
 
 function stage-changes-in-home {
-    do-in-home 'git --git-dir=.dotfiles add --all --ignore-errors' || {
+    git --git-dir="$targetHome"/.git --work-tree="$targetHome" add --all --ignore-errors || {
         warn "Failed to stage changes to ~/${1:+ $1}."
         return 11
     }
@@ -192,6 +206,7 @@ function stage-changes-in-home {
 
 # Operations
 
+process-vars
 setup-home
 fail "Unimplemented"
 setup-packages
