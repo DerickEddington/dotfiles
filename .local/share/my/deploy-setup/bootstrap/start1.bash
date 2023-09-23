@@ -72,10 +72,15 @@ function process-args
     fi
 }
 
-function has-repo-already {
-    ( cd "$targetHome"
-      [ -e .dotfiles ] || [ -e .git ] || [ -e .git-hidden ]
-    )
+function has-repo-already
+{
+    if ( cd "$targetHome" ; [ -e .dotfiles ] || [ -e .git ] || [ -e .git-hidden ] )
+    then
+        println "Info: Already have a repository in ${targetHome@Q}. Skipping."
+        return 0
+    else
+        return 1
+    fi
 }
 
 function failed-to-dotfiles {
@@ -136,13 +141,9 @@ function install-dotfiles
 {
     local retCode=0
 
-    # Check if we don't need to do anything.  Doing nothing is critical for being idempotent when
-    # this script is applied to the same home multiple times (e.g. via a `vagrant up` trigger).
+    # Extra check of this, to be safer.
     #
-    has-repo-already && {
-        println "Info: Already have a repository in ${targetHome@Q}. Skipping."
-        exit 0  #  Considered a success.
-    }
+    has-repo-already && return 0  #  Considered a success.
 
     # Install Git if not already
     #
@@ -222,11 +223,19 @@ function stage-changes-in-home
 # Operations
 
 process-vars
-prepare-home
-fail "Unimplemented"
-install-packages
-prepare-login
-commit-staged-changes
+
+# Check if we should not do anything.  Doing nothing is critical for being idempotent when this
+# script is applied to the same home multiple times (e.g. via a `vagrant up` trigger).
+#
+if has-repo-already ; then
+    exit 0  #  Considered a success.
+else
+    prepare-home
+    fail "Unimplemented"
+    install-packages
+    prepare-login
+    commit-staged-changes
+fi
 
 
 
