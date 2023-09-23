@@ -108,7 +108,7 @@ function merge-dotfiles
 
     if git merge --allow-unrelated-histories --no-edit "$userBranch"
     then
-        git fetch --no-write-fetch-head "$targetHome"/.git "$mergeBranch":"$userBranch"
+        git fetch --no-write-fetch-head "$GIT_DIR" "$mergeBranch":"$userBranch"
         git checkout "$userBranch"
         git branch --delete --force "$mergeBranch"
     else
@@ -122,9 +122,9 @@ function hide-dotfiles-gitdir
 {
     # After the previous operations, to avoid adding and tracking .dotfiles/, and to avoid having
     # .dotfiles/ until now.
-    git init --separate-git-dir="$targetHome"/.dotfiles
+    git init --separate-git-dir="${GIT_DIR%/.git}"/.dotfiles
+    std mv "$GIT_DIR"{,-hidden}
     unset GIT_DIR GIT_WORK_TREE
-    std mv "$targetHome"/.git{,-hidden}
 }
 
 function setup-dotfiles
