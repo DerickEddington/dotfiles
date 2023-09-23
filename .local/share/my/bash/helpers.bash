@@ -66,11 +66,19 @@ declare-function-readonly declare-function-readonly
 
 # Already defined in ../sh/helpers.sh.
 declare-function-readonly std
+declare-function-readonly is_command_found
+declare-function-readonly _my_script_prelude
 
-is-function-def is_command_found && declare-function-readonly is_command_found
 is-function-undef is-command-found || return
 function is-command-found { is_command_found "$@" ;}
 declare-function-readonly is-command-found
+
+is-function-undef _my-script-prelude || return
+function _my-script-prelude {
+    shopt -s assoc_expand_once extglob globstar nullglob
+    _my_script_prelude
+}
+declare-function-readonly _my-script-prelude
 
 is-function-undef is-var-attr || return
 function is-var-attr {

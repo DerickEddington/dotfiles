@@ -1,27 +1,16 @@
 #! /usr/bin/env bash
-set -o errexit -o nounset
-shopt -s assoc_expand_once extglob
-(( "${VERBOSE:=0}" >= 3 )) && set -o xtrace
-(( "${VERBOSE:=0}" >= 4 )) && set -o verbose
-
-
-# Capture arguments, before anything else could mess with them.
-#
-readonly selfFull=$0
 readonly args=("$@")
-
-
 # shellcheck source=../share/my/bash/helpers.bash
 source "${XDG_DATA_HOME:-$HOME/.local/share}"/my/bash/helpers.bash
+_my-script-prelude
 
 
-self=$(std basename "$selfFull"); readonly self
-
+# shellcheck disable=SC2154  # selfBase is assigned by _my-script-prelude
 if (( ${#args[@]} != 1 )); then
     std cat 1>&2 <<-EOF
-	Usage: $self ssh://[USER@]HOSTNAME[:PORT]
-	   or: $self vagrant://[NAME|ID]
-	   or: $self dir:LOCALDIR
+	Usage: $selfBase ssh://[USER@]HOSTNAME[:PORT]
+	   or: $selfBase vagrant://[NAME|ID]
+	   or: $selfBase dir:LOCALDIR
 	EOF
     exit 1
 fi
@@ -95,8 +84,8 @@ function rsh { rsh-cd . "$@" ;}
 
 function rsh-cd {
     local shOpts=('set -e;')
-    (( VERBOSE >= 3 )) && shOpts+=('set -x;')
-    (( VERBOSE >= 4 )) && shOpts+=('set -v;')
+    (( VERBOSE >= 5 )) && shOpts+=('set -x;')
+    (( VERBOSE >= 6 )) && shOpts+=('set -v;')
 
     remote-sh-cd "$targetUrl" "$1" "${shOpts[*]} $2" "${@:3}"
 }

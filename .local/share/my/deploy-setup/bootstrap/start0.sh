@@ -1,27 +1,34 @@
 #! /usr/bin/env sh
-set -e -u
-[ "${VERBOSE:=0}" -ge 3 ] && set -x
-[ "${VERBOSE:=0}" -ge 4 ] && set -v
 
-# Capture these before anything else could mess with them.
+readonly HOME  # Guarantee this remains the same for start1.bash.
+
+# Similar to _my_script_prelude.  Done manually here, because we can't source my/sh/helpers.sh
+# yet (because we want to use topDir to do that but it needs this).
 #
-readonly HOME  # Guarantee this remains the same for `start1.bash`.
-selfDir=$(command -p  dirname "$0")
-selfDir=$(cd "$selfDir" && pwd)  # Absolute pathname via `pwd`.
+set -e -u  # -o errexit -o nounset
+readonly self="$0"
+selfDir=$(command -p  dirname "$self")
 readonly selfDir
-topDir=$(cd "$selfDir"/../../../../.. && pwd)  # Normalized pathname via `cd`.
+case "$selfDir" in
+    (/*) selfDirAbs="$selfDir" ;;
+    (*)  selfDirAbs=$(command -p  pwd -L); selfDirAbs=${selfDirAbs%/}/$selfDir ;;
+esac
+readonly selfDirAbs
+selfDirNorm=$(command -p  cd -P -- "$selfDirAbs"   &&   command -p  pwd -P)
+readonly selfDirNorm
+
+[ "${VERBOSE:=0}" -ge 5 ] && set -x
+[ "${VERBOSE:=0}" -ge 6 ] && set -v
+
+# The top of our same instance of our facility's files.
+#
+topDir=$selfDirNorm/../../../../..
+topDir=$(command -p  cd -P -- "$topDir"   &&   command -p  pwd -P)
 readonly topDir
 
 
-make_tmp_runtime_dir() {
-    ( # In a subshell to prevent this source'ing from affecting the outer shell.
-      # shellcheck source=../../sh/helpers.sh
-      . "${XDG_DATA_HOME:?}"/my/sh/helpers.sh > /dev/null 2>&1 || exit
-      _my_make_runtime_dir_in_tmp
-    )
-}
-
-prepare_special_xdg_bds() {
+prepare_special_xdg_bds()
+{
     # Ensure we use our same instance of our facility's files, because they should be guaranteed
     # to be mutually coherent.
     #
@@ -29,13 +36,13 @@ prepare_special_xdg_bds() {
     export XDG_CONFIG_HOME="$topDir"/.config
 
     [ -d "$XDG_DATA_HOME" ] || return
-    # It's OK if XDG_CONFIG_HOME is not present.
+    # It's OK if $XDG_CONFIG_HOME doesn't exist.
 
     # Must know what this location is before used next.  (Which is why we make it ourself, if
     # needed, instead of letting helpers.sh.)
     #
     if ! [ -d "${XDG_RUNTIME_DIR:-}" ]; then
-        XDG_RUNTIME_DIR=$(make_tmp_runtime_dir) || return  # (After XDG_DATA_HOME was set.)
+        XDG_RUNTIME_DIR=$(_my_make_runtime_dir_in_tmp) || return
     fi
     export XDG_RUNTIME_DIR
 
@@ -51,19 +58,27 @@ prepare_special_xdg_bds() {
 }
 
 
-# These environment variables must be set before source'ing helpers.sh.
+_MY_SH_HELPERS__ONLY_FUNCTIONS=yes  # (Must not be a variable assignment in the next `.` command.)
+# shellcheck source=../../sh/helpers.sh
+. "$topDir"/.local/share/my/sh/helpers.sh
+unset _MY_SH_HELPERS__ONLY_FUNCTIONS
+
+# These environment variables must be set before calling _my_sh_helpers__finish.  This
+# prepare_special_xdg_bds can't work until after the above source'ing of my/sh/helpers.sh was done
+# (because prepare_special_xdg_bds needs _my_make_runtime_dir_in_tmp).
 #
 prepare_special_xdg_bds
 
-# shellcheck source=../../sh/helpers.sh
-. "${XDG_DATA_HOME:?}"/my/sh/helpers.sh
+# Finish loading my/sh/helpers.sh
+#
+_my_sh_helpers__finish
 
-# Install Bash if not already.
+# Install Bash if not already.  This can't work until after _my_sh_helpers__finish was done.
 #
 _my_install_bash_if_needed
 
-# Use Bash for the rest.  Remove SHELL from the environment, so that Bash will set it to the
-# user's login shell.
+# Use Bash for the rest.  Remove SHELL from the environment so that Bash will set it to the
+# user's login shell, for start1.bash.
 #
 unset -v SHELL
 exec bash "$selfDir"/start1.bash "$@"

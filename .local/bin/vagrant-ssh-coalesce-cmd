@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
-set -o errexit -o nounset
-(( "${VERBOSE:=0}" >= 3 )) && set -o xtrace
-(( "${VERBOSE:=0}" >= 4 )) && set -o verbose
+# shellcheck source=../share/my/bash/helpers.bash
+source "${XDG_DATA_HOME:-$HOME/.local/share}"/my/bash/helpers.bash
+_my-script-prelude
 
 # Simply wraps `vagrant ssh` to coalesce a given command from multiple arguments into a single
 # one.  Especially useful with the git-remote-ext "remote helper program" of Git as invoked via a
@@ -13,8 +13,8 @@ readonly machine=$1 command=${*:2}
 sshOptsExtra=(
     -T  # `-T` to separate stdout & stderr.
 )
-if (( "$VERBOSE" >= 5 )); then
-    for (( i = VERBOSE - 4 ; i > 0 ; i-- )); do
+if (( "$VERBOSE" >= 7 )); then
+    for (( i = VERBOSE - 6 ; i > 0 ; i-- )); do
         sshOptsExtra+=(-v)
     done
 fi

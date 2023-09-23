@@ -1,37 +1,30 @@
-set -o errexit -o nounset
-shopt -s assoc_expand_once extglob
-(( "${VERBOSE:=0}" >= 3 )) && set -o xtrace
-(( "${VERBOSE:=0}" >= 4 )) && set -o verbose
+#! /usr/bin/env bash
+readonly args=("$@")
+readonly HOME  # Guarantee this remains the same throughout.
+# shellcheck source=../../bash/helpers.bash
+source "${XDG_DATA_HOME:-$HOME/.local/share}"/my/bash/helpers.bash
+_my-script-prelude
+
+# The top of our same instance of our facility's files.
+#
+# shellcheck disable=SC2154  # selfDirNorm is assigned by _my-script-prelude
+topDir=$(norm_abs_path "$selfDirNorm"/../../../../..)
+readonly topDir
+
 
 readonly defaultDotfilesRefs='HEAD main'
 
-# Capture arguments, before anything else could mess with them.
-#
-selfDir=$(command -p  dirname "$0")
-selfDir=$(cd "$selfDir" && pwd)  # Absolute pathname via `pwd`.
-readonly selfDir
-topDir=$(cd "$selfDir"/../../../../.. && pwd)  # Normalized pathname via `cd`.
-readonly topDir
-readonly bootstrapDotfilesRefs=${1:-$defaultDotfilesRefs}
-readonly bootstrapDotfilesRepo=${2:-$topDir/.git}
+# TODO: Reverse the order of these args, so ${@:2} can be multiple refs
+readonly bootstrapDotfilesRefs=${args[0]:-$defaultDotfilesRefs}
+readonly bootstrapDotfilesRepo=${args[1]:-$topDir/.git}
 readonly currentLoginShell=${SHELL:-}
-readonly HOME  # Guarantee this remains the same throughout.
 readonly targetHome=${HOME:?}
-
-# Might as well.
-# shellcheck disable=SC2034
-readonly XDG_DATA_HOME XDG_CONFIG_HOME XDG_RUNTIME_DIR XDG_STATE_HOME XDG_CACHE_HOME
-
-
-# shellcheck source=../../bash/helpers.bash
-source "${XDG_DATA_HOME:?}"/my/bash/helpers.bash
-
 
 split-on-words "$bootstrapDotfilesRefs" dotfilesRefs
 readonly dotfilesRefs
 
 userName=$(userName_given || print unknown)
-userEmail=${userName:?}@${HOSTNAME:-$(std uname -n)}
+userEmail=${userName:?}@${HOSTNAME:-$(std uname -n || print unknown)}
 readonly userName userEmail
 
 if (( ${#dotfilesRefs[@]} >= 1 )); then
