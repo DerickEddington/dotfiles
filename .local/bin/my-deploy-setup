@@ -19,7 +19,7 @@ fi
 # Defaults
 
 readonly defaultDotfilesRepo=$HOME/.dotfiles
-readonly defaultDotfilesRefspecs="HEAD:user/\$USER main"
+readonly defaultDotfilesRefspecs="HEAD:user/\$USER main"  # '$USER' is a placeholder.
 
 
 # Functions

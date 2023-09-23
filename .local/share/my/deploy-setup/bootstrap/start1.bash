@@ -15,7 +15,7 @@ readonly topDir
 # Defaults
 
 readonly defaultBootstrapDotfilesRepo=$topDir/.git
-readonly defaultDotfilesRefspecs=("HEAD:user/\$USER" "main")
+readonly defaultBootstrapDotfilesRefspecs=("HEAD:user/\$USER" "main")  # '$USER' is a placeholder.
 
 
 # Functions
@@ -46,17 +46,27 @@ function process-args
     readonly bootstrapDotfilesRepo=${args[1]:-$defaultBootstrapDotfilesRepo}
 
     if (( ${#args[@]} >= 3 )); then
-        readonly dotfilesRefspecs=("${args[@]:2}")
+        local -r bootstrapDotfilesRefspecs=("${args[@]:2}")
     else
-        readonly dotfilesRefspecs=("${defaultDotfilesRefspecs[@]}")
+        local -r bootstrapDotfilesRefspecs=("${defaultBootstrapDotfilesRefspecs[@]}")
     fi
 
-    if (( ${#dotfilesRefspecs[@]} >= 1 )); then
-        # The first refspec is considered the primary.
-        readonly primaryDotfilesRef=${dotfilesRefspecs[0]%:*}
-        userBranch=${dotfilesRefspecs[0]##*:}
-        userBranch=${userBranch//\$USER/$userName}
-        readonly userBranch
+    if (( ${#bootstrapDotfilesRefspecs[@]} >= 1 ))
+    then
+        local refspecs=("${bootstrapDotfilesRefspecs[@]}")
+        local i
+        for i in "${!refspecs[@]}"; do
+            refspecs[i]=${refspecs[i]//\$USER/$userName}
+            if ! [[ "${refspecs[i]}" = *:* ]]; then
+                refspecs[i]="${refspecs[i]/*/&:&}"  # Construct refspec from ref.
+            fi
+        done
+        readonly fetchDotfilesRefspecs=("${refspecs[@]}")
+
+        # The first refspec is considered the primary and its <dst> determines which branch is
+        # used for the user's home directory.
+        #
+        readonly userBranch=${fetchDotfilesRefspecs[0]##*:}
     else
         fail "No refspecs given!"
     fi
@@ -76,8 +86,10 @@ function start-dotfiles-repo
 {
     git init --initial-branch=preexisting
     git add --all --ignore-errors
+
     git config user.name "$userName"
     git config user.email "$userEmail"
+
     if git status --porcelain | std grep -q -E -e '^A ' ; then
         git commit --message='As was.'
     else
@@ -87,17 +99,10 @@ function start-dotfiles-repo
 
 function fetch-into-dotfiles-repo
 {
-    local refspecs=("${primaryDotfilesRef}:${userBranch}" "${dotfilesRefspecs[@]:1}") i
-    for i in "${!refspecs[@]}"; do
-        if ! [[ "${refspecs[i]}" = *:* ]]; then
-            refspecs[i]="${refspecs[i]/*/&:&}"  # Construct refspec from ref.
-        fi
-    done
-
     # We don't change directory because $bootstrapDotfilesRepo might be (and often is) a relative
     # pathname.
     #
-    git fetch "$bootstrapDotfilesRepo" "${refspecs[@]}"
+    git fetch "$bootstrapDotfilesRepo" "${fetchDotfilesRefspecs[@]}"
 }
 
 function merge-dotfiles
