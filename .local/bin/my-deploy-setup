@@ -53,10 +53,10 @@ function process-args
                 targetHomeDirExpr=$(quote "$targetLocalDir")
                 targetUrl=shell://localhost
             else
-                error "Invalid directory: $(quote "$targetLocalDir")" 2
+                error "Invalid directory: ${targetLocalDir@Q}!" 2
             fi
         else
-            error "Missing directory name in URL: $(quote "$targetUrl")!" 3
+            error "Missing directory name in URL: ${targetUrl@Q}!" 3
         fi
     fi
 
@@ -71,7 +71,7 @@ function process-env-vars
     fi
     localDotfilesRepo=$(abs_path "$localDotfilesRepo") || return
 
-    [ -r "$localDotfilesRepo" ] || error "Invalid dotfiles repo: $(quote "$localDotfilesRepo")" 4
+    [ -r "$localDotfilesRepo" ] || error "Invalid dotfiles repo: ${localDotfilesRepo@Q}!" 4
 
     # The first refspec is considered the primary.
     dotfilesRefspecs=${MY_DEPLOY_SETUP_DOTFILES_FROM_REFSPECS:-$defaultDotfilesRefspecs}
@@ -90,7 +90,7 @@ function rsh-cd {
     remote-sh-cd "$targetUrl" "$1" "${shOpts[*]} $2" "${@:3}"
 }
 
-function rsh-in-bd { rsh-cd "$targetBootstrapDir" "$@" ;}
+function rsh-in-bd { rsh-cd "$(quote "$targetBootstrapDir")" "$@" ;}
 
 function check-can-command-target
 {
@@ -176,6 +176,10 @@ function run-bootstrap
     "
 }
 
+function cleanup {
+    rsh-in-bd "rm -r -f $(quote "$targetBootstrapDir")"
+}
+
 
 # Operations
 
@@ -183,3 +187,4 @@ process-vars
 check-can-command-target
 copy-bootstrap-files
 run-bootstrap
+cleanup  # Don't cleanup if anything above fails (`errexit` will cause exit before here, if so).
