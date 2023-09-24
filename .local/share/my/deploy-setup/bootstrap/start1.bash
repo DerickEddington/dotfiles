@@ -28,8 +28,6 @@ function process-vars
 
 function process-env-vars
 {
-    readonly currentLoginShell=${SHELL:-}
-
     userName=$(userName_given || print unknown)
     userEmail=${userName:?}@${HOSTNAME:-$(std uname -n || print unknown)}
     readonly userName userEmail
@@ -58,7 +56,7 @@ function process-args
         for i in "${!refspecs[@]}"; do
             refspecs[i]=${refspecs[i]//\$USER/$userName}
             if ! [[ "${refspecs[i]}" = *:* ]]; then
-                refspecs[i]="${refspecs[i]/*/&:&}"  # Construct refspec from ref.
+                refspecs[i]="${refspecs[i]}:${refspecs[i]}"  # Construct refspec from ref.
             fi
         done
         readonly fetchDotfilesRefspecs=("${refspecs[@]}")
@@ -87,6 +85,15 @@ function failed-to-dotfiles {
     fail "Failed to $1 ~/.dotfiles repository!" "${@:2}"
 }
 
+function commit-if-staged
+{
+    if git status --porcelain | std grep -q -E -e '^A ' ; then
+        git commit --message="${1:?}"
+    else
+        : # Nothing was added, so, to avoid error, do not try to commit.
+    fi
+}
+
 function start-dotfiles-repo
 {
     git init --initial-branch=preexisting
@@ -95,11 +102,7 @@ function start-dotfiles-repo
     git config user.name "$userName"
     git config user.email "$userEmail"
 
-    if git status --porcelain | std grep -q -E -e '^A ' ; then
-        git commit --message='As was.'
-    else
-        : # Nothing was added, so, to avoid error, do not try to commit.
-    fi
+    commit-if-staged 'As was.'
 }
 
 function fetch-into-dotfiles-repo
@@ -177,27 +180,9 @@ function install-dotfiles
     return $retCode
 }
 
-function change-gitignore {
-    local -r hmComment='# Things managed by home-manager'
-
-    if std grep -q -F -e "$hmComment" "$targetHome"/.gitignore
-    then
-        # This deletes (d) all lines starting from the comment one to the end of file ($).
-        local -r sedScript="/$hmComment/,\$d"
-        ( cd "$targetHome"
-          std sed -e "$sedScript" .gitignore > .gitignore-changed
-          std mv .gitignore-changed .gitignore
-        )
-    fi
-}
-
 function prepare-home
 {
     install-dotfiles || warn "Failed to install ~/.dotfiles completely."
-
-    # Change .gitignore to not ignore files that are of interest in the target home.
-    #
-    change-gitignore || warn 'Failed to change .gitignore.'
 
     # Ensure permissions on and in ~/ are good
     #
@@ -205,6 +190,11 @@ function prepare-home
       std chmod o-rwx .
       std chmod -R go-rwx .ssh
     ) || warn 'Failed to chmod something(s) in ~/.'
+
+    # Delegate to the branch's approach for any further preparation of the target home.  Must only
+    # be done after installing and checking-out the dotfiles.
+    #
+    run-hook prepare-home
 
     # Stage any of the changes to ~/ resulting from the above.
     #
@@ -219,6 +209,71 @@ function stage-changes-in-home
     }
 }
 
+function install-packages
+{
+    # Delegate to the branch's approach for installing any desired packages.  Must only be done
+    # after setting-up the target home, because some packages need to install into home along with
+    # their metadata, and we want these changes to home to be captured by the branch.
+    #
+    run-hook install-packages
+
+    # Stage any changes to ~/ resulting from the above installing.  (E.g. `cargo install` might
+    # add/update its metadata files.)
+    #
+    stage-changes-in-home "after install-packages" || true
+}
+
+function prepare-login
+{
+    # Delegate to the branch's approach for configuring logins for the target user.  Must only be
+    # done after installing and checking-out the dotfiles.  Is done after the `install-packages`
+    # hook, in case the branch's `prepare-login` hook wants to use some package from that.
+    #
+    run-hook prepare-login
+
+    # Stage any of the changes to ~/ resulting from the above.
+    #
+    stage-changes-in-home "after prepare-login" || true
+}
+
+function run-hook
+{
+    local -r hook="$targetHome"/.config/my/deploy-setup/hooks/"${1:?}"
+
+    ( cd "$targetHome"  # The hooks expect this.
+
+      if [ -x "$hook" ]; then
+          # Use the target home's instance of the facility's files, because they should be
+          # mutually coherent with the versions of these hooks, and so that anything run (perhaps
+          # transitively) by these hooks sees the target home as HOME.  We allow XDG_CACHE_HOME
+          # XDG_RUNTIME_DIR to remain as they are (usually set to special temporary locations by
+          # start0.sh) because that seems to make sense because running these hooks is still part
+          # of the bootstrap.  (We use `env` in case any of these variables are read-only in our
+          # script.)
+          #
+          local -r envVars=(
+              HOME="$targetHome"
+              XDG_CONFIG_HOME="$targetHome"/.config
+              XDG_DATA_HOME="$targetHome"/.local/share
+              XDG_STATE_HOME="$targetHome"/.local/state
+              VERBOSE="${VERBOSE:-}"
+          )
+          std env "${envVars[@]}" "$hook"
+      else
+          :  # We don't care if it's not provided.
+      fi
+    )
+}
+
+function commit-staged-changes
+{
+    ( export GIT_DIR=$targetHome/.dotfiles GIT_WORK_TREE=$targetHome
+
+      # shellcheck disable=SC2154  # selfBase is assigned by _my-script-prelude
+      commit-if-staged "Changes made via \`$selfBase\`."
+    )
+}
+
 
 # Operations
 
@@ -231,25 +286,7 @@ if has-repo-already ; then
     exit 0  #  Considered a success.
 else
     prepare-home
-    fail "Unimplemented"
     install-packages
     prepare-login
     commit-staged-changes
 fi
-
-
-
-
-
-# Make user's login shell be Bash, if not already.
-# Hopefully, this is portable enough? (https://en.wikipedia.org/wiki/Chsh)
-#
-if [ "$(std basename "$currentLoginShell")" != bash ]; then
-    sudo chsh -s "$(command -v bash)" "$(logname)" || warn "Failed to change login shell to Bash."
-fi
-
-
-# TODO: invoke install-desired-packages, or something.
-#       Must be done after setting-up the user's home,
-#       because some packages need to install into home along with their metadata,
-#       and we want these changes to home to be captured by the user's dotfiles branch.

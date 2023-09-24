@@ -167,16 +167,17 @@ function remote-shell
     else
         local -r cmd=()
     fi
+    local -r sshSepStderr=(${MY_REMOTE_SHELL__SEPARATE_STDERR+-T})
 
     if [[ "$remoteUrl" =~ ^ssh://[^/]+$ ]]
     then
         # shellcheck disable=SC2029  # Want these expanded client-side.
-        ssh "${schemeOpts[@]}" "$remoteUrl" "${cmd[@]}"
+        ssh "${sshSepStderr[@]}" "${schemeOpts[@]}" "$remoteUrl" "${cmd[@]}"
 
     elif [[ "$remoteUrl" =~ ^vagrant://([^/]+)$ ]]
     then
         local -r machine=${BASH_REMATCH[1]}
-        local i vagOpts=() sshOpts=()
+        local i vagOpts=() sshOpts=(-- "${sshSepStderr[@]}")
 
         if (( ${#cmd[@]} >= 1 )); then
             vagOpts+=(-c "${cmd[*]}")
@@ -184,7 +185,7 @@ function remote-shell
         for (( i = 0; i < ${#schemeOpts[@]}; i++ )); do
             local o="${schemeOpts[i]}"
             if [ "$o" = "--" ]; then
-                sshOpts=("${schemeOpts[@]:i}")
+                sshOpts+=("${schemeOpts[@]:i+1}")
                 break
             else
                 vagOpts+=("$o")
@@ -248,6 +249,26 @@ declare-function-readonly remote-bash-cd
 
 
 # Miscellaneous
+
+is-function-undef prepend-to-file || return
+function prepend-to-file { ( set -e -u
+    local -r fileName="${1:?}" content="${2:?}"
+    local tf ; tf=$(gnu mktemp "$fileName"--XXXXXXXXXXXXXXXX) ; readonly tf
+
+    print "$content" > "$tf"
+    if [ -e "$fileName" ]; then
+        std cat "$fileName" >> "$tf"
+    fi
+    std mv -f "$tf" "$fileName"
+) }
+declare-function-readonly prepend-to-file
+
+is-function-undef append-to-file || return
+function append-to-file {
+    local -r fileName="${1:?}" content="${2:?}"
+    print "$content" >> "$fileName"
+}
+declare-function-readonly append-to-file
 
 function git-clone-into-nonempty
 {

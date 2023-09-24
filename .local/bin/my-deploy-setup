@@ -107,7 +107,8 @@ function make-bootstrap-dir
         targetBootstrapDir=$(gnu mktemp -u XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX)
 
         # shellcheck disable=SC2016
-        if targetBootstrapDir=$(rsh '
+        if targetBootstrapDir=$(MY_REMOTE_SHELL__SEPARATE_STDERR=yes
+                                rsh '
                                     tmpDir=${TMPDIR:-/tmp}
                                     bootstrapDir=$tmpDir/'"$(quote "$targetBootstrapDir")"'
 

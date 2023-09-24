@@ -1,0 +1,34 @@
+#! /usr/bin/env bash
+# shellcheck source=../../../../.local/share/my/bash/helpers.bash
+source "${XDG_DATA_HOME:-$HOME/.local/share}"/my/bash/helpers.bash
+_my-script-prelude
+
+
+# This is run with the target home directory as the current working directory, and this is invoked
+# by my/deploy-setup/bootstrap/start1.bash (which is usually run in a different host by
+# my-deploy-setup).
+#
+# You may do whatever you want here (within reason of fitting with the bootstrap), to extend the
+# setup of the target home directory when its dotfiles repository is being deployed.
+
+
+function change-gitignore
+{
+    local -r hmComment='# Things managed by home-manager'
+
+    if std grep -q -F -e "$hmComment" .gitignore
+    then
+        # This deletes (d) all lines starting from the comment one to the end of file ($).
+        local -r sedScript="/$hmComment/,\$d"
+        std sed -e "$sedScript" .gitignore > .gitignore-changed
+        std mv .gitignore-changed .gitignore
+    fi
+}
+
+
+if [ "${MY_PLATFORM_VARIANT:-}" != NixOS ]
+then
+    # Change .gitignore to not ignore files that are of interest in the target home.
+    #
+    change-gitignore || warn 'Failed to change .gitignore.'
+fi
