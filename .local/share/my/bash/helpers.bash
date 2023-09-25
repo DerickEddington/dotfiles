@@ -224,15 +224,15 @@ function _remote-shell-specific {
         # (Use `mktemp` in the local host, because it might not be available in a remote host.)
         cmdFile=$(gnu mktemp -u ./cmdFile-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX) || return
 
+        # Make the $cmdFile unlink itself ASAP, while still executing.
+        local -r shellCmdRm="rm -f $cmdFile"$'\n'"$shellCmd"
+
         # We assume whatever remote login-shell supports the common basic shell language of the
         # commands we synthesize here.
         #
-        if remote-shell "$remoteUrl" "cat > $cmdFile" <<< "$shellCmd" > /dev/null
+        if remote-shell "$remoteUrl" "cat > $cmdFile" <<< "$shellCmdRm" > /dev/null
         then
             remote-shell "$remoteUrl" "$shell $cmdFile" "${schemeOpts[@]}"
-            local -r rc=$?
-            remote-shell "$remoteUrl" "rm -f $cmdFile" < /dev/null > /dev/null || true
-            return $rc
         else
             error "_remote-shell-specific: Failed to copy \`cmdFile\`!"
             return 64
