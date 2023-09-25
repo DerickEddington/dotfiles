@@ -161,6 +161,8 @@ function my-port-install {
     local -r args=("$@")
     local -r portName="${args[-1]}" opts=("${args[@]:0:${#args[@]}-1}")
 
+    is-pkg-installed "$portName" && return
+
     _my_freebsd_install_ports_collection || return  # Ensure the Ports Collection is present.
 
     if ! [ -d /usr/ports/"$portName" ]; then
