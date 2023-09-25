@@ -104,21 +104,9 @@ function make-bootstrap-dir
     local attempts=5
     while (( attempts-- >= 1 )); do
         # (Use `mktemp` in the local host, because it might not be available in a remote host.)
-        targetBootstrapDir=$(gnu mktemp -u XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX)
+        targetBootstrapDir=$(gnu mktemp -u /tmp/XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX)
 
-        # shellcheck disable=SC2016
-        if targetBootstrapDir=$(MY_REMOTE_SHELL__SEPARATE_STDERR=yes
-                                rsh '
-                                    tmpDir=${TMPDIR:-/tmp}
-                                    bootstrapDir=$tmpDir/'"$(quote "$targetBootstrapDir")"'
-
-                                    if mkdir -m u=rwx,g=,o= "$bootstrapDir" ; then
-                                        printf "%s" "$bootstrapDir"
-                                    else
-                                        exit 1
-                                    fi
-                                ')
-        then
+        if rsh "mkdir -m u=rwx,g=,o= $targetBootstrapDir"; then
             break
         else
             unset targetBootstrapDir
