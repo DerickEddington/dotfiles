@@ -196,11 +196,11 @@ function remote-shell
 
     elif [ "$remoteUrl" = shell://localhost ]  # Occasionally useful (e.g. for testing).
     then
-        local shellCmd=()
+        local localCmd=()
         if (( ${#cmd[@]} >= 1 )); then
-            shellCmd=(-c "${cmd[*]}")
+            localCmd=(-c "${cmd[*]}")
         fi
-        "${SHELL:?}" "${schemeOpts[@]}" "${shellCmd[@]}"
+        "${SHELL:?}" "${schemeOpts[@]}" "${localCmd[@]}"
     else
         error "remote-shell: Unsupported URL: ${remoteUrl@Q}"
         return 1
@@ -210,8 +210,36 @@ declare-function-readonly remote-shell
 
 is-function-undef _remote-shell-specific || return
 function _remote-shell-specific {
-    local shCmd=("${1:?}") ; [ "${3:-}" ] && shCmd+=(-c "$(quote "$3")")
-    remote-shell "${2?}" "${shCmd[*]}" "${@:4}"
+    local -r shell=${1:?} remoteUrl=${2?} shellCmd=${3:-} schemeOpts=("${@:4}")
+
+    if [ "${shellCmd:-}" ]; then
+        # Have the desired remote shell read the given commands from a file in the remote host,
+        # instead of trying to pass the given commands on the remote login-shell's command-line
+        # (-c ...), because this avoids problems with incompatibilities in the syntax/language of
+        # the login shell which will interpret our synthesized command that invokes the desired
+        # shell.  E.g. the `csh` login-shell of FreeBSD requires \-line-continuations even inside
+        # single-quoted strings, but Bash and POSIX Shell do not, and trying to reconcile such
+        # syntax differences is impractical.
+        local cmdFile
+        # (Use `mktemp` in the local host, because it might not be available in a remote host.)
+        cmdFile=$(gnu mktemp -u ./cmdFile-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX) || return
+
+        # We assume whatever remote login-shell supports the common basic shell language of the
+        # commands we synthesize here.
+        #
+        if remote-shell "$remoteUrl" "cat > $cmdFile" <<< "$shellCmd" > /dev/null
+        then
+            remote-shell "$remoteUrl" "$shell $cmdFile" "${schemeOpts[@]}"
+            local -r rc=$?
+            remote-shell "$remoteUrl" "rm -f $cmdFile" < /dev/null > /dev/null || true
+            return $rc
+        else
+            error "_remote-shell-specific: Failed to copy \`cmdFile\`!"
+            return 64
+        fi
+    else
+        remote-shell "$remoteUrl" "$shell" "${schemeOpts[@]}"
+    fi
 }
 declare-function-readonly _remote-shell-specific
 
@@ -227,13 +255,8 @@ is-function-undef _remote-shell-specific-cd || return
 function _remote-shell-specific-cd {
     # shellcheck disable=SC2016
     local -r dirExpr=${3-'"$HOME"'} inDirCmd=${4:-}
-    # Note: Some shells, like tcsh of FreeBSD, require \-line-continuations even inside
-    # single-quoted strings (which $cdCmd becomes when quoted next).  This is why $cdCmd has them
-    # so that it works with both Bourne and C shells.  Note: The user must ensure that $inDirCmd
-    # also has such line-continuations, when it contains multi-line commands, when it's passed to
-    # such a shell.
-    local -r cdCmd='( cd '"$dirExpr"' < /dev/null > /dev/null || exit ; \
-                      '"$inDirCmd"' \
+    local -r cdCmd='( cd '"$dirExpr"' < /dev/null > /dev/null || exit
+                      '"$inDirCmd"'
                     )'
     _remote-shell-specific "$1" "$2" "$cdCmd" "${@:5}"
 }
