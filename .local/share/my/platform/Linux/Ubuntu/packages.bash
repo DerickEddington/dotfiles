@@ -11,6 +11,8 @@ source "$(dirname "${BASH_SOURCE[0]}")"/../../../bash/helpers.bash
 _my_bash_sourced_already local/share/my/platform/Linux/Ubuntu/packages && return
 
 
+# TODO: _my_llvm_greatest function, and use instead of hard-coded version numbers.
+
 function _my_clangd_greatest {
     apt-cache search --names-only clangd | grep -E -o '^clangd(-[0-9]+)?' | sort -V | tail -n1
 }
@@ -19,11 +21,18 @@ function _my_clangd_greatest {
 #
 readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
              [bash-completion]=bash-completion
+                        [bear]=bear
                        [cargo]=cargo
+                       [clang]=clang-15
                       [clangd]="$(_my_clangd_greatest)"
                      [fd-find]=fd-find
+                         [gcc]=gcc
                          [git]=git
                [gnu-coreutils]=coreutils
+                    [gnu-grep]=:  # TODO: Really no apt packages for these?!
+                     [gnu-sed]=:
+                     [gnu-tar]=:
+                       [gnupg]=gnupg
                         [htop]=htop
                         [most]=most
     [my-bash-history-combiner]=my_bash_history_combiner
@@ -39,12 +48,17 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
 # value (an eval'ed command) may be multiple words quoted (e.g. to pass options to a command).
 #
 readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
+                           [:]=true  # Do nothing
              [bash-completion]=my-apt-install
+                        [bear]=my-apt-install
                        [cargo]=my-apt-install
+                    [clang-15]=my-apt-install
     ["$(_my_clangd_greatest)"]=my-apt-install
                    [coreutils]=my-apt-install
                      [fd-find]=my-apt-install
+                         [gcc]=my-apt-install
                          [git]=my-apt-install
+                       [gnupg]=my-apt-install
                         [htop]=my-apt-install
                         [most]=my-apt-install
     [my_bash_history_combiner]="single my-cargo-install-user-local-from-my-repo"

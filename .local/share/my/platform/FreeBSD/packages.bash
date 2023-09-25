@@ -19,11 +19,17 @@ function _my_llvm_greatest {
 #
 readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
              [bash-completion]=bash-completion
+                        [bear]=bear
                        [cargo]=rust
                       [clangd]="$(_my_llvm_greatest)"
                      [fd-find]=fd-find
+                         [gcc]=gcc
                          [git]=git
                [gnu-coreutils]=coreutils
+                    [gnu-grep]=gnugrep
+                     [gnu-sed]=gsed
+                     [gnu-tar]=gtar
+                       [gnupg]=gnupg
                         [htop]=htop
                         [most]=most
     [my-bash-history-combiner]=my_bash_history_combiner
@@ -40,10 +46,16 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
 #
 readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
              [bash-completion]=my-pkg-install
+                        [bear]=my-pkg-install
                    [coreutils]=my-pkg-install
       ["$(_my_llvm_greatest)"]=my-pkg-install
                      [fd-find]=my-pkg-install
+                         [gcc]=my-pkg-install
                          [git]=my-pkg-install
+                     [gnugrep]=my-pkg-install
+                       [gnupg]=my-pkg-install
+                        [gsed]=my-pkg-install
+                        [gtar]=my-pkg-install
                         [htop]=my-pkg-install
                         [most]=my-pkg-install
     [my_bash_history_combiner]="single my-cargo-install-user-local-from-my-repo"

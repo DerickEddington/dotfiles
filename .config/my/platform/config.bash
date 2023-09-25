@@ -13,10 +13,12 @@
 #
 readonly MY_PLATFORM_PACKAGES_DESIRED=(
     bash-completion
-   #clangd
+   #bear
+   #clang clangd
     fd-find
     git
-    gnu-coreutils
+    gnu-coreutils gnu-grep gnu-sed gnu-tar
+    gnupg
     htop
     most
     my-bash-history-combiner  # Needed by _my_histfile_combining.
