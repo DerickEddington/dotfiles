@@ -35,6 +35,17 @@ function change-login-shell-to-bash
     fi
 }
 
+function suppress-chattiness
+{
+    touch .hushlogin
+
+    case "$MY_PLATFORM_OS" in
+        (FreeBSD)
+            gnu sed -i -s -E -e 's/^.*\bfortune\b.*$/## &/' .login .profile
+            ;;
+    esac
+}
+
 # shellcheck disable=SC2016
 function prepare-shell-init
 {
@@ -120,4 +131,5 @@ source "${XDG_CONFIG_HOME:-$HOME/.config}"/my/bash/interactive/init.bash
 
 
 change-login-shell-to-bash
+suppress-chattiness
 prepare-shell-init

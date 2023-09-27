@@ -31,4 +31,6 @@ then
     # Change .gitignore to not ignore files that are of interest in the target home.
     #
     change-gitignore || warn 'Failed to change .gitignore.'
+
+    mkdir -p tmp || warn "Failed to make '~/tmp' dir."
 fi
