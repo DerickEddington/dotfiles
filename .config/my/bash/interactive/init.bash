@@ -32,22 +32,6 @@ readonly MY_BASH_INTERACTIVE_CONFIG MY_BASH_CONFIG
 unset MYSELF_RELDIR
 
 
-# Try to use newer bash version if the default one is ancient.
-if [ "${BASH_VERSINFO[0]}" -le 3 ] && [ $SHLVL -eq 1 ]
-then
-    # (The PLATFORM variable is defined in $XDG_CONFIG_HOME/my/env/profile.sh and is available
-    # here because that file was source'd before this one.)
-
-    # If PLATFORM undefined, $HOME//... will be used.
-    NEW_SH="$HOME/$PLATFORM/local/bin/bash"
-
-    if [ -x "$NEW_SH" ]; then
-        export SHELL="$NEW_SH"
-        exec "$NEW_SH"
-    fi
-fi
-
-
 # Execute the below when any bash is run, whether top-level or not.
 
 # Aspects that a user might want to customize.
@@ -62,10 +46,13 @@ if [ "${BASH_VERSINFO[0]}" -ge 4 ]; then
 fi
 
 # Platform-specific.
-if [ -f "$MY_BASH_INTERACTIVE_CONFIG"/platform/"$(uname)"/init.bash ]; then
-    # shellcheck source=./platform/FreeBSD/init.bash  #  (Just one of many, to have something.)
-    source "$MY_BASH_INTERACTIVE_CONFIG"/platform/"$(uname)"/init.bash || true
-fi
+for _my_platform_id in "${MY_PLATFORM_IDS[@]}"; do
+    if [ -f "$MY_BASH_INTERACTIVE_CONFIG"/platform/"$_my_platform_id"/init.bash ]; then
+        # shellcheck source=./platform/FreeBSD/init.bash  #  (Just one of many, to have something.)
+        source "$MY_BASH_INTERACTIVE_CONFIG"/platform/"$_my_platform_id"/init.bash || true
+    fi
+done
+unset _my_platform_id
 
 # Wrappers of utils, before source'ing aliases.bash (because those can use these).
 if [ -f "$MY_BASH_INTERACTIVE_CONFIG"/wrappers.bash ]; then

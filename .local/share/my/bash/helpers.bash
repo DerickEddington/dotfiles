@@ -315,4 +315,25 @@ function git-clone-into-nonempty
 }
 
 
+# Variables
+
+function _assign_MY_PLATFORM_IDS {
+    declare -g MY_PLATFORM_IDS=()  # No duplicates, and no empties.
+    local id x
+    for id in "${MY_PLATFORM_OS-}" "${MY_PLATFORM_OS_VARIANT-}" "${MY_PLATFORM_OS_VAR_VER-}"; do
+        if [ "$id" ]; then
+            for x in "${MY_PLATFORM_IDS[@]}"; do
+                if [ "$id" = "$x" ]; then
+                    continue 2
+                fi
+            done
+            MY_PLATFORM_IDS+=("$id")
+        fi
+    done
+    readonly MY_PLATFORM_IDS
+}
+_assign_MY_PLATFORM_IDS
+unset -f _assign_MY_PLATFORM_IDS
+
+
 # Any source'ing of sub files must be done below here, so that the above are all defined for such.

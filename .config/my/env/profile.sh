@@ -77,7 +77,8 @@ if [ "${MY_PLATFORM_VARIANT-}" != NixOS ]; then
 
     # Platform-specific.  This is all ordered intentionally, so that more-specific
     # platform-delegation can take precedence, and so that user-configuration locations can take
-    # precedence, and so that further profile.sh files can modify those.
+    # precedence, and so that further profile.sh files can modify those.  (Maintenance: keep in
+    # sync with MY_PLATFORM_IDS in helpers.bash.)
     #
     for _my_platform_id
     in "${MY_PLATFORM_OS-}" "${MY_PLATFORM_OS_VARIANT-}" "${MY_PLATFORM_OS_VAR_VER-}"
