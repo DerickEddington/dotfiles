@@ -1,4 +1,4 @@
-# Dynamically generate functions for all ./platform/$(uname)/bin/*
+# Dynamically generate functions for all ./platform/$MY_PLATFORM_OS_VARIANT/bin/*
 # Functions are used, instead of aliases, because having functions still allows elsewhere defining
 # aliases with the same names - such aliases will use these functions.
 
@@ -10,7 +10,7 @@ function _my_gnu_generate_wrappers
 
     myselfDir=$(std dirname "${BASH_SOURCE[0]}") || return
     myselfDir=$(abs_path "$myselfDir") || return
-    platformDir=$myselfDir/platform/$(uname) || return
+    platformDir=$myselfDir/platform/${MY_PLATFORM_OS_VARIANT:-unknown} || return
 
     if [ -d "$platformDir"/bin ]
     then
