@@ -151,6 +151,55 @@ assert_all_nonexistent() {
     done
 }
 
+is_in_colon_list() {
+    println "${2-}" | std grep -q -E -e "(^|:)${1-}(:|\$)"
+}
+
+prepend_to_colon_list() {
+    print "${1-}${2:+:$2}"
+}
+
+prepend_to_colon_list_var_export() {
+    eval "$(
+        element=${1?}
+        varName=${2:?}
+        eval "varValue=\${${varName}-}"
+        element=$(quote "$element")
+        varValue=$(quote "$varValue")
+        print "${varName}=\$(prepend_to_colon_list $element $varValue)"
+    )" || return
+    eval "export ${2:?}"
+}
+
+prepend_to_PATH_if_ok() {
+    if [ -d "${1:?}" ]; then
+        if ! is_in_colon_list "$1" "${PATH-}" ; then
+            prepend_to_colon_list_var_export "$1" PATH
+        fi
+    fi
+}
+
+prepend_to_LD_LIBRARY_PATH_if_ok() {
+    # This doesn't support "A zero-length directory name indicates the current working directory",
+    # because that's Linux-specific.  Instead, give `.` which seems more portable (TODO: this
+    # point is untested).
+    if [ -d "${1:?}" ]; then
+        if ! is_in_colon_list "$1" "${LD_LIBRARY_PATH-}" ; then
+            prepend_to_colon_list_var_export "$1" LD_LIBRARY_PATH
+        fi
+    fi
+}
+
+prepend_bin_and_subs_to_PATH_if_ok() {
+    # Include sub-dirs also.  This can be especially convenient for symlink'ing to short-term
+    # manually-built packages, e.g. ~/bin/thing-1.2.3 -> ~/tmp/thing-1.2.3/bin.
+    set -- "${1:?}" "$1"/*
+    while [ $# -ge 1 ]; do
+        prepend_to_PATH_if_ok "$1"
+        shift
+    done
+}
+
 _my_script_prelude() {
     set -e -u  # -o errexit -o nounset
     readonly self="$0"  # The same $0 as outside a function.
