@@ -302,8 +302,11 @@ _my_sh_helpers__set_platform_identification()
 }
 
 _my_sh_helpers__finish() {
-    _my_sh_helpers__set_XDG_BDS
-    _my_sh_helpers__set_platform_identification
+    if ! [ "${_MY_SH_HELPERS__IS_FINISHED+is-set}" ]; then
+        _my_sh_helpers__set_XDG_BDS
+        _my_sh_helpers__set_platform_identification
+        _MY_SH_HELPERS__IS_FINISHED=true
+    fi
 }
 
 
