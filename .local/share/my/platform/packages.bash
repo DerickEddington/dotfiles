@@ -16,7 +16,7 @@ function my-platform-install-packages
 {
     local - ; set -o nounset
     local -r names=("$@")
-    local name method errPlatform=${MY_PLATFORM_OS_VARIANT:-Unknown}
+    local name method errPlatform=${MY_PLATFORM_OS_VARIANT:-unknown}
 
     if ! is-var-assoc-array MY_PLATFORM_SPECIFIC_PACKAGES_NAMES \
     || ! is-var-assoc-array MY_PLATFORM_SPECIFIC_PACKAGES_METHODS

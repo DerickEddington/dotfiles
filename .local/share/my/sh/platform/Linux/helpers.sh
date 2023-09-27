@@ -3,9 +3,9 @@
 
 # Avoid source'ing this file more than once.
 #
-[ "${_MY_SH_SOURCED_ALREADY__PLATFORM_HELPERS+is-set}" ] && return
+[ "${_MY_SH_SOURCED_ALREADY__PLATFORM_OS_HELPERS+is-set}" ] && return
 # Set immediately, to avoid the possibility of recursive source'ing.
-_MY_SH_SOURCED_ALREADY__PLATFORM_HELPERS=true
+_MY_SH_SOURCED_ALREADY__PLATFORM_OS_HELPERS=true
 
 
 # Platform-specific identification

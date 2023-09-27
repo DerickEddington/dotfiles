@@ -1,5 +1,5 @@
-The ./platform/$(uname)/bin/ directories can be used for both generating wrapper functions and/or
-for adding to the PATH.  Wrapper functions are safer because their scope is only that of a shell
-process (and its sub-shells).  Adding to the PATH can be useful but is risky because it can affect
-a host's other programs that assume that utilities named the same are the non-GNU default/stock
-variants of that platform and this can alter/break how such programs behave.
+The ./platform/$MY_PLATFORM_OS_VARIANT/bin/ directories can be used for both generating wrapper
+functions and/or for adding to the PATH.  Wrapper functions are safer because their scope is only
+that of a shell process (and its sub-shells).  Adding to the PATH can be useful but is risky
+because it can affect a host's other programs that assume that utilities named the same are the
+non-GNU default/stock variants of that platform and this can alter/break how such programs behave.
