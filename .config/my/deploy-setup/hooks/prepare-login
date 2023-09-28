@@ -41,7 +41,15 @@ function suppress-chattiness
 
     case "$MY_PLATFORM_OS" in
         (FreeBSD)
-            gnu sed -i -s -E -e 's/^.*\bfortune\b.*$/## &/' .login .profile
+            local loginInitFiles=() f
+            for f in .login .profile ; do
+                if [ -r "$f" ] && [ -w "$f" ]; then
+                    loginInitFiles+=("$f")
+                fi
+            done
+            if (( ${#loginInitFiles[@]} >= 1 )); then
+                gnu sed -i -s -E -e 's/^.*\bfortune\b.*$/## &/' "${loginInitFiles[@]}"
+            fi
             ;;
     esac
 }

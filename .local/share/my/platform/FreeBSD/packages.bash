@@ -144,7 +144,9 @@ function _my_freebsd_clone_ports_collection {
 function _my_freebsd_install_ports_collection {
     local - ; set -o nounset
 
-    if ! [ -d /usr/ports ]
+    if ( shopt -s nullglob dotglob
+         local -r portsEntries=(/usr/ports/*)
+         (( ${#portsEntries[@]} == 0 )) )
     then
         if ! is-command-found git ; then
             my-platform-install-packages git || return  # Ensure it's installed.
