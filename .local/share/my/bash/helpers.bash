@@ -172,7 +172,7 @@ function remote-shell
     if [[ "$remoteUrl" =~ ^ssh://[^/]+$ ]]
     then
         # shellcheck disable=SC2029  # Want these expanded client-side.
-        ssh "${sshSepStderr[@]}" "${schemeOpts[@]}" "$remoteUrl" "${cmd[@]}"
+        ssh -t "${sshSepStderr[@]}" "${schemeOpts[@]}" "$remoteUrl" "${cmd[@]}"
 
     elif [[ "$remoteUrl" =~ ^vagrant://([^/]+)$ ]]
     then
