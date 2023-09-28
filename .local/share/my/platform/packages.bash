@@ -8,7 +8,7 @@ source "$(dirname "${BASH_SOURCE[0]}")"/../bash/helpers.bash
 _my_bash_sourced_already local/share/my/platform/packages && return
 
 
-# shellcheck source=./Linux/Ubuntu/packages.bash  #  (Just one of many, to have something.)
+# shellcheck source=./Linux/Debian/packages.bash  #  (Just one of many, to have something.)
 source "$(dirname "${BASH_SOURCE[0]}")"/"$MY_PLATFORM_OS_VARIANT"/packages.bash
 
 

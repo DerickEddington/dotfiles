@@ -8,13 +8,14 @@ source "$(dirname "${BASH_SOURCE[0]}")"/../../../bash/helpers.bash
 
 
 # If already source'd, don't do anything.
-_my_bash_sourced_already local/share/my/platform/Linux/Ubuntu/packages && return
+_my_bash_sourced_already local/share/my/platform/Linux/Debian/packages && return
 
 
-# TODO: _my_llvm_greatest function, and use instead of hard-coded version numbers.
-
-function _my_clangd_greatest {
-    apt-cache search --names-only clangd | grep -E -o '^clangd(-[0-9]+)?' | sort -V | tail -n1
+function _my_greatest_pkg {
+    apt-cache search --names-only "^${1:?}(-[0-9]+)?$"  \
+    | gnu egrep --only-matching "^${1}(-[0-9]+)?"       \
+    | gnu sort --version-sort                           \
+    | std tail -n 1
 }
 
 # Maps my own convention of a package name to its platform-specific package name.
@@ -23,8 +24,8 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
              [bash-completion]=bash-completion
                         [bear]=bear
                        [cargo]=cargo
-                       [clang]=clang-15
-                      [clangd]="$(_my_clangd_greatest)"
+                       [clang]="$(_my_greatest_pkg clang)"
+                      [clangd]="$(_my_greatest_pkg clangd)"
                      [fd-find]=fd-find
                          [gcc]=gcc
                          [git]=git
@@ -48,29 +49,29 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
 # value (an eval'ed command) may be multiple words quoted (e.g. to pass options to a command).
 #
 readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
-                           [:]=true  # Do nothing
-             [bash-completion]=my-apt-install
-                        [bear]=my-apt-install
-                       [cargo]=my-apt-install
-                    [clang-15]=my-apt-install
-    ["$(_my_clangd_greatest)"]=my-apt-install
-                   [coreutils]=my-apt-install
-                     [fd-find]=my-apt-install
-                         [gcc]=my-apt-install
-                         [git]=my-apt-install
-                       [gnupg]=my-apt-install
-                        [htop]=my-apt-install
-                        [most]=my-apt-install
-    [my_bash_history_combiner]="single my-cargo-install-user-local-from-my-repo"
-                        [nano]=my-apt-install
-                     [ripgrep]=my-apt-install
-                       [rustc]=my-apt-install
-                      [screen]=my-apt-install
-                  [util-linux]=my-apt-install
+                               [:]=true  # Do nothing
+                 [bash-completion]=my-apt-install
+                            [bear]=my-apt-install
+                           [cargo]=my-apt-install
+     ["$(_my_greatest_pkg clang)"]=my-apt-install
+    ["$(_my_greatest_pkg clangd)"]=my-apt-install
+                       [coreutils]=my-apt-install
+                         [fd-find]=my-apt-install
+                             [gcc]=my-apt-install
+                             [git]=my-apt-install
+                           [gnupg]=my-apt-install
+                            [htop]=my-apt-install
+                            [most]=my-apt-install
+        [my_bash_history_combiner]="single my-cargo-install-user-local-from-my-repo"
+                            [nano]=my-apt-install
+                         [ripgrep]=my-apt-install
+                           [rustc]=my-apt-install
+                          [screen]=my-apt-install
+                      [util-linux]=my-apt-install
     # TODO: the others
 )
 
-unset -f _my_clangd_greatest
+unset -f _my_greatest_pkg
 
 
 function my-apt-install {
