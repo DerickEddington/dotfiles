@@ -21,6 +21,7 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
              [bash-completion]=bash-completion
                         [bear]=bear
                        [cargo]=rust
+                       [clang]="$(_my_llvm_greatest)"
                       [clangd]="$(_my_llvm_greatest)"
                      [fd-find]=fd-find
                          [gcc]=gcc
