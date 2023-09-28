@@ -86,17 +86,6 @@ is_shell_interactive() {
     esac
 }
 
-if is_shell_interactive ; then
-    :  # Can't change it.  Doing so would break many tab-completion functions' use of it.
-else
-    # Prevent my scripts from using it.  (http://www.etalabs.net/sh_tricks.html)
-    echo() {
-        # shellcheck disable=SC2016
-        error 'Don'\''t use `echo`! It'\''s unportable and unreliable! Use my `println` (etc).'
-        if is_shell_interactive; then return 42; else exit 42; fi
-    }
-fi
-
 # POSIX-Shell-quoted form of arbitrary string (http://www.etalabs.net/sh_tricks.html).
 # (Note: Transformations like Bash's `${var@Q}` or `printf %q` are not suitable for
 # POSIX-Shell-conformance portability, because those can produce forms like `$'...\n...'` which
@@ -202,14 +191,25 @@ prepend_bin_and_subs_to_PATH_if_ok() {
 
 _my_script_prelude() {
     set -e -u  # -o errexit -o nounset
+
     readonly self="$0"  # The same $0 as outside a function.
     selfBase=$(std basename "$self")
     selfDir=$(std dirname "$self")
     selfDirAbs=$(abs_path "$selfDir")
     selfDirNorm=$(norm_abs_path "$selfDirAbs") || true
     readonly selfBase selfDir selfDirAbs selfDirNorm
+
+    # Prevent my scripts from using `echo`.  (http://www.etalabs.net/sh_tricks.html)
+    # shellcheck disable=SC2317
+    echo() {
+        # shellcheck disable=SC2016
+        error 'Don'\''t use `echo`! It'\''s unportable and unreliable! Use my `println` (etc).'
+        if is_shell_interactive; then return 42; else exit 42; fi
+    }
+
     [ "${VERBOSE:=0}" -ge 5 ] && set -x
     [ "${VERBOSE:=0}" -ge 6 ] && set -v
+
     true
 }
 
