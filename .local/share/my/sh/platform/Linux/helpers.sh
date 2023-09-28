@@ -28,8 +28,11 @@ then
     #   Ubuntu/22.04
     #
 # TODO: Is noisy to stderr on NixOS for some reason, when SHELLOPTS=...:emacs:... was exported.
-    eval "MY_PLATFORM_VARIANT=$(lsb_release -s -i)"
-    eval "MY_PLATFORM_VERSION=$(lsb_release -s -r)"
+    eval "MY_PLATFORM_VARIANT=$(lsb_release --id --short)"
+    eval "MY_PLATFORM_VERSION=$(lsb_release --release --short)"
+    if [ "$MY_PLATFORM_VERSION" = "n/a" ]; then
+        eval "MY_PLATFORM_VERSION=$(lsb_release --codename --short)"
+    fi
 fi
 
 readonly MY_PLATFORM_VARIANT MY_PLATFORM_VERSION
