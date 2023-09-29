@@ -99,6 +99,17 @@ function check-can-command-target
     rsh 'true' || error "Cannot execute a simple shell command in the target host!" 5
 }
 
+function has-repo-already
+{
+    if rsh-cd "$targetHomeDirExpr" '[ -e .dotfiles ] || [ -e .git ] || [ -e .git-hidden ]'
+    then
+        println "Info: Already have a repository in $targetHomeDirExpr. Skipping."
+        return 0
+    else
+        return 1
+    fi
+}
+
 function make-bootstrap-dir
 {
     local attempts=5
@@ -175,6 +186,14 @@ function cleanup {
 
 process-vars
 check-can-command-target
-copy-bootstrap-files
-run-bootstrap
-cleanup  # Don't cleanup if anything above fails (`errexit` will cause exit before here, if so).
+
+# Check if we should not do anything.  Doing nothing avoids invoking start0.sh when this script is
+# applied to the same home multiple times (e.g. via a `vagrant up` trigger).
+#
+if has-repo-already ; then
+    exit 0  #  Considered a success.
+else
+    copy-bootstrap-files
+    run-bootstrap
+    cleanup  # Don't cleanup if anything above fails (`errexit` will exit before here, if so).
+fi
