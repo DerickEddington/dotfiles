@@ -15,7 +15,8 @@ readonly topDir
 # Defaults
 
 readonly defaultBootstrapDotfilesRepo=$topDir/.git
-readonly defaultBootstrapDotfilesRefspecs=("HEAD:user/\$USER" "main")  # '$USER' is a placeholder.
+# '$USER' is a placeholder that will be substituted with the target user's name.
+readonly defaultBootstrapDotfilesRefspecs=("HEAD:user/\$USER" "HEAD:deployed-from" "main")
 
 
 # Functions
