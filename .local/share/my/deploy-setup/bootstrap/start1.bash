@@ -87,7 +87,8 @@ function failed-to-dotfiles {
 
 function commit-if-staged
 {
-    if git status --porcelain | std grep -q -E -e '^A ' ; then
+    if git status --porcelain --untracked-files=no --ignored=no | std grep -q -E -e '^[^ ?!] '
+    then
         git commit --message="${1:?}"
     else
         : # Nothing was added, so, to avoid error, do not try to commit.
@@ -125,8 +126,13 @@ function merge-dotfiles
         git checkout "$userBranch"
         git branch --delete --force "$mergeBranch"
     else
+        # Abort to undo merge conflicts, to ensure they can't corrupt files that are needed for
+        # logging-in as the user (e.g. ~/.profile).
         git merge --abort
-        # Leave the $mergeBranch for the user to manually do the merge.
+        # Leave the $mergeBranch (at the same commit as the `preexisting` branch) for the user to
+        # manually do the merge or otherwise resolve.  The user might want to do something
+        # differently than the merge-fetch-checkout-delete approach this function would've done,
+        # which is why we don't do that when continuing after the user manually resolves.
         return 6
     fi
 }
@@ -142,8 +148,6 @@ function hide-dotfiles-gitdir
 
 function install-dotfiles
 {
-    local retCode=0
-
     # Extra check of this, to be safer.
     #
     has-repo-already && return 0  #  Considered a success.
@@ -168,21 +172,26 @@ function install-dotfiles
     # is checked-out.
     #
     merge-dotfiles || {
-        warn "Failed to merge ${userBranch@Q} with preexisting! You should manually do."
-        retCode=7
+        error "Failed to merge ${userBranch@Q} with preexisting! You should manually do."
+        println "Info: When you are done, create (touch) ${topDir@Q}/continue-deploying-setup ."
+        print "Waiting for that ..."
+        until [ -e "$topDir"/continue-deploying-setup ]; do
+            print "."
+            std sleep 5 || true
+        done
+        println ; println "Info: Continuing after presumed manual merge."
+        std rm -f "$topDir"/continue-deploying-setup || true
     }
 
     # Hide ~/.git so that the user's home directory is not seen by Git as a repository most of the
     # time.
     #
     hide-dotfiles-gitdir || failed-to-dotfiles "hide git-dir of" 8
-
-    return $retCode
 }
 
 function prepare-home
 {
-    install-dotfiles || warn "Failed to install ~/.dotfiles completely."
+    install-dotfiles
 
     # Ensure permissions on and in ~/ are good
     #
