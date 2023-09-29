@@ -33,6 +33,7 @@ end
 def setup_my_way(config)
   set_vm_magnitude(config)
   set_trigger_deploy_setup(config)
+ #config.vm.network "public_network"  # Have a bridged interface. Only as public as that is.
 end
 
 def provision_apt_upgrade(vm)
