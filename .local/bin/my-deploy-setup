@@ -20,7 +20,7 @@ fi
 
 readonly defaultDotfilesRepo=$HOME/.dotfiles
 # '$USER' is a placeholder that will be substituted with the target user's name.
-readonly defaultDotfilesRefspecs="HEAD:user/\$USER HEAD:deployed-from main"
+readonly defaultDotfilesRefspecs="HEAD:user/\$USER main"
 
 
 # Functions

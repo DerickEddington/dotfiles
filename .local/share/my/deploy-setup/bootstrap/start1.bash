@@ -16,7 +16,7 @@ readonly topDir
 
 readonly defaultBootstrapDotfilesRepo=$topDir/.git
 # '$USER' is a placeholder that will be substituted with the target user's name.
-readonly defaultBootstrapDotfilesRefspecs=("HEAD:user/\$USER" "HEAD:deployed-from" "main")
+readonly defaultBootstrapDotfilesRefspecs=("HEAD:user/\$USER" "main")
 
 
 # Functions
@@ -121,7 +121,9 @@ function merge-dotfiles
 
     git checkout -b "$mergeBranch"
 
-    if git merge --allow-unrelated-histories --no-edit "$userBranch"
+    git branch deployed-from "$userBranch"
+
+    if git merge --allow-unrelated-histories --no-edit deployed-from
     then
         git fetch --no-write-fetch-head "$GIT_DIR" "$mergeBranch":"$userBranch"
         git checkout "$userBranch"
