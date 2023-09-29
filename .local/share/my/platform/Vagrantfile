@@ -14,10 +14,9 @@ def set_vm_magnitude(config)
     vb.memory = 2 * 1024  # MiB
   end
   # Some boxes' (e.g. freebsd/*) default disk size is too small (or too large) for my needs.
-  # Changing this requires VAGRANT_EXPERIMENTAL="... disks ..." to be set in the environment of
-  # the `vagrant up ...` command executed in the host, because this Vagrant feature is
-  # experimental.
+  ENV['VAGRANT_EXPERIMENTAL'] = "disks"
   config.vm.disk :disk, size: "32GB", primary: true
+  ENV.delete('VAGRANT_EXPERIMENTAL')
 end
 
 def set_trigger_deploy_setup(config)
