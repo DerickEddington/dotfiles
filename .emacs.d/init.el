@@ -13,6 +13,7 @@
                    ;; possibility of loading .elc files instead.
                    "utils"  ;; Should be kept as first
                    "my"     ;; Should be kept as second
+                   "ssh"    ;; Should be kept as third
                    "tramp"
                    "ibuffer"
                   ;"projectile"  ;; Unused currently.
