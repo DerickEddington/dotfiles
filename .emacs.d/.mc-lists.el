@@ -35,6 +35,7 @@
         magit-section-toggle
         markdown-cycle
         markdown-outdent-or-delete
+        query-replace
         sp-backward-delete-char
         sp-backward-kill-word
         sp-backward-sexp
@@ -68,6 +69,7 @@
         handle-switch-frame
         ivy-switch-buffer
         lsp-signature-stop
+        magit-status
         overwrite-mode
         read-only-mode
         suspend-frame
