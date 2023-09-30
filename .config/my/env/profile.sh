@@ -59,6 +59,17 @@ fi
 _my_sh_helpers__finish
 
 
+# Ensure XDG_RUNTIME_DIR is exported
+#
+if [ "${MY_RUNTIME_DIR-}" ]; then
+    if ! [ "${XDG_RUNTIME_DIR-}" ]; then
+        export XDG_RUNTIME_DIR="$MY_RUNTIME_DIR"
+    fi
+else
+    warn "MY_RUNTIME_DIR is undefined!"
+fi
+
+
 if [ "${MY_PLATFORM_VARIANT-}" != NixOS ]; then
 
     export TZ=:US/Pacific  # (The `:` complies with POSIX for implementation-defined manner.)
