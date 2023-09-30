@@ -38,7 +38,7 @@ if (($# == 1)); then
         # of the compilation-units of a program for instrumentation to use just
         # %p.profraw without needing to try to know or involve the program
         # name.)
-        $COVDIR/*.profraw
+        "$COVDIR"/*.profraw
         # Previous outputs of this script that I saved to be merged along with
         # the latest.  Especially helpful when a run crashed without dumping its
         # .profraw, and so its last coverage counters are lost, but I'd also
@@ -47,7 +47,7 @@ if (($# == 1)); then
         # that run's coverage counters, which I rename to .merge.profdata so it
         # will be merged with subsequent runs' so the crashed run's coverage
         # counters are still included.
-        $COVDIR/"$NAME".*.merge.profdata
+        "$COVDIR"/"$NAME".*.merge.profdata
     )
 elif (($# >= 3)); then
     COVDIR="$2"
@@ -60,13 +60,14 @@ fi
 
 
 llvm-profdata merge -sparse "${INPUTS[@]}" \
-              -o $COVDIR/"$NAME".profdata  # (Overwrites any pre-existing.)
+              -o "$COVDIR"/"$NAME".profdata  # (Overwrites any pre-existing.)
 
 ARGS=(
-    -instr-profile=$COVDIR/"$NAME".profdata
+    -instr-profile="$COVDIR"/"$NAME".profdata
     "$BIN"
 )
 if [ -v MY_COV_REPORT_SHOW_OPTS ]; then
+    # shellcheck disable=SC2206  # Want word-splitting and globbing for this.
     SHOW_OPTS=($MY_COV_REPORT_SHOW_OPTS)
 else
     SHOW_OPTS=(
@@ -81,17 +82,17 @@ SHOW_ARGS=(
     "${ARGS[@]}"
 )
 
-llvm-cov show "${SHOW_ARGS[@]}" -format=html > $COVDIR/"$NAME".cov.html
+llvm-cov show "${SHOW_ARGS[@]}" -format=html > "$COVDIR"/"$NAME".cov.html
 
 # For the below, force color, because my usual usage is with stdout as terminal
 # or pager, and even if stdout is redirected I'd probably want the ANSI color
 # escape codes in that too.
 
-if (($VERBOSE >= 2)); then
+if (( VERBOSE >= 2 )); then
     llvm-cov show -use-color "${SHOW_ARGS[@]}"  # Print to stdout.
     println
 fi
 
-if (($VERBOSE >= 1)); then
+if (( VERBOSE >= 1 )); then
     llvm-cov report -use-color "${ARGS[@]}"     # Print to stdout.
 fi

@@ -29,6 +29,7 @@ _my-script-prelude
 if [ $# -ge 1 ]; then
   COMMAND=("$@")
 else
+  # shellcheck disable=SC2206  # Want word-splitting and globbing for this.
   COMMAND=($VISUAL)
 fi;
 
