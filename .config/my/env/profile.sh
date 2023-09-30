@@ -69,6 +69,20 @@ else
     warn "MY_RUNTIME_DIR is undefined!"
 fi
 
+if [ "${XDG_RUNTIME_DIR-}" ]
+then
+    # Directories for control sockets for multiplexed SSH connections.  This must create the
+    # hard-coded directories that ~/.ssh/config uses, and this may create others.
+    # shellcheck disable=SC2043
+    #
+    for _my_control_sockets_subdir in ssh ; do  # (Could add more if needed.)
+        std mkdir -p "$XDG_RUNTIME_DIR"/my/"$_my_control_sockets_subdir"
+    done
+    unset _my_control_sockets_subdir
+else
+    warn "XDG_RUNTIME_DIR is still undefined!"
+fi
+
 
 if [ "${MY_PLATFORM_VARIANT-}" != NixOS ]; then
 
