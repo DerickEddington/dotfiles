@@ -297,7 +297,7 @@
  '(tramp-sh-extra-args
    '(("\\(\\`\\|/\\)bash\\'" . "-noediting -norc -noprofile")
      ("\\(\\`\\|/\\)zsh\\'" . "-f +Z -V")))
- '(tramp-use-ssh-controlmaster-options nil)
+ '(tramp-use-ssh-controlmaster-options t)
  '(vc-directory-exclusion-list (cons "build" vc-directory-exclusion-list))
  '(vc-handled-backends '(Git SVN))
  '(view-read-only t)
