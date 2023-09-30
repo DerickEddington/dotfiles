@@ -285,8 +285,10 @@
  '(tooltip-mode nil)
  '(tramp-auto-save-directory "~/tmp/tramp-auto-save")
  '(tramp-connection-properties
-   (cons
-    '(nil "remote-shell" "bash")
+   (append
+    '((nil "remote-shell" "bash")
+      ("/vagrant:" "remote-shell-login"
+       ("-l")))
     tramp-connection-properties))
  '(tramp-copy-size-limit 2097152)
  '(tramp-default-method "ssh")
