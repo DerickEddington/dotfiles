@@ -45,7 +45,7 @@
  '(diff-default-read-only t)
  '(diff-switches "-u -r")
  '(dired-create-destination-dirs 'ask)
- '(dired-listing-switches "-l -A -h -F")
+ '(dired-listing-switches "-l -A -h -F --group-directories-first")
  '(dired-vc-rename-file t)
  '(eldoc-echo-area-use-multiline-p t)
  '(eldoc-idle-delay 1)
