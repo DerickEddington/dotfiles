@@ -230,7 +230,8 @@ function _remote-shell-specific {
         # We assume whatever remote login-shell supports the common basic shell language of the
         # commands we synthesize here.
         #
-        if remote-shell "$remoteUrl" "cat > $cmdFile" <<< "$shellCmdRm" > /dev/null
+        if remote-shell "$remoteUrl" "cat > $cmdFile" "${schemeOpts[@]}" \
+                        <<< "$shellCmdRm" > /dev/null
         then
             remote-shell "$remoteUrl" "$shell $cmdFile" "${schemeOpts[@]}"
         else

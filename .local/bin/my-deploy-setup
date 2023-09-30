@@ -38,6 +38,7 @@ function process-vars
 function process-args
 {
     targetUrl="${args[0]}"
+    reuseConnOpts=()
     # shellcheck disable=SC2016
     targetHomeDirExpr='"${HOME:?}"'
 
@@ -59,9 +60,26 @@ function process-args
         else
             error "Missing directory name in URL: ${targetUrl@Q}!" 3
         fi
+    else
+        # Reusing the SSH connection, via multiplexing, can greatly speed-up the numerous `ssh`
+        # commands this script does, for some target hosts that are slow at establishing each SSH
+        # connection.  Persistence of the master connection must be done, because each `ssh`
+        # command terminates sequentially, and so persisting the initial connection is needed to
+        # reuse it.  (Note: The length of a control-socket's pathname must be minimized, due to
+        # the size limit of `sockaddr_un.sun_path`.)
+        reuseConnOpts=(
+            -o ControlMaster=auto
+            -o ControlPath="${MY_RUNTIME_DIR:?}"/my/deploy-setup/%C  # (%C is constant-length.)
+            -o ControlPersist=1h  # Just enough for subsequent commands of this script.
+        )
+        std mkdir -p "${MY_RUNTIME_DIR:?}"/my/deploy-setup
+
+        if [[ "$targetUrl" =~ ^vagrant:// ]]; then
+            reuseConnOpts=(-- "${reuseConnOpts[@]}")
+        fi
     fi
 
-    readonly targetUrl targetHomeDirExpr
+    readonly targetUrl targetHomeDirExpr reuseConnOpts
 }
 
 function process-env-vars
@@ -84,11 +102,12 @@ function process-env-vars
 function rsh { rsh-cd . "$@" ;}
 
 function rsh-cd {
+    (( $# == 2 ))
     local shOpts=('set -e;')
     (( VERBOSE >= 5 )) && shOpts+=('set -x;')
     (( VERBOSE >= 6 )) && shOpts+=('set -v;')
 
-    remote-sh-cd "$targetUrl" "$1" "${shOpts[*]} $2" "${@:3}"
+    remote-sh-cd "$targetUrl" "$1" "${shOpts[*]} $2" "${reuseConnOpts[@]}"
 }
 
 function rsh-in-bd { rsh-cd "$(quote "$targetBootstrapDir")" "$@" ;}
