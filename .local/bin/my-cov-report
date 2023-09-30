@@ -1,3 +1,5 @@
+#! /usr/bin/env bash
+
 # A utility to help generate code-coverage reports from the dumps of such data
 # produced by binaries that were built by LLVM (e.g. Clang or Rust) to have such
 # instrumentation.
@@ -10,13 +12,10 @@
 # the same toolchain that was used to build the binaries that are being worked
 # with, and it is the user's responsibility to arrange for the correct version
 # of those to be in the PATH.  (nix-shell can be helpful for this.)
-#
-# (This file is separate from ./cov-report.nix to be easier to edit/maintain and
-# in case executing this directly is ever needed.)
 
-set -o nounset -o errexit
-shopt -s nullglob
-((${VERBOSE:=0} >= 3)) && set -o xtrace
+# shellcheck source=../share/my/bash/helpers.bash
+source "${XDG_DATA_HOME:-$HOME/.local/share}"/my/bash/helpers.bash
+_my-script-prelude
 
 
 BIN="$1"
@@ -55,7 +54,7 @@ elif (($# >= 3)); then
     mkdir -p "$COVDIR"
     INPUTS=("${@:3}")
 else
-    echo "error: invalid arguments" 1>&2
+    error "invalid arguments"
     exit 1
 fi
 
@@ -90,7 +89,7 @@ llvm-cov show "${SHOW_ARGS[@]}" -format=html > $COVDIR/"$NAME".cov.html
 
 if (($VERBOSE >= 2)); then
     llvm-cov show -use-color "${SHOW_ARGS[@]}"  # Print to stdout.
-    echo
+    println
 fi
 
 if (($VERBOSE >= 1)); then
