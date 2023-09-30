@@ -26,9 +26,7 @@ readonly MY_PLATFORM_PACKAGES_DESIRED=(
     ripgrep
     screen
     util-linux  # Needed by _my_lock_combined_histfile to have `flock`.
-    # TODO: more by default in main branch for all users
    #gcc
-    # TODO: more by commented-out possibilities in main branch for all users to choose to uncomment.
 )
 
 

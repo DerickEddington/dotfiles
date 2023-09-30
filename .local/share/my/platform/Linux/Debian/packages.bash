@@ -30,7 +30,7 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
                          [gcc]=gcc
                          [git]=git
                [gnu-coreutils]=coreutils
-                    [gnu-grep]=:  # TODO: Really no apt packages for these?!
+                    [gnu-grep]=:  # Apparently, there are no APT packages for these (?).
                      [gnu-sed]=:
                      [gnu-tar]=:
                        [gnupg]=gnupg
@@ -42,7 +42,6 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
                         [rust]=rustc
                       [screen]=screen
                   [util-linux]=util-linux
-    # TODO: the others
 )
 
 # Maps a platform-specific package name to its platform-specific command for installing it.  Each
@@ -68,7 +67,6 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
                            [rustc]=my-apt-install
                           [screen]=my-apt-install
                       [util-linux]=my-apt-install
-    # TODO: the others
 )
 
 unset -f _my_greatest_pkg

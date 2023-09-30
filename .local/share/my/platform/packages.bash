@@ -1,5 +1,4 @@
-# TODO: describe
-
+# Provides the generic procedures for using each platform's specification of packages to install.
 
 source "$(dirname "${BASH_SOURCE[0]}")"/../bash/helpers.bash
 

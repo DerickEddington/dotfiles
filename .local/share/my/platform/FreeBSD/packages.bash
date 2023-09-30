@@ -40,7 +40,6 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
                         [rust]=rust
                       [screen]=screen
                   [util-linux]=devel/util-linux
-    # TODO: the others
 )
 
 # Maps a platform-specific package name to its platform-specific command for installing it.  Each
@@ -79,7 +78,6 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
                                # arrange some other way(s) to use the util-linux ones by default,
                                # if I want.
             [devel/util-linux]='single my-port-install WITH="CAL FLOCK GETOPT HARDLINK"'
-    # TODO: the others
 )
 
 unset -f _my_llvm_greatest
