@@ -138,6 +138,11 @@ source "${XDG_CONFIG_HOME:-$HOME/.config}"/my/bash/interactive/init.bash
 }
 
 
-change-login-shell-to-bash
-suppress-chattiness
-prepare-shell-init
+if [ "${MY_PLATFORM_VARIANT-}" = NixOS ]
+then
+    :  # Assume that Home Manager and NixOS are being used to configure these aspects elsewise.
+else
+    change-login-shell-to-bash
+    suppress-chattiness
+    prepare-shell-init
+fi

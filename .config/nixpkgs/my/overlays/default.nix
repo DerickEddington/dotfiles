@@ -34,14 +34,17 @@ let
     # usually adds debugging support in its own way, but we want to ensure that only our way is in
     # effect here).  We do not use `self.hello` because that usually is the one from
     # `systemWideOverlays`.
-    (self: super: {
-      my-hello-test = early.myLib.makeHelloTestPkg super;
-    })
+    (self: super:
+      if early.myLib ? makeHelloTestPkg then {
+        my-hello-test = early.myLib.makeHelloTestPkg super;
+      } else {})
   ];
 
-  systemWideOverlays =
-    if early.myLib.nixosConfigLoc.isDefined
-    then import (early.myLib.nixosConfigLoc.dirName + "/nixpkgs/overlays.nix") deps
+  systemWideOverlays = let
+    pathName = early.myLib.nixosConfigLoc.dirName + "/nixpkgs/overlays.nix";
+  in
+    if early.myLib.nixosConfigLoc.isDefined && (builtins.pathExists pathName)
+    then import pathName deps
     else [];
 
   myLibOverlays = [
@@ -60,7 +63,9 @@ let
 
       selection = debuggingSupportFor super;
     in
-      (myLib.pkgWithDebuggingSupport.byMyConfig debuggingSupportConfig).overlayResult selection)
+      if myLib ? pkgWithDebuggingSupport then
+        (myLib.pkgWithDebuggingSupport.byMyConfig debuggingSupportConfig).overlayResult selection
+      else {})
   ];
 
   choicesOverlays = customOverlays ++ debuggingSupportOverlays;

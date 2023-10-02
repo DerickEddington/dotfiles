@@ -12,10 +12,13 @@ let
     sys.myLib =
       if sysWideMyLib != null then
         sysWideMyLib  # Get it as provided by system-wide overlay.
-      else if user.myLib.nixosConfigLoc.isDefined then
-        import (user.myLib.nixosConfigLoc.dirName + "/lib") { inherit pkgs lib; }
-      else
-        null;
+      else let
+        libPathName = user.myLib.nixosConfigLoc.dirName + "/lib";
+      in
+        if user.myLib.nixosConfigLoc.isDefined && (builtins.pathExists libPathName) then
+          import libPathName { inherit pkgs lib; }
+        else
+          null;
 
     user.myLib = {
       # Have what is provided by the other myLib from the host's NixOS-configuration directory.

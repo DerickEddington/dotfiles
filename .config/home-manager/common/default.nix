@@ -4,11 +4,11 @@
 # file, committed to the main branch of the dotfiles repository, if the change
 # should be merged upstream and supplied to all users of the host system.
 
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, nixos-config, ... }:
 
 let
-  inherit (builtins) getEnv;
-  inherit (lib) hm mkDefault mkEnableOption mkIf;
+  inherit (builtins) getEnv pathExists;
+  inherit (lib) hm mkDefault mkEnableOption mkIf optionals;
 in
 
 let
@@ -16,16 +16,25 @@ let
   # (toString avoids the path coercion in antiquotation that would copy to /nix/store/.)
   systemPath = toString /run/current-system/sw;
   userProfilePath = toString ~/.nix-profile;
+
+  early.myLib = import ../../nixpkgs/my/lib { pkgs = null; };
+  inherit (early.myLib) nixosConfigLoc;
+
+  systemWide.debuggingModule.exists =
+    (    nixosConfigLoc.isDefined
+      && (pathExists (nixosConfigLoc.dirName + "/debugging.nix")));
 in
 {
   imports = [
     ./module-args.nix
-    ./debugging.nix
     ./emacs.nix
     ./git-svn.nix
     ./rootless-docker.nix
     ./rust.nix
-  ];
+  ]
+  ++ (optionals systemWide.debuggingModule.exists [
+    ./debugging.nix
+  ]);
 
   options.my = {
     tmpDir = mkEnableOption "`~/tmp` existence";
@@ -73,10 +82,11 @@ in
       # $XDG_CONFIG_HOME/my/bash/interactive/history/ needs this `my-bash_history-combiner`
       # utility.
       (import ../../nixpkgs/my/bash_history-combiner.nix { inherit pkgs; })
-
+    ]
+    ++ (optionals systemWide.debuggingModule.exists [
       # Exercise ../../nixpkgs/my/overlays and its addition of debugging support.
       my-hello-test
-    ];
+    ]);
 
     #---------------------------------------------------------------------------
     # Environment Variables
@@ -253,7 +263,7 @@ in
     # dconf.  Affects GNOME-like desktop environments such as MATE.  The values
     # below were discovered with the CLI tool `dconf dump /`.
     #---------------------------------------------------------------------------
-    dconf.settings = {
+    dconf.settings = mkIf nixos-config.programs.dconf.enable {
 
       "org/mate/power-manager" = {
         action-critical-battery = "suspend";

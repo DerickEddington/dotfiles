@@ -7,7 +7,8 @@
 { config, pkgs, lib, ... }:
 
 let
-  inherit (lib) mkForce;
+  inherit (builtins) pathExists;
+  inherit (lib) mkForce optional;
 in
 
 let
@@ -18,8 +19,9 @@ in
 {
   imports = [
     ./common
-    (./per-host + "/${hostName}")
-  ];
+  ]
+  ++ (let perHostName = ./per-host + "/${hostName}";
+      in optional (pathExists perHostName) perHostName);
 
   # Packages available in per-user profile.
   home.packages = with pkgs; [
