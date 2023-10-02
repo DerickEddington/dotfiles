@@ -1,6 +1,6 @@
 # Provides the generic procedures for using each platform's specification of packages to install.
 
-source "$(dirname "${BASH_SOURCE[0]}")"/../bash/helpers.bash
+source "$(command -p  dirname "${BASH_SOURCE[0]}")"/../bash/helpers.bash
 
 
 # If already source'd, don't do anything.
@@ -8,7 +8,7 @@ _my_bash_sourced_already local/share/my/platform/packages && return
 
 
 # shellcheck source=./Linux/Debian/packages.bash  #  (Just one of many, to have something.)
-source "$(dirname "${BASH_SOURCE[0]}")"/"$MY_PLATFORM_OS_VARIANT"/packages.bash
+source "$(std dirname "${BASH_SOURCE[0]}")"/"$MY_PLATFORM_OS_VARIANT"/packages.bash
 
 
 function my-platform-install-packages

@@ -28,7 +28,7 @@ _my_bash_sourced_already local/share/my/bash/helpers && return
 
 
 # Also provide all of these.
-source "$(command -p dirname "${BASH_SOURCE[0]}")"/../sh/helpers.sh  # (Must be outside any function.)
+source "$(command -p  dirname "${BASH_SOURCE[0]}")"/../sh/helpers.sh  # (Must not be in function.)
 
 
 # For defining functions.  It's assumed that it's OK to redefine functions that didn't use these.

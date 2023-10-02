@@ -4,9 +4,6 @@
 # shellcheck disable=SC2034  # These variables are used by what `source`s this file.
 
 
-source "$(dirname "${BASH_SOURCE[0]}")"/../../../bash/helpers.bash
-
-
 # If already source'd, don't do anything.
 _my_bash_sourced_already local/share/my/platform/Linux/Debian/packages && return
 
