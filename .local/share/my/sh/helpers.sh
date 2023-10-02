@@ -160,33 +160,43 @@ prepend_to_colon_list_var_export() {
     eval "export ${2:?}"
 }
 
-prepend_to_PATH_if_ok() {
+prepend_to_colon_list_var_export_if_ok() {
     if [ -d "${1:?}" ]; then
-        if ! is_in_colon_list "$1" "${PATH-}" ; then
-            prepend_to_colon_list_var_export "$1" PATH
+        if ! eval "is_in_colon_list \"\$1\" \"\${${2:?}-}\"" ; then
+            prepend_to_colon_list_var_export "$1" "$2"
         fi
     fi
+}
+
+prepend_to_PATH_if_ok() {
+    prepend_to_colon_list_var_export_if_ok "${1:?}" PATH
 }
 
 prepend_to_LD_LIBRARY_PATH_if_ok() {
     # This doesn't support "A zero-length directory name indicates the current working directory",
     # because that's Linux-specific.  Instead, give `.` which seems more portable (TODO: this
     # point is untested).
-    if [ -d "${1:?}" ]; then
-        if ! is_in_colon_list "$1" "${LD_LIBRARY_PATH-}" ; then
-            prepend_to_colon_list_var_export "$1" LD_LIBRARY_PATH
-        fi
-    fi
+    prepend_to_colon_list_var_export_if_ok "${1:?}" LD_LIBRARY_PATH
 }
 
-prepend_bin_and_subs_to_PATH_if_ok() {
-    # Include sub-dirs also.  This can be especially convenient for symlink'ing to short-term
-    # manually-built packages, e.g. ~/bin/thing-1.2.3 -> ~/tmp/thing-1.2.3/bin.
-    set -- "${1:?}" "$1"/*
-    while [ $# -ge 1 ]; do
-        prepend_to_PATH_if_ok "$1"
-        shift
+prepend_and_subs_to_colon_list_var_export_if_ok() {
+    prepend_to_colon_list_var_export_if_ok "${1:?}" "${2:?}"
+    # Include sub-dirs also.  This can be especially convenient for symlink'ing like:
+    # ~/bin/thing-0.42 -> ~/tmp/thing-0.42/bin.
+    for subDir in "$1"/* ; do
+        if [ "$(std basename "$subDir")" != "my" ]; then  # Exclude the special `my` sub-dir.
+            prepend_to_colon_list_var_export_if_ok "$subDir" "$2"
+        fi
     done
+    unset subDir
+}
+
+prepend_and_subs_to_PATH_if_ok() {
+    prepend_and_subs_to_colon_list_var_export_if_ok "${1:?}" PATH
+}
+
+prepend_and_subs_to_LD_LIBRARY_PATH_if_ok() {
+    prepend_and_subs_to_colon_list_var_export_if_ok "${1:?}" LD_LIBRARY_PATH
 }
 
 _my_script_prelude() {
@@ -266,16 +276,19 @@ _my_sh_helpers__set_platform_identification()
 
     MY_PLATFORM_OS=$(std uname)       # 1 component. E.g.: Linux, FreeBSD, SunOS, etc.
     MY_PLATFORM_ARCH=$(std uname -m)  # 1 component. E.g.: x86_64, amd64, i86pc, etc.
-    readonly MY_PLATFORM_OS MY_PLATFORM_ARCH
-    assert_nonnull MY_PLATFORM_OS MY_PLATFORM_ARCH
+    MY_PLATFORM_OS_ARCH=$MY_PLATFORM_OS/$MY_PLATFORM_ARCH
+    readonly MY_PLATFORM_OS MY_PLATFORM_ARCH MY_PLATFORM_OS_ARCH
+    assert_nonnull MY_PLATFORM_OS MY_PLATFORM_ARCH MY_PLATFORM_OS_ARCH
 
     # These must be defined by the next `source`:
     #   MY_PLATFORM_VARIANT  # 0 or 1 component. E.g.: Ubuntu, OpenIndiana, or empty for FreeBSD.
-    #   MY_PLATFORM_VERSION  # 1 component. E.g.: 22.04, 13, etc.
+    #   MY_PLATFORM_VERSION  # 1 component. E.g.: 22.04, 13, trixie, etc.
 
     # These will be automatically defined:
-    #   MY_PLATFORM_OS_VARIANT  # 1 or 2 component. E.g.: Linux/Ubuntu, SunOS/OpenIndiana, or FreeBSD.
-    #   MY_PLATFORM_OS_VAR_VER  # 2 or 3 component. E.g.: Linux/Ubuntu/22.04, or FreeBSD/13.
+    #   MY_PLATFORM_OS_VARIANT       # 1,2. E.g.: Linux/Ubuntu, SunOS/OpenIndiana, or FreeBSD.
+    #   MY_PLATFORM_OS_VARIANT_ARCH  # 2,3. E.g.: Linux/Ubuntu/x86_64, or FreeBSD/amd64.
+    #   MY_PLATFORM_OS_VAR_VER       # 2,3. E.g.: Linux/Ubuntu/22.04, or FreeBSD/13.
+    #   MY_PLATFORM_OS_VAR_VER_ARCH  # 3,4. E.g.: Linux/Ubuntu/22.04/x86_64, or FreeBSD/13/amd64.
 
     if [ -e "$MY_DATA_HOME"/my/sh/platform/"$MY_PLATFORM_OS"/helpers.sh ]; then
         # shellcheck source=./platform/Linux/helpers.sh  # (Just one of many, to have something.)
@@ -285,8 +298,12 @@ _my_sh_helpers__set_platform_identification()
     assert_nonnull MY_PLATFORM_VERSION
 
     readonly MY_PLATFORM_OS_VARIANT="$MY_PLATFORM_OS${MY_PLATFORM_VARIANT:+/$MY_PLATFORM_VARIANT}"
-    readonly MY_PLATFORM_OS_VAR_VER="$MY_PLATFORM_OS_VARIANT/$MY_PLATFORM_VERSION"
+    readonly MY_PLATFORM_OS_VAR_VER="$MY_PLATFORM_OS_VARIANT"/"$MY_PLATFORM_VERSION"
     assert_nonnull MY_PLATFORM_OS_VARIANT MY_PLATFORM_OS_VAR_VER
+
+    readonly MY_PLATFORM_OS_VARIANT_ARCH="$MY_PLATFORM_OS_VARIANT"/"$MY_PLATFORM_ARCH"
+    readonly MY_PLATFORM_OS_VAR_VER_ARCH="$MY_PLATFORM_OS_VAR_VER"/"$MY_PLATFORM_ARCH"
+    assert_nonnull MY_PLATFORM_OS_VARIANT_ARCH MY_PLATFORM_OS_VAR_VER_ARCH
 
     if [ "${MY_PLATFORM_VARIANT:-}" ]; then
         if [ -e "$MY_DATA_HOME"/my/sh/platform/"$MY_PLATFORM_OS_VARIANT"/helpers.sh ]; then

@@ -235,7 +235,7 @@
      " " mode-line-modes mode-line-misc-info mode-line-end-spaces))
  '(mode-line-percent-position '(6 "%q"))
  '(my-ibuffer-project-root-regexps
-   '("~/\\.config\\(/my\\)?/[^/]+" "~/.local/bin" "~/.local/share\\(/my\\)?/[^/]+" "~/.local/state\\(/my\\)?/[^/]+" "~/\\.emacs\\.d" "~/\\.ssh" "~/\\.nix-defexpr/channels[^/]*/[^/]+" "~/bin" "\\(.*/\\)?\\.?rustup/toolchains/[^/]+" "\\(.*/\\)?\\.?cargo/registry/src/[^/]+/[^/]+" "~/\\.rustup" "~/\\.cargo" "/boot" "/nix/store/[^/]+" "/nix/var/log/nix/drvs" "/nix/var/nix/profiles/per-user/[^/]+/channels[^/]*/[^/]+" "/nix/var/nix/profiles/per-user/[^/]+/[^/]+" "\\(.*/\\)?src/of-pkg-via-my/(build/)?[^/]+" "\\(.*/\\)?\\(debug\\|\\.build-id\\)" "~/\\.nix-profile/[^/]+"))
+   '("~/\\.config\\(/my\\)?/[^/]+" "~/.local/bin" "~/.local/lib" "~/.local/my/[^/]+" "~/.local/share\\(/my\\)?/[^/]+" "~/.local/state\\(/my\\)?/[^/]+" "~/\\.emacs\\.d" "~/\\.ssh" "~/\\.nix-defexpr/channels[^/]*/[^/]+" "~/bin" "~/lib" "\\(.*/\\)?\\.?rustup/toolchains/[^/]+" "\\(.*/\\)?\\.?cargo/registry/src/[^/]+/[^/]+" "~/\\.rustup" "~/\\.cargo" "/boot" "/nix/store/[^/]+" "/nix/var/log/nix/drvs" "/nix/var/nix/profiles/per-user/[^/]+/channels[^/]*/[^/]+" "/nix/var/nix/profiles/per-user/[^/]+/[^/]+" "\\(.*/\\)?src/of-pkg-via-my/(build/)?[^/]+" "\\(.*/\\)?\\(debug\\|\\.build-id\\)" "~/\\.nix-profile/[^/]+"))
  '(next-error-recenter '(4))
  '(package-archives nil)
  '(parse-sexp-ignore-comments t)

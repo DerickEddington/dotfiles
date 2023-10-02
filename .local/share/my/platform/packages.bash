@@ -115,21 +115,29 @@ function my-cargo-install-user-local
     local -r args=("$@")
     local -r crate="${args[-1]}" opts=("${args[@]:0:${#args[@]}-1}")
     local via=()
+    # (Maintenance: Keep in sync with the pathname scheme that ~/.config/my/env/profile.sh uses.)
+    local -r platspecDir=my/platform/${MY_PLATFORM_OS_VAR_VER_ARCH:?}/installed
+    local -r installDir=${HOME:?}/.local/$platspecDir
 
-    if ! is-command-found cargo ; then
-        my-platform-install-packages rust cargo || return  # Ensure they're installed.
-    fi
+    ( set -o errexit
 
-    case "$crate" in
-        (http*://*) via=(--git) ;;
-        (file:*)    via=(--path) ; crate=${crate#file:} ;;  # TODO: Keep the "file:" prefix?
-        (*:*)       error "Unsupported URI scheme!" ; return 2 ;;
-        (*)         via=() ;;  # From a registry (usually Crates.io).
-    esac
+      if ! is-command-found cargo ; then
+          my-platform-install-packages rust cargo  # Ensure they're installed.
+      fi
 
-    # Install executables into ~/.local/bin/ (the XDG-BDS dir that should already be in PATH).
-    #
-    cargo install --root ~/.local "${opts[@]}" "${via[@]}" "$crate" || return
+      case "$crate" in
+          (http*://*) via=(--git) ;;
+          (file:*)    via=(--path) ; crate=${crate#file:} ;;  # TODO: Keep the "file:" prefix?
+          (*:*)       error "Unsupported URI scheme!" 2 ;;
+          (*)         via=() ;;  # From a registry (usually Crates.io).
+      esac
+
+      # Install binaries into the architecture-specific & platform-specific location.
+      # ~/.config/my/env/profile.sh should configure that's bin/ and lib/ sub-dirs to be in the
+      # PATH and LD_LIBRARY_PATH.
+
+      cargo install --root "$installDir" "${opts[@]}" "${via[@]}" "$crate"
+    )
 }
 
 function my-cargo-install-user-local-from-my-repo

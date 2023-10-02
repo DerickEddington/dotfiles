@@ -46,7 +46,7 @@
 /.gnupg/private*
 /.lesshst
 /.lldb/*history
-/.local/bin/my-bash_history-combiner
+/.local/my/platform/**/installed/bin/my-bash_history-combiner
 /.local/share/*
 !/.local/share/my/
 !/.local/share/rust-script

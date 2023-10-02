@@ -148,13 +148,19 @@ function _my_histfile_combining {
             if is-command-found my-bash_history-combiner ; then
                 # Use it wherever it currently is from.
                 local MY_BASH_HISTORY_COMBINER=my-bash_history-combiner
+
             elif [ "${MY_PLATFORM_VARIANT-}" = NixOS ]; then
-                # When it's not in the PATH (e.g. when inside `nix-shell --pure`), assume it's
-                # here:
+                # When it's not in the PATH (e.g. inside `nix-shell --pure`), assume it's here:
                 local MY_BASH_HISTORY_COMBINER=~/.nix-profile/bin/my-bash_history-combiner
             else
-                # For all other platforms, asssume it's hopefully in the XDG-BDS location:
-                local MY_BASH_HISTORY_COMBINER=~/.local/bin/my-bash_history-combiner
+                # For all other platforms, assume it's hopefully here:
+                if [ "${MY_PLATFORM_OS_VAR_VER_ARCH-}" ]; then
+                    local BIN_DIR=my/platform/$MY_PLATFORM_OS_VAR_VER_ARCH/installed/bin
+                else
+                    # Or in the XDG-BDS location:
+                    local BIN_DIR=bin
+                fi
+                local MY_BASH_HISTORY_COMBINER=~/.local/$BIN_DIR/my-bash_history-combiner
             fi
 
             if ! $MY_BASH_HISTORY_COMBINER "$PREV_COMBINED" "$MY_BASH_SESSION_HISTFILE" \
