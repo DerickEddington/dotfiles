@@ -94,6 +94,28 @@ quote() {
     std printf '%s' "${1:-}" | std sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"
 }
 
+remove_surrounding_quotes() { (
+    it=${1?}
+    case "$it" in
+        (\"*) it=${it#\"} ; it=${it%\"} ;;
+        (\'*) it=${it#\'} ; it=${it%\'} ;;
+    esac
+    print "$it"
+) }
+
+lowercase() {
+    print "${1?}" | std tr '[:upper:]' '[:lower:]'
+}
+
+capitalize() { (
+    it=${1?}
+    # Must give "text" (lines w/ newlines) to `cut`.  Use command substitutions to remove the
+    # trailing newlines.
+    C=$(println "$it" | std cut -c1 | std tr '[:lower:]' '[:upper:]')
+    it=${C}$(println "$it" | std cut -c2-)
+    print "$it"
+) }
+
 abs_path() { ( set -u -e
     case "${1:?}" in
         (/*)
@@ -280,25 +302,29 @@ _my_sh_helpers__set_platform_identification()
     readonly MY_PLATFORM_OS MY_PLATFORM_ARCH MY_PLATFORM_OS_ARCH
     assert_nonnull MY_PLATFORM_OS MY_PLATFORM_ARCH MY_PLATFORM_OS_ARCH
 
+    [ -r /usr/lib/os-release ] && MY_OS_RELEASE_FILE=/usr/lib/os-release
+    [ -r /etc/os-release ]     && MY_OS_RELEASE_FILE=/etc/os-release
+    readonly MY_OS_RELEASE_FILE
+
     # These must be defined by the next `source`:
     #   MY_PLATFORM_VARIANT  # 0 or 1 component. E.g.: Ubuntu, OpenIndiana, or empty for FreeBSD.
-    #   MY_PLATFORM_VERSION  # 1 component. E.g.: 22.04, 13, trixie, etc.
+    #   MY_PLATFORM_VERSION  # 0 or 1 component. E.g.: 22.04, 13, trixie, or empty for Arch Linux.
 
     # These will be automatically defined:
     #   MY_PLATFORM_OS_VARIANT       # 1,2. E.g.: Linux/Ubuntu, SunOS/OpenIndiana, or FreeBSD.
     #   MY_PLATFORM_OS_VARIANT_ARCH  # 2,3. E.g.: Linux/Ubuntu/x86_64, or FreeBSD/amd64.
-    #   MY_PLATFORM_OS_VAR_VER       # 2,3. E.g.: Linux/Ubuntu/22.04, or FreeBSD/13.
-    #   MY_PLATFORM_OS_VAR_VER_ARCH  # 3,4. E.g.: Linux/Ubuntu/22.04/x86_64, or FreeBSD/13/amd64.
+    #   MY_PLATFORM_OS_VAR_VER       # 1,3. E.g.: Linux/Ubuntu/22.04, FreeBSD/13, Linux/Arch.
+    #   MY_PLATFORM_OS_VAR_VER_ARCH  # 2,4. E.g.: Linux/Ubuntu/22.04/x86_64, or FreeBSD/13/amd64.
 
     if [ -e "$MY_DATA_HOME"/my/sh/platform/"$MY_PLATFORM_OS"/helpers.sh ]; then
         # shellcheck source=./platform/Linux/helpers.sh  # (Just one of many, to have something.)
         . "$MY_DATA_HOME"/my/sh/platform/"$MY_PLATFORM_OS"/helpers.sh
     fi
     readonly MY_PLATFORM_VARIANT MY_PLATFORM_VERSION
-    assert_nonnull MY_PLATFORM_VERSION
 
-    readonly MY_PLATFORM_OS_VARIANT="$MY_PLATFORM_OS${MY_PLATFORM_VARIANT:+/$MY_PLATFORM_VARIANT}"
-    readonly MY_PLATFORM_OS_VAR_VER="$MY_PLATFORM_OS_VARIANT"/"$MY_PLATFORM_VERSION"
+    MY_PLATFORM_OS_VARIANT="$MY_PLATFORM_OS${MY_PLATFORM_VARIANT:+/$MY_PLATFORM_VARIANT}"
+    MY_PLATFORM_OS_VAR_VER="$MY_PLATFORM_OS_VARIANT${MY_PLATFORM_VERSION:+/$MY_PLATFORM_VERSION}"
+    readonly MY_PLATFORM_OS_VARIANT MY_PLATFORM_OS_VAR_VER
     assert_nonnull MY_PLATFORM_OS_VARIANT MY_PLATFORM_OS_VAR_VER
 
     readonly MY_PLATFORM_OS_VARIANT_ARCH="$MY_PLATFORM_OS_VARIANT"/"$MY_PLATFORM_ARCH"
@@ -312,9 +338,11 @@ _my_sh_helpers__set_platform_identification()
         fi
     fi
 
-    if [ -e "$MY_DATA_HOME"/my/sh/platform/"$MY_PLATFORM_OS_VAR_VER"/helpers.sh ]; then
-        # shellcheck source=/dev/null  # (Don't care if there isn't one.)
-        . "$MY_DATA_HOME"/my/sh/platform/"$MY_PLATFORM_OS_VAR_VER"/helpers.sh
+    if [ "${MY_PLATFORM_VERSION:-}" ]; then
+        if [ -e "$MY_DATA_HOME"/my/sh/platform/"$MY_PLATFORM_OS_VAR_VER"/helpers.sh ]; then
+            # shellcheck source=/dev/null  # (Don't care if there isn't one.)
+            . "$MY_DATA_HOME"/my/sh/platform/"$MY_PLATFORM_OS_VAR_VER"/helpers.sh
+        fi
     fi
 }
 
@@ -323,6 +351,64 @@ _my_sh_helpers__finish() {
         _my_sh_helpers__set_XDG_BDS
         _my_sh_helpers__set_platform_identification
         _MY_SH_HELPERS__IS_FINISHED=true
+    fi
+}
+
+_my_set_id_and_version_from_os_release_file()
+{
+    # This is a reusable helper, because OSs other than Linux+systemd, e.g. FreeBSD, sometimes
+    # also support the `os-release` file.  Note that for some, e.g. FreeBSD, the $ID is the same
+    # as $MY_PLATFORM_OS and so uses of this function for such must adjust for this (e.g. by
+    # ignoring MY_OS_RELEASE_ID, not using it for MY_PLATFORM_VARIANT, but using
+    # MY_OS_RELEASE_VERSION for MY_PLATFORM_VERSION).
+
+    if [ "${MY_OS_RELEASE_FILE-}" ]
+    then
+        _MY_OS_RELEASE_ID=$(
+            unset ID NAME
+
+            # shellcheck source=/etc/os-release
+            . "$MY_OS_RELEASE_FILE" > /dev/null
+
+            if [ "${NAME-}" ]; then
+                NAME=${NAME%% *}  # Keep only the first word.
+            fi
+            if [ "${ID-}" ]; then
+                # If NAME is set, its first word, if the same as $ID case-insensitively, probably
+                # has better casing than ID capitalized (e.g. "NixOS" versus "Nixos").
+                if [ "$(lowercase "${NAME-}")" = "$(lowercase "$ID")" ]; then
+                    ID=$NAME
+                fi
+            elif [ "${NAME-}" ]; then
+                ID=$NAME
+            fi
+
+            if [ "${ID-}" ]; then
+                print "$(capitalize "$ID")"
+            fi
+        )
+
+        _MY_OS_RELEASE_VERSION=$(
+            unset VERSION_ID VERSION_CODENAME
+
+            # shellcheck source=/etc/os-release
+            . "$MY_OS_RELEASE_FILE" > /dev/null
+
+            if [ "${VERSION_ID-}" ]; then
+                print "$VERSION_ID"
+            elif [ "${VERSION_CODENAME-}" ]; then
+                print "$VERSION_CODENAME"
+            fi
+        )
+
+        # The caller chooses which variables to assign these to.
+        #
+        eval "${1:?}=$(quote "$_MY_OS_RELEASE_ID")"
+        eval "${2:?}=$(quote "$_MY_OS_RELEASE_VERSION")"
+
+        unset _MY_OS_RELEASE_ID _MY_OS_RELEASE_VERSION
+    else
+        return 1
     fi
 }
 

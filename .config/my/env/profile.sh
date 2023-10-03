@@ -180,7 +180,8 @@ else
             prepend_and_subs_to_LD_LIBRARY_PATH_if_ok "$HOME"/lib/"$_my_platspec"/lib
 
             # Further customization of platform-specific and architecture-specific aspects of the
-            # user's environment.
+            # user's environment.  These should guard against the possibility of being source'd
+            # multiple times.
             #
             _my_platspec_profile="$MY_CONFIG_HOME"/my/env/platform/"$_my_platform_id"/profile.sh
             if [ -f "$_my_platspec_profile" ]; then

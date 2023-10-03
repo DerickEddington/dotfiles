@@ -10,32 +10,36 @@ _MY_SH_SOURCED_ALREADY__PLATFORM_OS_HELPERS=true
 
 # Platform-specific identification
 
-if is_command_found lsb_release
+if [ "${MY_OS_RELEASE_FILE-}" ]
 then
-    # TODO: Maybe there's a better/safer way that does not use `eval`?
-    # Use `eval` to remove any quote syntax that some platforms output.
+    _my_set_id_and_version_from_os_release_file MY_PLATFORM_VARIANT MY_PLATFORM_VERSION
+
+elif is_command_found lsb_release
+then
+    MY_PLATFORM_VARIANT=$(lsb_release --id --short)
+    MY_PLATFORM_VERSION=$(lsb_release --release --short)
+    if [ "$MY_PLATFORM_VERSION" = "n/a" ]; then
+        MY_PLATFORM_VERSION=$(lsb_release --codename --short)
+    fi
+
+    # Must remove any quotes that some platforms output.
     # E.g.:
     #   $ println "$(lsb_release -s -i)/$(lsb_release -s -r)"
     #   "NixOS"/"23.05"
     # Versus:
     #   $ println "$(lsb_release -s -i)/$(lsb_release -s -r)"
     #   Ubuntu/22.04
-    # Whereas:
-    #   $ eval "println $(lsb_release -s -i)/$(lsb_release -s -r)"
-    #   NixOS/23.05
-    # And:
-    #   $ eval "println $(lsb_release -s -i)/$(lsb_release -s -r)"
-    #   Ubuntu/22.04
     #
-# TODO: Is noisy to stderr on NixOS for some reason, when SHELLOPTS=...:emacs:... was exported.
-    eval "MY_PLATFORM_VARIANT=$(lsb_release --id --short)"
-    eval "MY_PLATFORM_VERSION=$(lsb_release --release --short)"
-    if [ "$MY_PLATFORM_VERSION" = "n/a" ]; then
-        eval "MY_PLATFORM_VERSION=$(lsb_release --codename --short)"
-    fi
+    MY_PLATFORM_VARIANT=$(remove_surrounding_quotes "$MY_PLATFORM_VARIANT")
+    MY_PLATFORM_VERSION=$(remove_surrounding_quotes "$MY_PLATFORM_VERSION")
 fi
 
 readonly MY_PLATFORM_VARIANT MY_PLATFORM_VERSION
+
+if ! [ "${MY_PLATFORM_VARIANT-}" ] && ! [ "${MY_PLATFORM_VERSION-}" ]
+then
+    warn "Don't know how to further identify this $MY_PLATFORM_OS platform!"
+fi
 
 
 # Functions
