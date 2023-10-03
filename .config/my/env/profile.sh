@@ -107,7 +107,7 @@ if [ "${MY_PLATFORM_VARIANT-}" = NixOS ]
 then
     :  # Assume that Home Manager and NixOS are being used to configure these aspects elsewise.
 else
-    export TZ=:US/Pacific  # (The `:` complies with POSIX for implementation-defined manner.)
+    export TZ=:America/Los_Angeles  # (The `:` complies with POSIX for implementation-defined.)
 
     if is_command_found emacs ; then
         export EDITOR='emacs --no-window-system'
