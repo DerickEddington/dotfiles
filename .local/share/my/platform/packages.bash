@@ -119,13 +119,26 @@ function my-cargo-install-user-local
     local -r crate="${args[-1]}" opts=("${args[@]:0:${#args[@]}-1}")
     local via=()
     # (Maintenance: Keep in sync with the pathname scheme that ~/.config/my/env/profile.sh uses.)
-    local -r platspecDir=my/platform/${MY_PLATFORM_OS_VAR_VER_ARCH:?}/installed
-    local -r installDir=${HOME:?}/.local/$platspecDir
+    local -r platspecDir=my/platform/${MY_PLATFORM_OS_VAR_VER_ARCH:?}
+    local -r installDir=${HOME:?}/.local/$platspecDir/installed
 
     ( set -o errexit
 
       if ! is-command-found cargo ; then
-          my-platform-install-packages rust cargo  # Ensure they're installed.
+          # Ensure Rust & Cargo are installed.
+          my-platform-install-packages rust cargo  # (Ignores as success, if couldn't install.)
+          if ! is-command-found cargo ; then
+              if my-install-rustup "$installDir" ; then
+                  if ! is-command-found cargo ; then
+                      prepend_to_PATH_if_ok "$installDir"/bin
+                  fi
+              else
+                  warn "Failed to install RustUp (as fallback)!"
+              fi
+          fi
+          if ! is-command-found cargo ; then
+              warn "\`cargo\` still not in PATH!"
+          fi
       fi
 
       case "$crate" in
@@ -157,4 +170,58 @@ function my-cargo-install-user-local-from-my-repo
     local -r crate=$MY_PERSONAL_GIT_REPOSITORY/$(printf "%s.git" "$specName")
 
     my-cargo-install-user-local "${opts[@]}" "$crate"
+}
+
+function my-install-rustup
+{
+    # The advantage of installing Rust & Cargo this way is that it doesn't require superuser
+    # privilege.  (That is why this doesn't try to install a host system's `rustup` package.)
+
+    if [ "${1-}" ]; then
+        local -r installDir=$1
+    else
+        # (Maintenance: Keep in sync with the scheme that ~/.config/my/env/profile.sh uses.)
+        local -r platspecDir=my/platform/${MY_PLATFORM_OS_VAR_VER_ARCH:?}
+        local -r installDir=${HOME:?}/.local/$platspecDir/installed
+    fi
+    # You may provide this as an environment variable.  E.g. a pre-downloaded `rustup-init`
+    # executable, which can be useful when without network.  Or e.g. some other version of the
+    # Shell script that downloads `rustup-init` like `sh.rustup.rs` does.
+    local installer=${MY_RUSTUP_INSTALLER-}
+    local -r installArgs=(-y --default-toolchain stable --profile minimal --no-modify-path)
+    local -r rustupURL=https://sh.rustup.rs
+    local invoke=()
+
+    ( set -o errexit
+
+      if ! [ "$installer" ]; then
+          installer=${MY_RUNTIME_DIR:?}/my/rustup.sh
+          std mkdir -p "$(std dirname "$installer")"
+          _my-download-https "$rustupURL" > "$installer" || error "Failed to download RustUp!" 1
+          std chmod a-x "$installer"
+      fi
+      if ! [ -x "$installer" ]; then invoke=(std sh); fi
+
+      # CARGO_HOME is just to capture its bin/* next.
+      # CARGO_INSTALL_ROOT is pointless as of 2023-10-03, but for the future?
+      CARGO_HOME=$installDir/cargo      \
+      CARGO_INSTALL_ROOT=$installDir    \
+          "${invoke[@]}" "$installer" "${installArgs[@]}"
+
+      # Place RustUp's proxy executables according to my scheme (which will be automatically added
+      # to PATH), because these are OS-specific, sometimes platform-variant-specific, and
+      # architecture-specific.  But CARGO_HOME and RUSTUP_HOME are not specific, so let them
+      # default to ~/.cargo/ and ~/.rustup/ so they can be shared when $HOME is used across
+      # multiple hosts.
+      #
+      std mkdir -p "$installDir"/bin
+      std mv "$installDir"/cargo/bin/* "$installDir"/bin/
+      std rm -r -f "$installDir"/cargo
+
+      if ! [ -L ~/.rustup/toolchains ] \
+      && ! std grep -q -s -E -e '^/.rustup/toolchains/' ~/.gitignore
+      then
+          println $'# Added by my-install-rustup\n/.rustup/toolchains/' >> ~/.gitignore
+      fi
+    )
 }

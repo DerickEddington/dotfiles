@@ -121,6 +121,13 @@ else
         export PAGER=most
     fi
 
+    # What `cargo install` installs is OS-specific, sometimes platform-variant-specific, and
+    # architecture-specific, so place such according to my scheme (which will be automatically
+    # added to PATH).  But CARGO_HOME and RUSTUP_HOME are not specific, so let them default to
+    # ~/.cargo/ and ~/.rustup/ so they can be shared when $HOME is used across multiple hosts.
+    #
+    export CARGO_INSTALL_ROOT="$HOME"/.local/my/platform/"$MY_PLATFORM_OS_VAR_VER_ARCH"/installed
+
     # Platform-specific and architecture-specific aspects.  This is all ordered intentionally, so
     # that more-specific platform-delegation can take precedence, and so that
     # architecture-specific can take precedence, and so that user-customization can take
@@ -163,7 +170,7 @@ else
             # variants, versions, and architectures), and we can't control what names arbitrary
             # installers will create in a base destination.  (These are under ~/.local/ because
             # these are for the same purpose as that.)  (Maintenance: Keep in sync with:
-            # my-cargo-install-user-local.)
+            # my-cargo-install-user-local, my-install-rustup.)
             #
             prepend_to_PATH_if_ok            "$HOME"/.local/"$_my_platspec"/installed/bin
             prepend_to_LD_LIBRARY_PATH_if_ok "$HOME"/.local/"$_my_platspec"/installed/lib

@@ -46,7 +46,11 @@
 /.gnupg/private*
 /.lesshst
 /.lldb/*history
+/.local/my/platform/**/installed/bin/cargo*
+/.local/my/platform/**/installed/bin/clippy*
 /.local/my/platform/**/installed/bin/my-bash_history-combiner
+/.local/my/platform/**/installed/bin/rls*
+/.local/my/platform/**/installed/bin/rust*
 /.local/share/*
 !/.local/share/my/
 !/.local/share/rust-script

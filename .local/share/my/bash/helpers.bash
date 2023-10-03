@@ -294,6 +294,23 @@ function append-to-file {
 }
 declare-function-readonly append-to-file
 
+function _my-download-https
+{
+    # Write to standard output the content of a fetched HTTPS URL.
+    local -r url=${1:?}
+
+    if is-command-found curl ; then
+        local -r download=(curl --proto '=https' --tlsv1.2 --fail --silent --show-error)
+    elif is-command-found wget ; then
+        local -r download=(wget --https-only --secure-protocol=TLSv1_2 --no-verbose -O -)
+    else
+        error "Can't find a tool to download with!"
+        return 1
+    fi
+
+    "${download[@]}" "$url"
+}
+
 function git-clone-into-nonempty
 {
     local - ; set -o nounset
