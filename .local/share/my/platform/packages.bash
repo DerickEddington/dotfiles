@@ -101,7 +101,10 @@ function my-platform-install-packages
               # Method commands are `eval`ed because this enables them to use Shell syntax
               # (e.g. for quoting their options).
               #
-              eval "$cmd" || warn "Package installation failed: ${cmd@Q}. Ignoring."
+              eval "$cmd" || {
+                  cmd=$(eval print "$cmd")  # To show the expanded command.
+                  warn "Package installation failed: ${cmd@Q}. Ignoring."
+              }
           done
       done
     )
