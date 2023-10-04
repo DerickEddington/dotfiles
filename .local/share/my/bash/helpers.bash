@@ -10,10 +10,9 @@ if ! declare -g -p -F _my_bash_sourced_already >& /dev/null  # Not defined yet.
 then
     function _my_bash_sourced_already
     {
-        local - ; set -o nounset -o errexit
-        declare -g -A _MY_BASH_SOURCED_ALREADY
+        declare -g -A _MY_BASH_SOURCED_ALREADY || exit
 
-        if [[ -v _MY_BASH_SOURCED_ALREADY["$1"] ]]; then
+        if [[ -v _MY_BASH_SOURCED_ALREADY["${1:?}"] ]]; then
             return 0  # Enables `_my_bash_sourced_already ... && return` to return 0.
         else
             # Set immediately, to avoid the possibility of recursive source'ing.
@@ -21,7 +20,7 @@ then
         fi
         return 1
     }
-    declare -g -f -r _my_bash_sourced_already || return  # Make it readonly.
+    declare -g -f -r _my_bash_sourced_already || exit  # Make it readonly.
 fi
 
 _my_bash_sourced_already local/share/my/bash/helpers && return
@@ -35,8 +34,7 @@ source "$(command -p  dirname "${BASH_SOURCE[0]}")"/../sh/helpers.sh  # (Must no
 
 ! declare -g -p -F is-function-def >& /dev/null || return  # Must not be defined yet.
 function is-function-def {
-    local - ; set -o nounset -o errexit
-    declare -g -p -F -- "$1" >& /dev/null || return
+    declare -g -p -F -- "${1:?}" >& /dev/null || return
 }
 
 ! is-function-def is-function-undef || return
@@ -46,14 +44,12 @@ function is-function-undef {
 
 is-function-undef declare-function-readonly-lax || return
 function declare-function-readonly-lax {
-    local - ; set -o nounset -o errexit
-    declare -g -f -r -- "$1" || return
+    declare -g -f -r -- "${1:?}" || return
 }
 
 is-function-undef declare-function-readonly || return
 function declare-function-readonly {
-    local - ; set -o nounset -o errexit
-    declare-function-readonly-lax "$@"  # Exit on error.
+    declare-function-readonly-lax "$@" || exit
 }
 
 declare-function-readonly is-function-def

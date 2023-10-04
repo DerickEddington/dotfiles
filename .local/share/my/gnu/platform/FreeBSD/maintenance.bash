@@ -7,13 +7,13 @@ function _my_freebsd_populate_gnu_utils_unprefixed
 {
     local destDir=${1:-./gnu/bin}
 
-    ( shopt -s extglob nullglob ; set -o errexit
+    ( shopt -s extglob nullglob
 
       # Setup the GNU utilities for use by their normal non-prefixed names.
 
       # These are all installed with each of their utils prefixed with "g" or "gnu".
       local -r gnuUtilsPkgs=(coreutils gsed gtar gnugrep)
-      sudo pkg install --yes "${gnuUtilsPkgs[@]}"
+      sudo pkg install --yes "${gnuUtilsPkgs[@]}" || exit
 
       # Must exclude others that happen to also start with "g" (e.g. git, gettext).  At a
       # very-early stage of setting-up a fresh host, there shouldn't be any others in
@@ -27,25 +27,25 @@ function _my_freebsd_populate_gnu_utils_unprefixed
       local -r gnuPrefixed=(/usr/local/bin/gnustat)
 
       # A directory to have them without the prefix.
-      mkdir -p "$destDir"
-      ( cd "$destDir"
+      mkdir -p "$destDir" || exit
+      ( cd "$destDir" || exit
         println "Setting-up $destDir"
 
         # Symlink them from our dir as their non-prefixed names.
         local gUtil
         for gUtil in "${gPrefixed[@]}"; do
-            ln -s "$gUtil" "${gUtil#/usr/local/bin/g}"
+            ln -s "$gUtil" "${gUtil#/usr/local/bin/g}" || exit
         done
         for gUtil in "${gnuPrefixed[@]}"; do
-            ln -s "$gUtil" "${gUtil#/usr/local/bin/gnu}"
+            ln -s "$gUtil" "${gUtil#/usr/local/bin/gnu}" || exit
         done
 
         local -r exclude=(
           # env  # If destDir is added to PATH, this causes problems with pkg.
         )
         for gUtil in "${exclude[@]}"; do
-            rm "$gUtil"
+            rm "$gUtil" || exit
         done
-      )
+      ) || exit
     ) || return
 }

@@ -32,7 +32,7 @@ function prepare-home-manager
     # ~/.local/share/my/platform/Linux/NixOS/packages.bash (typically by ./install-packages by
     # ~/.local/share/my/deploy-setup/bootstrap/start1.bash).
 
-    [[ "$(nixos-version)" =~ ^([[:digit:]]+\.[[:digit:]]+) ]]  # errexit on fail
+    [[ "$(nixos-version)" =~ ^([[:digit:]]+\.[[:digit:]]+) ]] || return
     local -r nixOSver=${BASH_REMATCH[1]}
     local -r repo=https://github.com/nix-community/home-manager
     local -r URL=$repo/archive/release-$nixOSver.tar.gz

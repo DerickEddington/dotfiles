@@ -102,7 +102,7 @@ function process-env-vars
 function rsh { rsh-cd . "$@" ;}
 
 function rsh-cd {
-    (( $# == 2 ))
+    (( $# == 2 )) || exit
     local shOpts=('set -e;')
     (( VERBOSE >= 5 )) && shOpts+=('set -x;')
     (( VERBOSE >= 6 )) && shOpts+=('set -v;')
