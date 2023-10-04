@@ -86,6 +86,10 @@ is_shell_interactive() {
     esac
 }
 
+is_stdin_a_tty() {
+    std tty > /dev/null
+}
+
 # POSIX-Shell-quoted form of arbitrary string (http://www.etalabs.net/sh_tricks.html).
 # (Note: Transformations like Bash's `${var@Q}` or `printf %q` are not suitable for
 # POSIX-Shell-conformance portability, because those can produce forms like `$'...\n...'` which

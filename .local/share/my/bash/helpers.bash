@@ -163,17 +163,19 @@ function remote-shell
     else
         local -r cmd=()
     fi
+    if is_stdin_a_tty ; then local -r sshReqTTY=(-t); else local -r sshReqTTY=(); fi
     local -r sshSepStderr=(${MY_REMOTE_SHELL__SEPARATE_STDERR+-T})
 
     if [[ "$remoteUrl" =~ ^ssh://[^/]+$ ]]
     then
         # shellcheck disable=SC2029  # Want these expanded client-side.
-        ssh -t "${sshSepStderr[@]}" "${schemeOpts[@]}" "$remoteUrl" "${cmd[@]}"
+        ssh -o LogLevel=ERROR "${sshReqTTY[@]}" "${sshSepStderr[@]}" "${schemeOpts[@]}" \
+            "$remoteUrl" "${cmd[@]}"
 
     elif [[ "$remoteUrl" =~ ^vagrant://([^/]+)$ ]]
     then
         local -r machine=${BASH_REMATCH[1]}
-        local i vagOpts=() sshOpts=(-- "${sshSepStderr[@]}")
+        local i vagOpts=() sshOpts=(-- "${sshSepStderr[@]}")  # (`vagrant ssh` does -t as needed.)
 
         if (( ${#cmd[@]} >= 1 )); then
             vagOpts+=(-c "${cmd[*]}")

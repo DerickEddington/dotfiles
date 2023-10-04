@@ -96,7 +96,10 @@ function process-env-vars
     dotfilesRefspecs=${MY_DEPLOY_SETUP_DOTFILES_FROM_REFSPECS:-$defaultDotfilesRefspecs}
     split-on-words "$dotfilesRefspecs" dotfilesRefspecs
 
-    readonly localDotfilesRepo dotfilesRefspecs
+    extraConnMethodOpts=${MY_DEPLOY_SETUP_EXTRA_CONN_METHOD_OPTS-}
+    split-on-words "$extraConnMethodOpts" extraConnMethodOpts
+
+    readonly localDotfilesRepo dotfilesRefspecs extraConnMethodOpts
 }
 
 function rsh { rsh-cd . "$@" ;}
@@ -107,7 +110,8 @@ function rsh-cd {
     (( VERBOSE >= 5 )) && shOpts+=('set -x;')
     (( VERBOSE >= 6 )) && shOpts+=('set -v;')
 
-    remote-sh-cd "$targetUrl" "$1" "${shOpts[*]} $2" "${reuseConnOpts[@]}"
+    remote-sh-cd "$targetUrl" "$1" "${shOpts[*]} $2" \
+                 "${reuseConnOpts[@]}" "${extraConnMethodOpts[@]}"
 }
 
 function rsh-in-bd { rsh-cd "$(quote "$targetBootstrapDir")" "$@" ;}
