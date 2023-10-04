@@ -26,12 +26,19 @@ function change-login-shell-to-bash
     if [ "$(std basename "$currentLoginShell")" != bash ]
     then
         local bashExec userName
-        bashExec=$(command -v bash || command -p -v bash)  # Whatever is found in the PATH.
-        userName=$(std logname || std id -u -n)  # (Must not be the user ID number.)
+        # Whatever is found in the PATH, or fallback attempt.
+        bashExec=$(command -v bash || command -p -v bash || print bash) || return
+        userName=$(std logname || std id -u -n) || return  # (Must not be the user ID number.)
 
         # Hopefully, this `chsh` is portable enough? (https://en.wikipedia.org/wiki/Chsh)
         #
-        sudo chsh -s "$bashExec" "$userName" || warn "Failed to change login shell to Bash."
+        local -r cmd=(chsh -s "$bashExec")  # Usually asks for the user's password.
+        local -r sudoCmd=(sudo "${cmd[@]}" "$userName")  # Prefer this, to try to avoid asking.
+
+        if is-command-found sudo
+        then "${sudoCmd[@]}" || "${cmd[@]}"
+        else "${cmd[@]}"
+        fi || warn "Failed to change login shell to Bash."
     fi
 }
 
@@ -48,7 +55,10 @@ function suppress-chattiness
                 fi
             done
             if (( ${#loginInitFiles[@]} >= 1 )); then
-                gnu sed -i -s -E -e 's/^.*\bfortune\b.*$/## &/' "${loginInitFiles[@]}"
+                # Don't display a random "fortune cookie" on each login.  Comment-out that.
+                local -r sedScript='s/^([^#]+[[:<:]])?fortune([[:>:]].+)?$/## &/'
+                # (Use FreeBSD's `sed`, in case GNU's failed to be installed.)
+                std sed -i '' -E -e "$sedScript" "${loginInitFiles[@]}" || true
             fi
             ;;
     esac
