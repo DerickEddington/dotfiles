@@ -102,7 +102,7 @@ function my-platform-install-packages
               # (e.g. for quoting their options).
               #
               eval "$cmd" || {
-                  cmd=$(eval print "$cmd")  # To show the expanded command.
+                  cmd=$(eval "print $cmd")  # To show the expanded command.
                   warn "Package installation failed: ${cmd@Q}. Ignoring."
               }
           done
@@ -124,7 +124,7 @@ function my-cargo-install-user-local
 
     if ! is-command-found cargo ; then
         # Ensure Rust & Cargo are installed.
-        my-platform-install-packages rust cargo  # (Ignores as success, if couldn't install.)
+        my-platform-install-packages rust cargo  # (Ignores if couldn't install.)
         if ! is-command-found cargo ; then
             if my-install-rustup "$installDir" ; then
                 if ! is-command-found cargo ; then
