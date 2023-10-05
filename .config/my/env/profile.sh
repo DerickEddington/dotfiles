@@ -120,84 +120,84 @@ else
     if is_command_found most ; then
         export PAGER=most
     fi
-
-    # What `cargo install` installs is OS-specific, sometimes platform-variant-specific, and
-    # architecture-specific, so place such according to my scheme (which will be automatically
-    # added to PATH).  But CARGO_HOME and RUSTUP_HOME are not specific, so let them default to
-    # ~/.cargo/ and ~/.rustup/ so they can be shared when $HOME is used across multiple hosts.
-    #
-    export CARGO_INSTALL_ROOT="$HOME"/.local/my/platform/"$MY_PLATFORM_OS_VAR_VER_ARCH"/installed
-
-    # Platform-specific and architecture-specific aspects.  This is all ordered intentionally, so
-    # that more-specific platform-delegation can take precedence, and so that
-    # architecture-specific can take precedence, and so that user-customization can take
-    # precedence, and so that further sub-profile.sh files can modify those.  (Maintenance: Keep
-    # in sync with MY_PLATFORM_IDS in helpers.bash.)
-    #
-    for _my_platform_id in                                              \
-        "${MY_PLATFORM_OS-}"         "${MY_PLATFORM_OS_ARCH-}"          \
-        "${MY_PLATFORM_OS_VARIANT-}" "${MY_PLATFORM_OS_VARIANT_ARCH-}"  \
-        "${MY_PLATFORM_OS_VAR_VER-}" "${MY_PLATFORM_OS_VAR_VER_ARCH-}"
-    do
-        if [ "$_my_platform_id" ]; then
-
-            # If Emacs' TRAMP is getting my user's environment
-            #
-            case "${INSIDE_EMACS-}" in
-                (*tramp*)
-                    # Include the GNU utilities in PATH, because my TRAMP configuration assumes
-                    # these, and TRAMP cannot use my other wrapper shell functions for these.
-                    #
-                    prepend_to_PATH_if_ok "$MY_DATA_HOME"/my/gnu/platform/"$_my_platform_id"/bin
-                    ;;
-            esac
-
-            # Locate a user's (platform-specific and architecture-specific) binaries under this
-            # pathname scheme, because the `my` prefix helps avoid name conflicts in the various
-            # parent directories, since those directories may also be used by arbitrary other
-            # things to contain arbitrary other names.
-            #
-            _my_platspec=my/platform/"$_my_platform_id"
-
-            # Locations for executables & libraries of user-installed (platform-specific and
-            # architecture-specific) applications and facilities that should be considered as
-            # being in the ambient environment (i.e. not as something the user is frequently
-            # making changes to nor wants to see usually).  Note: this can be an easy base
-            # destination for installers (e.g. those that can take something like:
-            # --exec-prefix=~/.local/my/platform/Linux/Ubuntu/22.04/x86_64/installed).  The
-            # `installed` suffix helps avoid name conflicts in the nested platform directories,
-            # since those directories may also contain arbitrary other names (for platform
-            # variants, versions, and architectures), and we can't control what names arbitrary
-            # installers will create in a base destination.  (These are under ~/.local/ because
-            # these are for the same purpose as that.)  (Maintenance: Keep in sync with:
-            # my-cargo-install-user-local, my-install-rustup.)
-            #
-            prepend_to_PATH_if_ok            "$HOME"/.local/"$_my_platspec"/installed/bin
-            prepend_to_LD_LIBRARY_PATH_if_ok "$HOME"/.local/"$_my_platspec"/installed/lib
-
-            # Locations for executables & libraries (platform-specific and architecture-specific)
-            # as customized by the user.  The `bin` and `lib` suffixes are very unlikely to ever
-            # conflict with the name of a platform variant, version, or architecture.  (These are
-            # under ~/bin/ & ~/lib/ because these are for the same purpose as those.)  Including
-            # the sub-directories can be especially convenient for symlink'ing like:
-
-            # ~/lib/my/platform/Linux/lib/acme-3.2.1 -> ~/tmp/acme-3.2.1/lib
-            #
-            prepend_and_subs_to_PATH_if_ok            "$HOME"/bin/"$_my_platspec"/bin
-            prepend_and_subs_to_LD_LIBRARY_PATH_if_ok "$HOME"/lib/"$_my_platspec"/lib
-
-            # Further customization of platform-specific and architecture-specific aspects of the
-            # user's environment.  These should guard against the possibility of being source'd
-            # multiple times.
-            #
-            _my_platspec_profile="$MY_CONFIG_HOME"/my/env/platform/"$_my_platform_id"/profile.sh
-            if [ -f "$_my_platspec_profile" ]; then
-                # shellcheck source=/dev/null  # (Don't care if there isn't one.)
-                . "$_my_platspec_profile"
-            fi
-        fi
-    done
-    unset _my_platform_id _my_platspec _my_platspec_profile
-
-    export PATH
 fi
+
+# What `cargo install` installs is OS-specific, sometimes platform-variant-specific, and
+# architecture-specific, so place such according to my scheme (which will be automatically added
+# to PATH).  But CARGO_HOME and RUSTUP_HOME are not specific, so let them default to ~/.cargo/ and
+# ~/.rustup/ so they can be shared when $HOME is used across multiple hosts.
+#
+export CARGO_INSTALL_ROOT="$HOME"/.local/my/platform/"$MY_PLATFORM_OS_VAR_VER_ARCH"/installed
+
+# Platform-specific and architecture-specific aspects.  This is all ordered intentionally, so that
+# more-specific platform-delegation can take precedence, and so that architecture-specific can
+# take precedence, and so that user-customization can take precedence, and so that further
+# sub-profile.sh files can modify those.  (Maintenance: Keep in sync with MY_PLATFORM_IDS in
+# helpers.bash.)
+#
+for _my_platform_id in                                              \
+    "${MY_PLATFORM_OS-}"         "${MY_PLATFORM_OS_ARCH-}"          \
+    "${MY_PLATFORM_OS_VARIANT-}" "${MY_PLATFORM_OS_VARIANT_ARCH-}"  \
+    "${MY_PLATFORM_OS_VAR_VER-}" "${MY_PLATFORM_OS_VAR_VER_ARCH-}"
+do
+    if [ "$_my_platform_id" ]; then
+
+        # If Emacs' TRAMP is getting my user's environment
+        #
+        case "${INSIDE_EMACS-}" in
+            (*tramp*)
+                # Include the GNU utilities in PATH, because my TRAMP configuration assumes these,
+                # and TRAMP cannot use my other wrapper shell functions for these.
+                #
+                prepend_to_PATH_if_ok "$MY_DATA_HOME"/my/gnu/platform/"$_my_platform_id"/bin
+                ;;
+        esac
+
+        # Locate a user's (platform-specific and architecture-specific) binaries under this
+        # pathname scheme, because the `my` prefix helps avoid name conflicts in the various
+        # parent directories, since those directories may also be used by arbitrary other things
+        # to contain arbitrary other names.
+        #
+        _my_platspec=my/platform/"$_my_platform_id"
+
+        # Locations for executables & libraries of user-installed (platform-specific and
+        # architecture-specific) applications and facilities that should be considered as being in
+        # the ambient environment (i.e. not as something the user is frequently making changes to
+        # nor wants to see usually).  Note: this can be an easy base destination for installers
+        # (e.g. those that can take something like:
+        # --exec-prefix=~/.local/my/platform/Linux/Ubuntu/22.04/x86_64/installed).  The
+        # `installed` suffix helps avoid name conflicts in the nested platform directories, since
+        # those directories may also contain arbitrary other names (for platform variants,
+        # versions, and architectures), and we can't control what names arbitrary installers will
+        # create in a base destination.  (These are under ~/.local/ because these are for the same
+        # purpose as that.)  (Maintenance: Keep in sync with: my-cargo-install-user-local,
+        # my-install-rustup.)
+        #
+        prepend_to_PATH_if_ok            "$HOME"/.local/"$_my_platspec"/installed/bin
+        prepend_to_LD_LIBRARY_PATH_if_ok "$HOME"/.local/"$_my_platspec"/installed/lib
+
+        # Locations for executables & libraries (platform-specific and architecture-specific) as
+        # customized by the user.  The `bin` and `lib` suffixes are very unlikely to ever conflict
+        # with the name of a platform variant, version, or architecture.  (These are under ~/bin/
+        # & ~/lib/ because these are for the same purpose as those.)  Including the
+        # sub-directories can be especially convenient for symlink'ing like:
+
+        # ~/lib/my/platform/Linux/lib/acme-3.2.1 -> ~/tmp/acme-3.2.1/lib
+        #
+        prepend_and_subs_to_PATH_if_ok            "$HOME"/bin/"$_my_platspec"/bin
+        prepend_and_subs_to_LD_LIBRARY_PATH_if_ok "$HOME"/lib/"$_my_platspec"/lib
+
+        # Further customization of platform-specific and architecture-specific aspects of the
+        # user's environment.  These should guard against the possibility of being source'd
+        # multiple times.
+        #
+        _my_platspec_profile="$MY_CONFIG_HOME"/my/env/platform/"$_my_platform_id"/profile.sh
+        if [ -f "$_my_platspec_profile" ]; then
+            # shellcheck source=/dev/null  # (Don't care if there isn't one.)
+            . "$_my_platspec_profile"
+        fi
+    fi
+done
+unset _my_platform_id _my_platspec _my_platspec_profile
+
+export PATH
