@@ -47,6 +47,11 @@ in
         fi
         alias ps="ps dxu"
         ;;
+    (SunOS)
+        # shellcheck disable=SC2139  # Want this to be expanded when defined.
+        alias ls="$_my_gnu_ls_alias"
+        alias ps="ps -l -y"
+        ;;
 esac
 unset _my_gnu_ls_alias
 
