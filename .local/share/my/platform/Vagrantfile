@@ -77,6 +77,10 @@ Vagrant.configure("2") do |config|
     ubu22.vm.box = "ubuntu/jammy64"
     setup_my_way(ubu22)
     provision_apt_upgrade(ubu22.vm)
+    # When uncommented, to test a HOME shared across multiple OSs, also do this for at least one
+    # more of the VMs (i.e. copy-paste this to those others' definitions).
+   #ubu22.vm.synced_folder "~/tmp/test-shared-home", "/home/bum", owner: "bum",
+   #                       SharedFoldersEnableSymlinksCreate: true
   end
 
   config.vm.define "arch", autostart: false do |arch|
@@ -111,6 +115,9 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "fbsd13", autostart: false do |fbsd13|
     fbsd13.vm.box = "freebsd/FreeBSD-13.2-RELEASE"
+   #fbsd13.vm.box = "bento/freebsd-13"
+   #fbsd13.ssh.shell = "sh"
+   #fbsd13.ssh.connect_timeout = 120
     setup_my_way(fbsd13)
     fbsd13.vm.provision "pkg-update", type: "shell", privileged: true,
                         inline: "pkg update"
