@@ -36,6 +36,11 @@ if [ "${HOME-}" ]; then  # (Just in case.)
     readonly HOME  # Why not?
 
 
+    # Finish loading my/sh/helpers.sh, after HOME is finalized.
+    #
+    _my_sh_helpers__finish
+
+
     # The following locations are for portable platform-independent and architecture-independent
     # executables (i.e. scripts or byte-code, not compiled machine-code), so that they are valid
     # on multiple different OS platforms when the $HOME directory is shared across such.  (This is
@@ -59,11 +64,6 @@ if [ "${HOME-}" ]; then  # (Just in case.)
     prepend_and_subs_to_PATH_if_ok "$HOME"/bin
 
     export PATH
-
-
-    # Finish loading my/sh/helpers.sh, after HOME is finalized.
-    #
-    _my_sh_helpers__finish
 
 else
     # Helpers needed by the rest of this file.  These should be like those of helpers.sh.
@@ -103,38 +103,12 @@ else
 fi
 
 
-if [ "${MY_PLATFORM_VARIANT-}" = NixOS ]
-then
-    :  # Assume that Home Manager and NixOS are being used to configure these aspects elsewise.
-else
-    export TZ=:America/Los_Angeles  # (The `:` complies with POSIX for implementation-defined.)
-
-    if is_command_found emacs ; then
-        export EDITOR='emacs --no-window-system'
-    elif is_command_found nano ; then
-        export EDITOR=nano
-    fi
-    if [ "${EDITOR-}" ]; then
-        export VISUAL="$EDITOR"
-    fi
-    if is_command_found most ; then
-        export PAGER=most
-    fi
-fi
-
-# What `cargo install` installs is OS-specific, sometimes platform-variant-specific, and
-# architecture-specific, so place such according to my scheme (which will be automatically added
-# to PATH).  But CARGO_HOME and RUSTUP_HOME are not specific, so let them default to ~/.cargo/ and
-# ~/.rustup/ so they can be shared when $HOME is used across multiple hosts.
-#
-export CARGO_INSTALL_ROOT="$HOME"/.local/my/platform/"$MY_PLATFORM_OS_VAR_VER_ARCH"/installed
-
 # Platform-specific and architecture-specific aspects.  This is all ordered intentionally, so that
 # more-specific platform-delegation can take precedence, and so that architecture-specific can
 # take precedence, and so that user-customization can take precedence, and so that further
 # sub-profile.sh files can modify those.  (Maintenance: Keep in sync with MY_PLATFORM_IDS in
 # helpers.bash.)
-#
+
 for _my_platform_id in                                              \
     "${MY_PLATFORM_OS-}"         "${MY_PLATFORM_OS_ARCH-}"          \
     "${MY_PLATFORM_OS_VARIANT-}" "${MY_PLATFORM_OS_VARIANT_ARCH-}"  \
@@ -201,3 +175,35 @@ done
 unset _my_platform_id _my_platspec _my_platspec_profile
 
 export PATH
+
+if [ "${MY_PLATFORM_OS_VAR_VER_ARCH-}" ]
+then
+    # What `cargo install` installs is OS-specific, sometimes platform-variant-specific, and
+    # architecture-specific, so place such according to my scheme (which will be automatically
+    # added to PATH).  But CARGO_HOME and RUSTUP_HOME are not specific, so let them default to
+    # ~/.cargo/ and ~/.rustup/ so they can be shared when $HOME is used across multiple hosts.
+    #
+    export CARGO_INSTALL_ROOT="$HOME"/.local/my/platform/"$MY_PLATFORM_OS_VAR_VER_ARCH"/installed
+fi
+
+
+# Miscellaneous
+
+if [ "${MY_PLATFORM_VARIANT-}" = NixOS ]
+then
+    :  # Assume that Home Manager and NixOS are being used to configure these aspects elsewise.
+else
+    export TZ=:America/Los_Angeles  # (The `:` complies with POSIX for implementation-defined.)
+
+    if is_command_found emacs ; then
+        export EDITOR='emacs --no-window-system'
+    elif is_command_found nano ; then
+        export EDITOR=nano
+    fi
+    if [ "${EDITOR-}" ]; then
+        export VISUAL="$EDITOR"
+    fi
+    if is_command_found most ; then
+        export PAGER=most
+    fi
+fi
