@@ -65,7 +65,7 @@ function my-platform-install-packages
       # Apply each method to the names that are associated with it.
       #
       for method in "${!perMethods[@]}"; do
-          local specNamesList=${perMethods["$method"]} specNames specName cmds=()
+          local specNamesList=${perMethods["$method"]} specNames specName cmds=() cmd
           split-on-words "$specNamesList" specNames
 
           local methodCmd rc=0
@@ -75,10 +75,9 @@ function my-platform-install-packages
                   # Apply the method to each of its names separately.  This enables passing
                   # options that are unique to each name, and this also helps avoid ambiguity in
                   # methods' argument handling.
-                  # shellcheck disable=SC2016  # Want these single-quoted expressions.
                   #
                   for specName in "${specNames[@]}"; do
-                      cmds+=("$methodCmd "'"$specName"')
+                      cmds+=("$methodCmd ${specName@Q}")
                   done
                   ;;
               (1) # Was not prefixed, but is valid.
