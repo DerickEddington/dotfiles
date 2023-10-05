@@ -19,9 +19,16 @@ MY_BASH_HISTORY_CONFIG=$(abs_path "$MYSELF_RELDIR") || return
 readonly MY_BASH_HISTORY_CONFIG
 unset MYSELF_RELDIR
 
-[ "${MY_STATE_HOME:-}" ] && [ "${MY_RUNTIME_DIR:-}" ] || return
+[ "${MY_STATE_HOME:-}" ] || return
 readonly MY_BASH_HISTDIR=$MY_STATE_HOME/my/bash/interactive/history
-readonly MY_BASH_COMBINED_HISTFILE_LOCK=$MY_RUNTIME_DIR/my/bash/interactive/history/combined.lock
+
+# Use the `combined` history file as the lock file for locking itself.  It's important that the
+# lock file be the same file when the $HOME (actually, more precisely: $MY_BASH_HISTDIR) directory
+# is shared across multiple hosts.  Modern Linux can lock over NFS or CIFS (SMB), and hopefully
+# over other shared file-systems, and so hopefully other unix-like OSs can also.  If locking on a
+# shared FS doesn't work in some situations, that's unfortunate, and I'm unsure what exactly will
+# happen.
+readonly MY_BASH_COMBINED_HISTFILE_LOCK=$MY_BASH_HISTDIR/combined
 
 MY_BASH_HISTORY_COMBINER_IGNORES=$MY_BASH_HISTORY_CONFIG/ignores.regexes
 declare -x MY_BASH_HISTORY_COMBINER_IGNORES  # For my-bash_history-combiner utility.
@@ -79,7 +86,12 @@ is-function-undef _my_lock_combined_histfile || return
 function _my_lock_combined_histfile {
     local - ; set -o nounset +o errexit
     local LOCK_FD LOCK_FILE=$MY_BASH_COMBINED_HISTFILE_LOCK
-    exec {LOCK_FD}>> "$LOCK_FILE"  # Open a new file descriptor of it.
+
+    # Open a new file descriptor of the lock file.  Must be opened for writing so that exclusive
+    # locking will work over shared FSs.  Must be opened for appending so that the file is not
+    # truncated (clobbered), because it might be the `combined` history file itself.
+    exec {LOCK_FD}>> "$LOCK_FILE"
+
     if _my_flock "${1:-}" --timeout 10 $LOCK_FD ; then
         print $LOCK_FD
     else
@@ -140,7 +152,6 @@ function _my_histfile_combining {
 
         if _my_lock_combined_histfile --exclusive > /dev/null
         then
-            [ -e "$MY_BASH_HISTDIR"/combined ] || std touch "$MY_BASH_HISTDIR"/combined || return
             local PREV_COMBINED
             PREV_COMBINED=$(std mktemp "$MY_BASH_HISTDIR"/combined-prev-XXXXXXXXXX) || return
             std cp "$MY_BASH_HISTDIR"/combined "$PREV_COMBINED" || return
