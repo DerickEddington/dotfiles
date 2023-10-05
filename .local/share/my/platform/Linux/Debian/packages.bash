@@ -23,6 +23,8 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
                        [cargo]=cargo
                        [clang]="$(_my_greatest_pkg clang)"
                       [clangd]="$(_my_greatest_pkg clangd)"
+           [command-not-found]=command-not-found
+                   [emacs-nox]=emacs-nox
                      [fd-find]=fd-find
                          [gcc]=gcc
                          [git]=git
@@ -32,13 +34,16 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
                      [gnu-tar]=:
                        [gnupg]=gnupg
                         [htop]=htop
+                        [lsof]=lsof
                         [most]=most
     [my-bash-history-combiner]=my_bash_history_combiner
                         [nano]=nano
+                      [psmisc]=psmisc
                      [ripgrep]=ripgrep
                         [rust]=rustc
                       [screen]=screen
                   [util-linux]=util-linux
+                         [wrk]=wrk
 )
 
 # Maps a platform-specific package name to its platform-specific command for installing it.  Each
@@ -51,19 +56,24 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
                            [cargo]=my-apt-install
      ["$(_my_greatest_pkg clang)"]=my-apt-install
     ["$(_my_greatest_pkg clangd)"]=my-apt-install
+               [command-not-found]=my-apt-install
                        [coreutils]=my-apt-install
+                       [emacs-nox]=my-apt-install
                          [fd-find]=my-apt-install
                              [gcc]=my-apt-install
                              [git]=my-apt-install
                            [gnupg]=my-apt-install
                             [htop]=my-apt-install
+                            [lsof]=my-apt-install
                             [most]=my-apt-install
         [my_bash_history_combiner]="single my-cargo-install-user-local-from-my-repo"
                             [nano]=my-apt-install
+                          [psmisc]=my-apt-install
                          [ripgrep]=my-apt-install
                            [rustc]=my-apt-install
                           [screen]=my-apt-install
                       [util-linux]=my-apt-install
+                             [wrk]=my-apt-install
 )
 
 unset -f _my_greatest_pkg

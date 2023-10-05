@@ -20,6 +20,8 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
                        [cargo]=dummy
                        [clang]=dummy
                       [clangd]=dummy
+           [command-not-found]=dummy
+                   [emacs-nox]=dummy
                      [fd-find]=dummy
                          [gcc]=dummy
                          [git]=dummy
@@ -29,13 +31,16 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
                      [gnu-tar]=dummy
                        [gnupg]=dummy
                         [htop]=dummy
+                        [lsof]=dummy
                         [most]=dummy
     [my-bash-history-combiner]=dummy
                         [nano]=dummy
+                      [psmisc]=dummy
                      [ripgrep]=dummy
                         [rust]=dummy
                       [screen]=dummy
                   [util-linux]=dummy
+                         [wrk]=dummy
 )
 
 # Maps the dummy package name to the platform-specific command for installing Home Manager along

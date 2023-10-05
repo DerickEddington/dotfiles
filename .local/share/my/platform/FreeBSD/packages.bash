@@ -20,6 +20,8 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
                        [cargo]=rust
                        [clang]="$(_my_llvm_greatest)"
                       [clangd]="$(_my_llvm_greatest)"
+           [command-not-found]=""  # Or does some package actually provide it?
+                   [emacs-nox]=emacs-nox
                      [fd-find]=fd-find
                          [gcc]=gcc
                          [git]=git
@@ -29,14 +31,17 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
                      [gnu-tar]=gtar
                        [gnupg]=gnupg
                         [htop]=htop
+                        [lsof]=lsof
                         [most]=most
     [my-bash-history-combiner]=my_bash_history_combiner
                         [nano]=nano
                 [pkg-provides]=pkg-provides
+                      [psmisc]=psmisc
                      [ripgrep]=ripgrep
                         [rust]=rust
                       [screen]=screen
                   [util-linux]=devel/util-linux
+                         [wrk]=wrk-luajit
 )
 
 # Maps a platform-specific package name to its platform-specific command for installing it.  Each
@@ -47,6 +52,7 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
                         [bear]=my-pkg-install
                    [coreutils]=my-pkg-install
       ["$(_my_llvm_greatest)"]=my-pkg-install
+                   [emacs-nox]=my-pkg-install
                      [fd-find]=my-pkg-install
                          [gcc]=my-pkg-install
                          [git]=my-pkg-install
@@ -55,10 +61,12 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
                         [gsed]=my-pkg-install
                         [gtar]=my-pkg-install
                         [htop]=my-pkg-install
+                        [lsof]=my-pkg-install
                         [most]=my-pkg-install
     [my_bash_history_combiner]="single my-cargo-install-user-local-from-my-repo"
                         [nano]=my-pkg-install
                 [pkg-provides]=my-pkg-install
+                      [psmisc]=my-pkg-install
                      [ripgrep]=my-pkg-install
                         [rust]=my-pkg-install
                       [screen]=my-pkg-install
@@ -75,6 +83,7 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
                                # arrange some other way(s) to use the util-linux ones by default,
                                # if I want.
             [devel/util-linux]='single my-port-install WITH="CAL FLOCK GETOPT HARDLINK"'
+                  [wrk-luajit]=my-pkg-install
 )
 
 unset -f _my_llvm_greatest

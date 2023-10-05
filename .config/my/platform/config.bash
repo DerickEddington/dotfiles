@@ -15,14 +15,18 @@ readonly MY_PLATFORM_PACKAGES_DESIRED=(
     bash-completion
    #bear
    #clang clangd
+    command-not-found
+    emacs-nox
     fd-find
     git
     gnu-coreutils gnu-grep gnu-sed gnu-tar
     gnupg
     htop
+    lsof
     most
     my-bash-history-combiner  # Needed by _my_histfile_combining.
     nano
+    psmisc
     ripgrep
     screen
     util-linux  # Needed by _my_lock_combined_histfile to have `flock`.
