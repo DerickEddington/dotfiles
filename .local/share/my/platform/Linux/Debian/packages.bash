@@ -18,62 +18,64 @@ function _my_greatest_pkg {
 # Maps my own convention of a package name to its platform-specific package name.
 #
 readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
-             [bash-completion]=bash-completion
-                        [bear]=bear
-                       [cargo]=cargo
-                       [clang]="$(_my_greatest_pkg clang)"
-                      [clangd]="$(_my_greatest_pkg clangd)"
-           [command-not-found]=command-not-found
-                   [emacs-nox]=emacs-nox
-                     [fd-find]=fd-find
-                         [gcc]=gcc
-                         [git]=git
-               [gnu-coreutils]=coreutils
-                    [gnu-grep]=:  # Apparently, there are no APT packages for these (?).
-                     [gnu-sed]=:
-                     [gnu-tar]=:
-                       [gnupg]=gnupg
-                        [htop]=htop
-                        [lsof]=lsof
-                        [most]=most
-    [my-bash-history-combiner]=my_bash_history_combiner
-                        [nano]=nano
-                      [psmisc]=psmisc
-                     [ripgrep]=ripgrep
-                        [rust]=rustc
-                      [screen]=screen
-                  [util-linux]=util-linux
-                         [wrk]=wrk
+                       [bash-completion]=bash-completion
+                                  [bear]=bear
+                                 [cargo]=cargo
+                                 [clang]="$(_my_greatest_pkg clang)"
+                                [clangd]="$(_my_greatest_pkg clangd)"
+                     [command-not-found]=command-not-found
+    [corrector-of-llvm-xray-stack-flame]=corrector_of_llvm_xray_stack_flame
+                             [emacs-nox]=emacs-nox
+                               [fd-find]=fd-find
+                                   [gcc]=gcc
+                                   [git]=git
+                         [gnu-coreutils]=coreutils
+                              [gnu-grep]=:  # Apparently, there are no APT packages for these (?).
+                               [gnu-sed]=:
+                               [gnu-tar]=:
+                                 [gnupg]=gnupg
+                                  [htop]=htop
+                                  [lsof]=lsof
+                                  [most]=most
+              [my-bash-history-combiner]=my_bash_history_combiner
+                                  [nano]=nano
+                                [psmisc]=psmisc
+                               [ripgrep]=ripgrep
+                                  [rust]=rustc
+                                [screen]=screen
+                            [util-linux]=util-linux
+                                   [wrk]=wrk
 )
 
 # Maps a platform-specific package name to its platform-specific command for installing it.  Each
 # value (an eval'ed command) may be multiple words quoted (e.g. to pass options to a command).
 #
 readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
-                               [:]=true  # Do nothing
-                 [bash-completion]=my-apt-install
-                            [bear]=my-apt-install
-                           [cargo]=my-apt-install
-     ["$(_my_greatest_pkg clang)"]=my-apt-install
-    ["$(_my_greatest_pkg clangd)"]=my-apt-install
-               [command-not-found]=my-apt-install
-                       [coreutils]=my-apt-install
-                       [emacs-nox]=my-apt-install
-                         [fd-find]=my-apt-install
-                             [gcc]=my-apt-install
-                             [git]=my-apt-install
-                           [gnupg]=my-apt-install
-                            [htop]=my-apt-install
-                            [lsof]=my-apt-install
-                            [most]=my-apt-install
-        [my_bash_history_combiner]="single my-cargo-install-user-local-from-my-repo"
-                            [nano]=my-apt-install
-                          [psmisc]=my-apt-install
-                         [ripgrep]=my-apt-install
-                           [rustc]=my-apt-install
-                          [screen]=my-apt-install
-                      [util-linux]=my-apt-install
-                             [wrk]=my-apt-install
+                                     [:]=true  # Do nothing
+                       [bash-completion]=my-apt-install
+                                  [bear]=my-apt-install
+                                 [cargo]=my-apt-install
+           ["$(_my_greatest_pkg clang)"]=my-apt-install
+          ["$(_my_greatest_pkg clangd)"]=my-apt-install
+                     [command-not-found]=my-apt-install
+                             [coreutils]=my-apt-install
+    [corrector_of_llvm_xray_stack_flame]="single my-cargo-install-user-local-from-my-repo"
+                             [emacs-nox]=my-apt-install
+                               [fd-find]=my-apt-install
+                                   [gcc]=my-apt-install
+                                   [git]=my-apt-install
+                                 [gnupg]=my-apt-install
+                                  [htop]=my-apt-install
+                                  [lsof]=my-apt-install
+                                  [most]=my-apt-install
+              [my_bash_history_combiner]="single my-cargo-install-user-local-from-my-repo"
+                                  [nano]=my-apt-install
+                                [psmisc]=my-apt-install
+                               [ripgrep]=my-apt-install
+                                 [rustc]=my-apt-install
+                                [screen]=my-apt-install
+                            [util-linux]=my-apt-install
+                                   [wrk]=my-apt-install
 )
 
 unset -f _my_greatest_pkg

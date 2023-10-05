@@ -15,32 +15,33 @@ _my_bash_sourced_already local/share/my/platform/Linux/NixOS/packages && return
 # Maps my own convention of a package name to the dummy package name.
 #
 readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
-             [bash-completion]=dummy
-                        [bear]=dummy
-                       [cargo]=dummy
-                       [clang]=dummy
-                      [clangd]=dummy
-           [command-not-found]=dummy
-                   [emacs-nox]=dummy
-                     [fd-find]=dummy
-                         [gcc]=dummy
-                         [git]=dummy
-               [gnu-coreutils]=dummy
-                    [gnu-grep]=dummy
-                     [gnu-sed]=dummy
-                     [gnu-tar]=dummy
-                       [gnupg]=dummy
-                        [htop]=dummy
-                        [lsof]=dummy
-                        [most]=dummy
-    [my-bash-history-combiner]=dummy
-                        [nano]=dummy
-                      [psmisc]=dummy
-                     [ripgrep]=dummy
-                        [rust]=dummy
-                      [screen]=dummy
-                  [util-linux]=dummy
-                         [wrk]=dummy
+                       [bash-completion]=dummy
+                                  [bear]=dummy
+                                 [cargo]=dummy
+                                 [clang]=dummy
+                                [clangd]=dummy
+                     [command-not-found]=dummy
+    [corrector-of-llvm-xray-stack-flame]=dummy
+                             [emacs-nox]=dummy
+                               [fd-find]=dummy
+                                   [gcc]=dummy
+                                   [git]=dummy
+                         [gnu-coreutils]=dummy
+                              [gnu-grep]=dummy
+                               [gnu-sed]=dummy
+                               [gnu-tar]=dummy
+                                 [gnupg]=dummy
+                                  [htop]=dummy
+                                  [lsof]=dummy
+                                  [most]=dummy
+              [my-bash-history-combiner]=dummy
+                                  [nano]=dummy
+                                [psmisc]=dummy
+                               [ripgrep]=dummy
+                                  [rust]=dummy
+                                [screen]=dummy
+                            [util-linux]=dummy
+                                   [wrk]=dummy
 )
 
 # Maps the dummy package name to the platform-specific command for installing Home Manager along

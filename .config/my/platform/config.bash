@@ -16,6 +16,7 @@ readonly MY_PLATFORM_PACKAGES_DESIRED=(
    #bear
    #clang clangd
     command-not-found
+   #corrector-of-llvm-xray-stack-flame
     emacs-nox
     fd-find
     git
