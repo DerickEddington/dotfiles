@@ -14,7 +14,9 @@ source "$(std dirname "${BASH_SOURCE[0]}")"/"$MY_PLATFORM_OS_VARIANT"/packages.b
 function my-platform-install-packages
 {
     local - ; set -o nounset
-    local -r names=("$@")
+    local names=("$@")
+    remove-dups names  # Not required, but why not.
+    readonly names
     local name method errPlatform=${MY_PLATFORM_OS_VARIANT:-unknown}
 
     if ! is-var-assoc-array MY_PLATFORM_SPECIFIC_PACKAGES_NAMES \
@@ -67,6 +69,7 @@ function my-platform-install-packages
       for method in "${!perMethods[@]}"; do
           local specNamesList=${perMethods["$method"]} specNames specName cmds=() cmd
           split-on-words "$specNamesList" specNames
+          remove-dups specNames  # Important to prevent multiple invocations of the same.
 
           local methodCmd rc=0
           methodCmd=$(unprefix-cmd single "$method") || rc=$?

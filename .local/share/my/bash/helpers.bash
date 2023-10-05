@@ -309,6 +309,36 @@ function _my-download-https
     "${download[@]}" "$url"
 }
 
+function remove-dups
+{
+    # Remove duplicate elements from an array variable given by name.
+
+    local -n -r arrayVarNameRef=${1:?}
+    local -r orig=("${arrayVarNameRef[@]}")
+
+    if shopt -q assoc_expand_once ; then
+        local -r resetAEO=no  # It's already set.
+    else
+        local -r resetAEO=yes
+        shopt -s assoc_expand_once  # Critical for correctness of `seen` keys! Insane!
+    fi
+
+    arrayVarNameRef=()  # Clear it, to reaccumulate only non-duplicates.
+
+    local -A seen
+    local elem
+    for elem in "${orig[@]}" ; do
+        if ! [[ -v seen["$elem"] ]]; then
+            arrayVarNameRef+=("$elem")  # Not duplicate. Accumulate it.
+            seen["$elem"]=yes
+        fi
+    done
+
+    if [ "$resetAEO" = yes ]; then
+        shopt -u assoc_expand_once
+    fi
+}
+
 function git-clone-into-nonempty
 {
     local - ; set -o nounset

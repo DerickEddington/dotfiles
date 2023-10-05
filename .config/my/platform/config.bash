@@ -11,15 +11,12 @@
 # not available for a platform, or fails to install in a host, then a warning will be printed when
 # the provisioning is run.
 #
-readonly MY_PLATFORM_PACKAGES_DESIRED=(
+MY_PLATFORM_PACKAGES_DESIRED=(
     bash-completion
-   #bear
-   #clang clangd
     command-not-found
-   #corrector-of-llvm-xray-stack-flame
     emacs-nox
     fd-find
-    git
+    git  # Always useful for each user's ~/.dotfiles repository, at least.
     gnu-coreutils gnu-grep gnu-sed gnu-tar
     gnupg
     htop
@@ -31,8 +28,41 @@ readonly MY_PLATFORM_PACKAGES_DESIRED=(
     ripgrep
     screen
     util-linux  # Needed by _my_lock_combined_histfile to have `flock`.
-   #gcc
 )
+
+# Change any of these to `yes`, as desired.
+#
+declare -A group=(
+       [devel/C]=no
+    [devel/Rust]=no
+)
+
+if [ "${group[devel/C]}" = yes ]; then
+    MY_PLATFORM_PACKAGES_DESIRED+=(
+        bear
+        clang clangd
+        corrector-of-llvm-xray-stack-flame
+        gcc
+    )
+fi
+
+if [ "${group[devel/Rust]}" = yes ]; then
+    MY_PLATFORM_PACKAGES_DESIRED+=(
+        cargo
+        corrector-of-llvm-xray-stack-flame
+        rust
+    )
+fi
+
+unset group
+
+if [ "${MY_PLATFORM_OS:?}" = FreeBSD ]; then
+    MY_PLATFORM_PACKAGES_DESIRED+=(
+        pkg-provides
+    )
+fi
+
+readonly MY_PLATFORM_PACKAGES_DESIRED
 
 
 # Where my external personal packages are installed from.
