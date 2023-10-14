@@ -1,0 +1,13 @@
+# This is located at the top of my home directory so that this is used as my fallback for any
+# sub-directory under the home directory when the sub-directory does not provide its own
+# `.clang-format` file.  This is not used if a sub-directory does provide a `.clang-format` file
+# (unlike `clangd` which merges multiple configuration files from parent directories and from the
+# user's).
+
+# TODO: Maybe someday figure-out how I'd like to use
+#       https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+
+# For now, completely disable `clang-format`, so that it doesn't mess-up the formatting of source
+# files of others' projects that I work with that don't provide their own `.clang-format` file.
+#
+DisableFormat: true
