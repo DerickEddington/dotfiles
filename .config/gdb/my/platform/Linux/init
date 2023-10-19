@@ -1,0 +1,5 @@
+set non-stop on
+
+target native
+# Requires `target native`.
+set scheduler-locking step

@@ -27,6 +27,7 @@
                    "rust"
                    "nix"
                    "c"
+                   "sh"
                    "modeline"  ;; Should be kept as last
                    ))
   (load (expand-file-name (concat "init/" subinit) user-emacs-directory)))

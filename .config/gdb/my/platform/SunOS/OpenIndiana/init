@@ -1,0 +1,8 @@
+# Setting this last seems to help avoid the dreaded GDB bug on Solaris of:
+# "procfs: couldn't find pid 0 in procinfo list."
+target exec
+
+# For some reason, spurious SIGTRAP signals are sometimes received.  This signal seems to be
+# unneeded for breakpoints on x86_64 (presumably because GDB uses hardware breakpoints instead.)
+# You may try uncommenting this:
+#handle SIGTRAP nostop noprint nopass

@@ -1,0 +1,71 @@
+--- Bear-3.1.3/CMakeLists.txt	2023-08-28 01:46:17.000000000 -0700
++++ Bear-3.1.3/CMakeLists.txt	2023-10-12 21:30:38.606674773 -0700
+@@ -75,6 +75,7 @@
+             -DCMAKE_CXX_STANDARD_REQUIRED:BOOL=${CMAKE_CXX_STANDARD_REQUIRED}
+             -DCMAKE_CXX_EXTENSIONS:BOOL=${CMAKE_CXX_EXTENSIONS}
+             -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
++            -DCMAKE_LIBRARY_ARCHITECTURE:STRING=${CMAKE_LIBRARY_ARCHITECTURE}
+             -DCMAKE_PREFIX_PATH:PATH=${CMAKE_PREFIX_PATH}
+             -DCMAKE_INSTALL_PREFIX:PATH=${STAGED_INSTALL_PREFIX}
+             -DCMAKE_INSTALL_LIBDIR:PATH=${CMAKE_INSTALL_LIBDIR}
+--- Bear-3.1.3/source/intercept/proto/CMakeLists.txt	2023-08-28 01:46:17.000000000 -0700
++++ Bear-3.1.3/source/intercept/proto/CMakeLists.txt	2023-10-12 22:58:22.818202393 -0700
+@@ -11,6 +11,7 @@
+             ${_PROTOBUF_PROTOC}
+         ARGS
+             -I "${SUPERVISE_PROTO_PATH}"
++            -I /usr/include
+             --grpc_out "${CMAKE_CURRENT_BINARY_DIR}"
+             --cpp_out "${CMAKE_CURRENT_BINARY_DIR}"
+             --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
+@@ -34,6 +35,7 @@
+             ${_PROTOBUF_PROTOC}
+         ARGS
+             -I "${SUPERVISE_PROTO_PATH}"
++            -I /usr/include
+             --grpc_out "${CMAKE_CURRENT_BINARY_DIR}"
+             --cpp_out "${CMAKE_CURRENT_BINARY_DIR}"
+             --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
+--- Bear-3.1.3/source/intercept/source/report/libexec/Logger.cc	2023-08-28 01:46:17.000000000 -0700
++++ Bear-3.1.3/source/intercept/source/report/libexec/Logger.cc	2023-10-12 15:39:48.032524661 -0700
+@@ -37,7 +37,7 @@
+         ::localtime_r(&ts.tv_sec, &local_time);
+         const unsigned long micros = ts.tv_nsec / 1000;
+         const pid_t pid = ::getpid();
+-        ::dprintf(STDERR_FILENO, "[%02d:%02d:%02d.%06ld, el, %d] %s; %s%s\n",
++        ::fprintf(stderr, "[%02d:%02d:%02d.%06ld, el, %d] %s; %s%s\n",
+             local_time.tm_hour, local_time.tm_min, local_time.tm_sec, micros, pid, name, message, variable);
+     }
+ }
+@@ -67,7 +67,7 @@
+         if (el::log::VERBOSE == LEVEL) {
+             verbose_message(name_, message, "");
+         } else {
+-            dprintf(STDERR_FILENO, "libexec.so: %s; %s\n", name_, message);
++            fprintf(stderr, "libexec.so: %s; %s\n", name_, message);
+         }
+     }
+ }
+--- Bear-3.1.3/source/libmain/source/ApplicationLogConfig.cc	2023-08-28 01:46:17.000000000 -0700
++++ Bear-3.1.3/source/libmain/source/ApplicationLogConfig.cc	2023-10-12 16:02:24.953140770 -0700
+@@ -77,7 +77,7 @@
+ 
+     void ApplicationLogConfig::context() const {
+ #ifdef HAVE_UNAME
+-        auto name = utsname{};
++        auto name = (struct utsname){0};
+         if (const int status = uname(&name); status >= 0) {
+             spdlog::debug("sysname: {0}", name.sysname);
+             spdlog::debug("release: {0}", name.release);
+--- Bear-3.1.3/source/libsys/source/Signal.cc	2023-08-28 01:46:17.000000000 -0700
++++ Bear-3.1.3/source/libsys/source/Signal.cc	2023-10-13 11:24:18.144716960 -0700
+@@ -54,7 +54,8 @@
+     {
+         CHILD_PROCESSES.insert(pid_);
+         for (int signum = 1; signum < NSIG; ++signum) {
+-            handlers_[signum] = ::signal(signum, &handler);
++            if (signum != SIGCHLD)
++                handlers_[signum] = ::signal(signum, &handler);
+         }
+     }
+ 

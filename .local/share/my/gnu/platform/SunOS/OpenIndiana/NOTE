@@ -1,0 +1,3 @@
+Solaris (or at least OpenIndiana) does not need a maintenance helper to populate a directory with
+the GNU utilities without the "g" or "gnu" prefix (unlike FreeBSD).  But ./bin/ still might need
+occasional maintenance.

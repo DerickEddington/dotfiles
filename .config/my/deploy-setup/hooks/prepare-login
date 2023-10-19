@@ -1,0 +1,158 @@
+#! /usr/bin/env bash
+
+# This is usually set by Bash to the user's login shell, when start0.sh invokes start1.bash.  In
+# any case, we assume whatever its value is was intended.
+#
+readonly currentLoginShell=${SHELL:-}
+
+# shellcheck source=../../../../.local/share/my/bash/helpers.bash
+source "${XDG_DATA_HOME:-$HOME/.local/share}"/my/bash/helpers.bash
+_my-script-prelude
+
+
+# This is run with the target home directory as the current working directory, and this is invoked
+# by my/deploy-setup/bootstrap/start1.bash which is usually run in a different host by
+# my-deploy-setup.
+#
+# You may do whatever you want here (within reason of fitting with the bootstrap), to change, when
+# the target dotfiles repository is being deployed, the configuration of logging-in as the target
+# user.
+
+
+function change-login-shell-to-bash
+{
+    # Make my login shell be Bash, if not already.
+    #
+    if [ "$(std basename "$currentLoginShell")" != bash ]
+    then
+        local bashExec userName
+        # Whatever is found in the PATH, or fallback attempt.
+        bashExec=$(command -v bash || command -p -v bash || print bash) || return
+        userName=$(std logname || std id -u -n) || return  # (Must not be the user ID number.)
+
+        # Hopefully, this `chsh` is portable enough? (https://en.wikipedia.org/wiki/Chsh)
+        #
+        local -r cmd=(chsh -s "$bashExec")  # Usually asks for the user's password.
+        local -r sudoCmd=(sudo "${cmd[@]}" "$userName")  # Prefer this, to try to avoid asking.
+
+        if is-command-found sudo
+        then "${sudoCmd[@]}" || "${cmd[@]}"
+        else "${cmd[@]}"
+        fi || warn "Failed to change login shell to Bash."
+    fi
+}
+
+function suppress-chattiness
+{
+    touch .hushlogin
+
+    case "$MY_PLATFORM_OS" in
+        (FreeBSD)
+            local loginInitFiles=() f
+            for f in .login .profile ; do
+                if [ -r "$f" ] && [ -w "$f" ]; then
+                    loginInitFiles+=("$f")
+                fi
+            done
+            if (( ${#loginInitFiles[@]} >= 1 )); then
+                # Don't display a random "fortune cookie" on each login.  Comment-out that.
+                local -r sedScript='s/^([^#]+[[:<:]])?fortune([[:>:]].+)?$/## &/'
+                # (Use FreeBSD's `sed`, in case GNU's failed to be installed.)
+                std sed -i '' -E -e "$sedScript" "${loginInitFiles[@]}" || true
+            fi
+            ;;
+    esac
+}
+
+# shellcheck disable=SC2016
+function prepare-shell-init
+{
+    function F { std grep -q -s -F -e "$@" ;}
+
+    # Include my shell-init customizations from the standard locations
+
+    if ! F "_MY_SH_SOURCED_ALREADY__DOTPROFILE" .profile
+    then
+        # This one might be needed with some OS variants that also source .profile from their
+        # .bash_login.  That would cause source'ing .profile twice, with my addition of also
+        # source'ing .profile (and .bash_login) from my .bash_profile.  For other variants that
+        # don't do that, this is harmless.  (This doesn't use _my_bash_sourced_already because
+        # that would require this to first source helpers.bash, which must not be done from
+        # pure-POSIX-Shell like .profile must be, and anyway it seems better to keep this simpler
+        # for this critical init file).
+        #
+        prepend-to-file .profile '# Avoid `source`ing this file more than once.
+[ "${_MY_SH_SOURCED_ALREADY__DOTPROFILE+is-set}" ] && return
+# Set immediately, to avoid the possibility of recursive `source`ing.
+_MY_SH_SOURCED_ALREADY__DOTPROFILE=true
+
+'
+    fi
+
+    if ! F "my/env/profile" .profile
+    then
+        append-to-file .profile '
+# Include my customizations.
+. "${XDG_CONFIG_HOME:-$HOME/.config}"/my/env/profile.sh
+'
+    fi
+
+    if ! F ".bash_login" .bash_profile
+    then
+        append-to-file .bash_profile '
+# For login shell, both interactive and non-interactive.
+[ -f ~/.bash_login ] && source ~/.bash_login
+'
+    fi
+
+    if ! F ".profile" .bash_profile
+    then
+        append-to-file .bash_profile '
+# For login shell, both interactive and non-interactive.
+[ -f ~/.profile ] && source ~/.profile
+'
+    fi
+
+    if ! F "_MY_BASH_SOURCED_ALREADY__DOTBASHRC" .bashrc
+    then
+        # This one is needed with some OS variants that also source .bashrc from their .profile.
+        # That would cause source'ing .bashrc twice, with my addition of also source'ing .bashrc
+        # (and .profile) from my .bash_profile.  For other variants that don't do that, this is
+        # harmless.  (This doesn't use _my_bash_sourced_already because that would require this to
+        # first source helpers.bash, which should work, but it seems better to keep this simpler
+        # for this critical init file).
+        #
+        prepend-to-file .bashrc '# Avoid `source`ing this file more than once.
+[ "${_MY_BASH_SOURCED_ALREADY__DOTBASHRC+is-set}" ] && return
+# Set immediately, to avoid the possibility of recursive `source`ing.
+_MY_BASH_SOURCED_ALREADY__DOTBASHRC=true
+
+'
+    fi
+
+    if ! F "my/bash/interactive/init" .bashrc
+    then
+        append-to-file .bashrc '
+# Include my customizations.
+source "${XDG_CONFIG_HOME:-$HOME/.config}"/my/bash/interactive/init.bash
+'
+    fi
+
+    if ! F ".bashrc" .bash_profile
+    then
+        append-to-file .bash_profile '
+# For interactive login shell.  (Non-interactive will do nothing.)
+[[ "$-" = *i* ]] && [ -f ~/.bashrc ] && source ~/.bashrc
+'
+    fi
+}
+
+
+if [ "${MY_PLATFORM_VARIANT-}" = NixOS ]
+then
+    :  # Assume that Home Manager and NixOS are being used to configure these aspects elsewise.
+else
+    change-login-shell-to-bash
+    suppress-chattiness
+    prepare-shell-init
+fi

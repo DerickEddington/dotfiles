@@ -39,4 +39,4 @@ define hook-quit
 end
 
 
-source ~/.config/gdb/my/cov
+source-subinit my/cov

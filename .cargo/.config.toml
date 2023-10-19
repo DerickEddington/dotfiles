@@ -6,3 +6,6 @@
 #paths = [
 #  ".cargo/registry/src/github.com-.../...",
 #]
+
+[target.x86_64-unknown-illumos]
+linker = "my-rust-linkerdriver--static-libgcc"  # In my ~/bin/ usually.

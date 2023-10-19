@@ -83,7 +83,7 @@ in
         '';
 
       file = {
-        ".config/gdb/my/home-manager-init".text = let
+        ".config/gdb/my/platform/${pkgs.hostPlatform.uname.system}/NixOS/init".text = let
           sys.hasSrc = elem "/src" nixos-config.environment.pathsToLink;
           sys.srcLoc = optionalString sys.hasSrc "/run/current-system/sw/src/of-pkg-via-my";
           sys.hasTmp = nixos-config.my.debugging.support.sourceCode.tmpDirs != [];

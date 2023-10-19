@@ -1,14 +1,9 @@
-# Aspects setup by my Home Manager configuration.
-source ~/.config/gdb/my/home-manager-init
-
-
 # How a program behaves under debugging
 
-# Can be changed by user.
-target native
-# Requires `target native`.
-set scheduler-locking step
 set step-mode on
+
+# Usually want this for many programs.
+handle SIGPIPE nostop noprint pass
 
 
 # User interface
@@ -19,8 +14,6 @@ set print pretty on
 
 # Helpers
 
-source ~/.config/gdb/my/init
-
 define omit
   if $argc == 0
     tbreak +1
@@ -30,3 +23,55 @@ define omit
     jump $arg0
   end
 end
+document omit
+Jump over the given amount of source lines (default: `+1`). Don't execute them.
+end
+
+# This is defined here, and not in a `.py` file, to avoid needing to use `source` with a
+# hard-coded pathname, because the purpose of this helper is to avoid that pattern.
+python
+import os, subprocess
+
+# This is defined globally so that it's reusable by other Python snippets in GDB and so that it's
+# computed only once.
+my_config_home = subprocess.check_output(
+    ['sh', '-c',
+     '. "${XDG_DATA_HOME:-${HOME:?}/.local/share}"/my/sh/helpers.sh > /dev/null || exit \n'
+     'print "${MY_CONFIG_HOME:?}"'],
+    text=True)
+
+assert os.path.isabs(my_config_home), "$MY_CONFIG_HOME is not absolute!"
+
+class SourceSubInit(gdb.Command):
+    """Read commands from a file named $MY_CONFIG_HOME/gdb/$FILE.
+
+Usage: source-subinit FILE
+
+This `source`s sub-initialization files given as pathnames relative to GDB's
+directory in the home configuration directory.  (As opposed to the normal
+`source` command that requires either absolute pathnames which would be
+hard-coded which we want to avoid or that requires searching the \"source search
+path\" which we don't want to do.)
+"""
+
+    def __init__(self, name, mustExist):
+        self.mustExist = mustExist
+        super(SourceSubInit, self).__init__(name, gdb.COMMAND_SUPPORT)
+
+    def invoke(self, arg, _from_tty):
+        self.dont_repeat()
+        init_file = os.path.join(my_config_home, 'gdb', arg)
+        if self.mustExist or os.path.exists(init_file):
+            gdb.execute('source ' + init_file)
+
+SourceSubInit("source-subinit",           True)
+SourceSubInit("source-subinit-if-exists", False)
+end
+
+source-subinit my/init
+
+
+# Platform specific
+
+# Having this be last is needed by some of the platform-specific sub-init files.
+source-subinit my/platform.py

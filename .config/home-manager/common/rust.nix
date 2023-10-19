@@ -47,6 +47,7 @@ in
     mkIf cfg.enable {
 
       home.packages = (with pkgs; [
+        gcc  # Needed by `rustc`.
         rustup  # Not optional.
       ])
       ++ cfg.packages

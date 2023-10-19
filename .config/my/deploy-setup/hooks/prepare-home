@@ -1,0 +1,63 @@
+#! /usr/bin/env bash
+# shellcheck source=../../../../.local/share/my/bash/helpers.bash
+source "${XDG_DATA_HOME:-$HOME/.local/share}"/my/bash/helpers.bash
+_my-script-prelude
+
+
+# This is run with the target home directory as the current working directory, and this is invoked
+# by my/deploy-setup/bootstrap/start1.bash (which is usually run in a different host by
+# my-deploy-setup).
+#
+# You may do whatever you want here (within reason of fitting with the bootstrap), to extend the
+# setup of the target home directory when its dotfiles repository is being deployed.
+
+
+function change-gitignore
+{
+    local -r hmComment='# Things managed by home-manager'
+
+    if std grep -q -F -e "$hmComment" .gitignore
+    then
+        # This deletes (d) all lines starting from the comment one to the end of file ($).
+        local -r sedScript="/$hmComment/,\$d"
+        std sed -e "$sedScript" .gitignore > .gitignore-changed
+        std mv .gitignore-changed .gitignore
+    fi
+}
+
+
+function prepare-home-manager
+{
+    # This only prepares the channel.  Home Manager is later installed by
+    # ~/.local/share/my/platform/Linux/NixOS/packages.bash (typically by ./install-packages by
+    # ~/.local/share/my/deploy-setup/bootstrap/start1.bash).
+
+    [[ "$(nixos-version)" =~ ^([[:digit:]]+\.[[:digit:]]+) ]] || return
+    local -r nixOSver=${BASH_REMATCH[1]}
+    local -r repo=https://github.com/nix-community/home-manager
+    local -r URL=$repo/archive/release-$nixOSver.tar.gz
+
+    nix-channel --add "$URL" home-manager
+    nix-channel --update home-manager
+}
+
+function prepare-nixos-unstable
+{
+    local -r URL=https://nixos.org/channels/nixos-unstable
+
+    nix-channel --add "$URL" nixos-unstable
+    nix-channel --update nixos-unstable
+}
+
+
+if [ "${MY_PLATFORM_VARIANT-}" = NixOS ]
+then
+    prepare-home-manager
+    prepare-nixos-unstable
+else
+    # Change .gitignore to not ignore files that are of interest in the target home.
+    #
+    change-gitignore || warn 'Failed to change .gitignore.'
+
+    mkdir -p tmp || warn "Failed to make '~/tmp' dir."
+fi

@@ -1,0 +1,64 @@
+--- grpc-1.59.1/CMakeLists.txt	2023-10-06 16:44:58.000000000 -0700
++++ grpc-1.59.1/CMakeLists.txt	2023-10-12 20:58:48.946512800 -0700
+@@ -67,19 +67,19 @@
+ # "module": build the dependency using sources from git submodule (under third_party)
+ # "package": use cmake's find_package functionality to locate a pre-installed dependency
+ 
+-set(gRPC_ZLIB_PROVIDER "module" CACHE STRING "Provider of zlib library")
++set(gRPC_ZLIB_PROVIDER "package" CACHE STRING "Provider of zlib library")
+ set_property(CACHE gRPC_ZLIB_PROVIDER PROPERTY STRINGS "module" "package")
+ 
+-set(gRPC_CARES_PROVIDER "module" CACHE STRING "Provider of c-ares library")
++set(gRPC_CARES_PROVIDER "package" CACHE STRING "Provider of c-ares library")
+ set_property(CACHE gRPC_CARES_PROVIDER PROPERTY STRINGS "module" "package")
+ 
+-set(gRPC_RE2_PROVIDER "module" CACHE STRING "Provider of re2 library")
++set(gRPC_RE2_PROVIDER "package" CACHE STRING "Provider of re2 library")
+ set_property(CACHE gRPC_RE2_PROVIDER PROPERTY STRINGS "module" "package")
+ 
+-set(gRPC_SSL_PROVIDER "module" CACHE STRING "Provider of ssl library")
++set(gRPC_SSL_PROVIDER "package" CACHE STRING "Provider of ssl library")
+ set_property(CACHE gRPC_SSL_PROVIDER PROPERTY STRINGS "module" "package")
+ 
+-set(gRPC_PROTOBUF_PROVIDER "module" CACHE STRING "Provider of protobuf library")
++set(gRPC_PROTOBUF_PROVIDER "package" CACHE STRING "Provider of protobuf library")
+ set_property(CACHE gRPC_PROTOBUF_PROVIDER PROPERTY STRINGS "module" "package")
+ 
+ if(gRPC_BUILD_TESTS)
+@@ -89,7 +89,7 @@
+   set(gRPC_BENCHMARK_PROVIDER "none")
+ endif()
+ 
+-set(gRPC_ABSL_PROVIDER "module" CACHE STRING "Provider of absl library")
++set(gRPC_ABSL_PROVIDER "package" CACHE STRING "Provider of absl library")
+ set_property(CACHE gRPC_ABSL_PROVIDER PROPERTY STRINGS "module" "package")
+ 
+ set(gRPC_ABSL_USED_TARGETS
+--- grpc-1.59.1/src/core/ext/filters/client_channel/resolver/dns/c_ares/grpc_ares_ev_driver_posix.cc	2023-10-06 16:44:58.000000000 -0700
++++ grpc-1.59.1/src/core/ext/filters/client_channel/resolver/dns/c_ares/grpc_ares_ev_driver_posix.cc	2023-10-12 21:01:46.447700810 -0700
+@@ -28,6 +28,11 @@
+ #include <sys/uio.h>
+ #include <unistd.h>
+ 
++#ifdef GPR_SOLARIS
++#include <sys/filio.h>
++#include <stropts.h>
++#endif
++
+ #include <memory>
+ #include <string>
+ #include <unordered_set>
+--- grpc-1.59.1/src/core/lib/event_engine/posix_engine/grpc_polled_fd_posix.h	2023-10-06 16:44:58.000000000 -0700
++++ grpc-1.59.1/src/core/lib/event_engine/posix_engine/grpc_polled_fd_posix.h	2023-10-12 21:12:26.926484382 -0700
+@@ -28,6 +28,11 @@
+ #include <sys/uio.h>
+ #include <unistd.h>
+ 
++#ifdef GPR_SOLARIS
++#include <sys/filio.h>
++#include <stropts.h>
++#endif
++
+ #include <string>
+ #include <unordered_set>
+ #include <utility>

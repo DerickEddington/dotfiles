@@ -15,13 +15,20 @@ _my_bash_sourced_already config/my/bash/interactive/history/init && return
 
 # All related config files are relative to the current file.
 MYSELF_RELDIR=$(std dirname "${BASH_SOURCE[0]}") || return  # (Must be outside any function.)
-MY_BASH_HISTORY_CONFIG=$(std realpath -m -L -s "$MYSELF_RELDIR") || return
+MY_BASH_HISTORY_CONFIG=$(abs_path "$MYSELF_RELDIR") || return
 readonly MY_BASH_HISTORY_CONFIG
 unset MYSELF_RELDIR
 
-[ "${MY_STATE_HOME:-}" ] && [ "${MY_RUNTIME_DIR:-}" ] || return
+[ "${MY_STATE_HOME:-}" ] || return
 readonly MY_BASH_HISTDIR=$MY_STATE_HOME/my/bash/interactive/history
-readonly MY_BASH_COMBINED_HISTFILE_LOCK=$MY_RUNTIME_DIR/my/bash/interactive/history/combined.lock
+
+# Use the `combined` history file as the lock file for locking itself.  It's important that the
+# lock file be the same file when the $HOME (actually, more precisely: $MY_BASH_HISTDIR) directory
+# is shared across multiple hosts.  Modern Linux can lock over NFS or CIFS (SMB), and hopefully
+# over other shared file-systems, and so hopefully other unix-like OSs can also.  If locking on a
+# shared FS doesn't work in some situations, that's unfortunate, and I'm unsure what exactly will
+# happen.
+readonly MY_BASH_COMBINED_HISTFILE_LOCK=$MY_BASH_HISTDIR/combined
 
 MY_BASH_HISTORY_COMBINER_IGNORES=$MY_BASH_HISTORY_CONFIG/ignores.regexes
 declare -x MY_BASH_HISTORY_COMBINER_IGNORES  # For my-bash_history-combiner utility.
@@ -46,10 +53,8 @@ function _my_unique_histfile {
     FILENAME=$MY_BASH_HISTDIR/by-time/$(std date +%Y/%m/%d/%T)--${HOSTNAME}${ID:+--}$ID || return
     DIRNAME="$(std dirname "$FILENAME")" || return
     std mkdir -p "$DIRNAME" || return
-    if type -t mktemp >& /dev/null; then
-        FILENAME=$(std mktemp "$FILENAME"--XXXXXXXXXX) || return
-    fi
-    echo "$FILENAME"
+    FILENAME=$(gnu mktemp "$FILENAME"--XXXXXXXXXX) || return
+    print "$FILENAME"
 }
 declare-function-readonly _my_unique_histfile
 
@@ -81,11 +86,16 @@ is-function-undef _my_lock_combined_histfile || return
 function _my_lock_combined_histfile {
     local - ; set -o nounset +o errexit
     local LOCK_FD LOCK_FILE=$MY_BASH_COMBINED_HISTFILE_LOCK
-    exec {LOCK_FD}>> "$LOCK_FILE"  # Open a new file descriptor of it.
-    if std flock "${1:-}" --timeout 10 $LOCK_FD ; then
-        echo $LOCK_FD
+
+    # Open a new file descriptor of the lock file.  Must be opened for writing so that exclusive
+    # locking will work over shared FSs.  Must be opened for appending so that the file is not
+    # truncated (clobbered), because it might be the `combined` history file itself.
+    exec {LOCK_FD}>> "$LOCK_FILE"
+
+    if _my_flock "${1:-}" --timeout 10 $LOCK_FD ; then
+        print $LOCK_FD
     else
-        echo "Failed to lock $LOCK_FILE" >&2
+        warn "Failed to lock $LOCK_FILE"
         exec {LOCK_FD}>&-  # Close the FD to clean-up.
         return 1
     fi
@@ -142,17 +152,27 @@ function _my_histfile_combining {
 
         if _my_lock_combined_histfile --exclusive > /dev/null
         then
-            [ -e "$MY_BASH_HISTDIR"/combined ] || std touch "$MY_BASH_HISTDIR"/combined || return
             local PREV_COMBINED
-            PREV_COMBINED=$(std mktemp "$MY_BASH_HISTDIR"/combined-prev-XXXXXXXXXX) || return
+            PREV_COMBINED=$(gnu mktemp "$MY_BASH_HISTDIR"/combined-prev-XXXXXXXXXX) || return
             std cp "$MY_BASH_HISTDIR"/combined "$PREV_COMBINED" || return
 
-            if type my-bash_history-combiner >& /dev/null; then
+            if is-command-found my-bash_history-combiner ; then
+                # Use it wherever it currently is from.
                 local MY_BASH_HISTORY_COMBINER=my-bash_history-combiner
-            else
-                # When it's not in the PATH (e.g. when inside `nix-shell --pure`), assume it's
-                # here:
+
+            elif [ "${MY_PLATFORM_VARIANT-}" = NixOS ]; then
+                # When it's not in the PATH (e.g. inside `nix-shell --pure`), assume it's here:
                 local MY_BASH_HISTORY_COMBINER=~/.nix-profile/bin/my-bash_history-combiner
+            else
+                local BIN_DIR
+                # For all other platforms, assume it's hopefully here:
+                if [ "${MY_PLATFORM_OS_VAR_VER_ARCH-}" ]; then
+                    BIN_DIR=$(_my_platspec_install_dir)/bin
+                else
+                    # Or in the XDG-BDS location:
+                    BIN_DIR=bin
+                fi
+                local MY_BASH_HISTORY_COMBINER=~/.local/$BIN_DIR/my-bash_history-combiner
             fi
 
             if ! $MY_BASH_HISTORY_COMBINER "$PREV_COMBINED" "$MY_BASH_SESSION_HISTFILE" \
@@ -183,5 +203,5 @@ if [ -v IN_NIX_SHELL ]; then
 elif [ -z "$(trap -p EXIT)" ]; then  # Don't replace any preexisting trap.
     trap _my_histfile_combining_ignore_failure EXIT
 else
-    echo "Note: Unable to setup _my_histfile_combining for exit." 1>&2
+    warn "Unable to setup _my_histfile_combining for exit."
 fi

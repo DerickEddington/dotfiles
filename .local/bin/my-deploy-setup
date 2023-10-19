@@ -1,0 +1,223 @@
+#! /usr/bin/env bash
+readonly args=("$@")
+# shellcheck source=../share/my/bash/helpers.bash
+source "${XDG_DATA_HOME:-$HOME/.local/share}"/my/bash/helpers.bash
+_my-script-prelude
+
+
+# shellcheck disable=SC2154  # selfBase is assigned by _my-script-prelude
+if (( ${#args[@]} != 1 )); then
+    std cat 1>&2 <<-EOF
+	Usage: $selfBase ssh://[USER@]HOSTNAME[:PORT]
+	   or: $selfBase vagrant://[NAME|ID]
+	   or: $selfBase dir:LOCALDIR
+	EOF
+    exit 1
+fi
+
+
+# Defaults
+
+readonly defaultDotfilesRepo=$HOME/.dotfiles
+# '$USER' is a placeholder that will be substituted with the target user's name.
+readonly defaultDotfilesRefspecs="HEAD:user/\$USER main"
+
+
+# Functions
+
+function process-vars
+{
+    process-args
+    process-env-vars
+
+    readonly baseDirOfNeededByBootstrap="${MY_DATA_HOME:?}"/my
+    readonly dirsNeededByBootstrap=(sh bash deploy-setup)
+    readonly prefixNeededByBootstrap=.local/share/my
+}
+
+function process-args
+{
+    targetUrl="${args[0]}"
+    reuseConnOpts=()
+    # shellcheck disable=SC2016
+    targetHomeDirExpr='"${HOME:?}"'
+
+    if [[ "$targetUrl" =~ ^dir:(.*)$ ]]; then
+        local targetLocalDir=${BASH_REMATCH[1]}
+        if [ "$targetLocalDir" ]; then
+            targetLocalDir=$(norm_abs_path "$targetLocalDir") || true
+            if ! [ -e "$targetLocalDir" ] && [ "$targetLocalDir" ]; then
+                std mkdir -p "$targetLocalDir" || return
+            fi
+            if [ -d "$targetLocalDir" ] \
+            && [ -r "$targetLocalDir" ] && [ -w "$targetLocalDir" ] && [ -x "$targetLocalDir" ]
+            then
+                targetHomeDirExpr=$(quote "$targetLocalDir")
+                targetUrl=shell://localhost
+            else
+                error "Invalid directory: ${targetLocalDir@Q}!" 2
+            fi
+        else
+            error "Missing directory name in URL: ${targetUrl@Q}!" 3
+        fi
+    else
+        # Reusing the SSH connection, via multiplexing, can greatly speed-up the numerous `ssh`
+        # commands this script does, for some target hosts that are slow at establishing each SSH
+        # connection.  Persistence of the master connection must be done, because each `ssh`
+        # command terminates sequentially, and so persisting the initial connection is needed to
+        # reuse it.  (Note: The length of a control-socket's pathname must be minimized, due to
+        # the size limit of `sockaddr_un.sun_path`.)
+        reuseConnOpts=(
+            -o ControlMaster=auto
+            -o ControlPath="${MY_RUNTIME_DIR:?}"/my/deploy-setup/%C  # (%C is constant-length.)
+            -o ControlPersist=1h  # Just enough for subsequent commands of this script.
+        )
+        std mkdir -p "${MY_RUNTIME_DIR:?}"/my/deploy-setup
+
+        if [[ "$targetUrl" =~ ^vagrant:// ]]; then
+            reuseConnOpts=(-- "${reuseConnOpts[@]}")
+        fi
+    fi
+
+    readonly targetUrl targetHomeDirExpr reuseConnOpts
+}
+
+function process-env-vars
+{
+    localDotfilesRepo=${MY_DEPLOY_SETUP_DOTFILES_FROM_REPO:-$defaultDotfilesRepo}
+    if ! [[ "$localDotfilesRepo" = */@(.git|.dotfiles) ]]; then
+        localDotfilesRepo+=/.git
+    fi
+    localDotfilesRepo=$(abs_path "$localDotfilesRepo") || return
+
+    [ -r "$localDotfilesRepo" ] || error "Invalid dotfiles repo: ${localDotfilesRepo@Q}!" 4
+
+    # The first refspec is considered the primary.
+    dotfilesRefspecs=${MY_DEPLOY_SETUP_DOTFILES_FROM_REFSPECS:-$defaultDotfilesRefspecs}
+    split-on-words "$dotfilesRefspecs" dotfilesRefspecs
+
+    extraConnMethodOpts=${MY_DEPLOY_SETUP_EXTRA_CONN_METHOD_OPTS-}
+    split-on-words "$extraConnMethodOpts" extraConnMethodOpts
+
+    readonly localDotfilesRepo dotfilesRefspecs extraConnMethodOpts
+}
+
+function rsh { rsh-cd . "$@" ;}
+
+function rsh-cd {
+    (( $# == 2 )) || exit
+    local shOpts=('set -e;')
+    (( VERBOSE >= 5 )) && shOpts+=('set -x;')
+    (( VERBOSE >= 6 )) && shOpts+=('set -v;')
+
+    remote-sh-cd "$targetUrl" "$1" "${shOpts[*]} $2" \
+                 "${reuseConnOpts[@]}" "${extraConnMethodOpts[@]}"
+}
+
+function rsh-in-bd { rsh-cd "$(quote "$targetBootstrapDir")" "$@" ;}
+
+function check-can-command-target
+{
+    # Basic sanity check before the looping in `make-bootstrap-dir`.
+    #
+    rsh 'true' || error "Cannot execute a simple shell command in the target host!" 5
+}
+
+function has-repo-already
+{
+    if rsh-cd "$targetHomeDirExpr" '[ -e .dotfiles ] || [ -e .git ] || [ -e .git-hidden ]'
+    then
+        println "Info: Already have a repository in $targetHomeDirExpr. Skipping."
+        return 0
+    else
+        return 1
+    fi
+}
+
+function make-bootstrap-dir
+{
+    local attempts=5
+    while (( attempts-- >= 1 )); do
+        # (Use `mktemp` in the local host, because it might not be available in a remote host.)
+        targetBootstrapDir=$(gnu mktemp -u /tmp/XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX)
+
+        if rsh "mkdir -m u=rwx,g=,o= $targetBootstrapDir"; then
+            break
+        else
+            unset targetBootstrapDir
+        fi
+    done
+    readonly targetBootstrapDir
+
+    [ "${targetBootstrapDir:-}" ] || fail "Failed to make bootstrap directory in target host!" 6
+}
+
+function copy-bootstrap-scripts
+{
+    local - ; set -o pipefail
+
+    make-bootstrap-dir
+
+    gnu tar --create --directory="$baseDirOfNeededByBootstrap" --dereference \
+        --transform="s,^,$prefixNeededByBootstrap/," \
+        "${dirsNeededByBootstrap[@]}" \
+    | \
+    rsh-in-bd 'tar xf -'  # (Any `tar` implementation, not only GNU's, should work this way.)
+}
+
+function copy-dotfiles-bundle
+{
+    local - ; set -o pipefail
+    local -r bundleRefs=("${dotfilesRefspecs[@]%:*}")
+
+    # As bundle is created, immediately output it over the connection to the target host without
+    # having an intermediate local file.
+    #
+    git --git-dir="$localDotfilesRepo" bundle create - "${bundleRefs[@]}" \
+    | \
+    rsh-in-bd 'cat > ./dotfiles.git.bundle'
+}
+
+function copy-bootstrap-files
+{
+    copy-bootstrap-scripts
+    copy-dotfiles-bundle
+}
+
+function run-bootstrap
+{
+    local quotedDotfilesRefspecs=() rs
+    for rs in "${dotfilesRefspecs[@]}"; do
+        quotedDotfilesRefspecs+=("$(quote "$rs")")
+    done
+
+    rsh-in-bd "
+        HOME=$targetHomeDirExpr                                 \\
+        VERBOSE=$(quote "$VERBOSE")                             \\
+            ./.local/share/my/deploy-setup/bootstrap/start0.sh  \\
+                $targetHomeDirExpr                              \\
+                ./dotfiles.git.bundle                           \\
+                ${quotedDotfilesRefspecs[*]}
+    "
+}
+
+function cleanup {
+    rsh "rm -r -f $(quote "$targetBootstrapDir")"
+}
+
+
+# Operations
+
+process-vars
+check-can-command-target
+
+# Check if we should not do anything.  Doing nothing avoids invoking start0.sh when this script is
+# applied to the same home multiple times (e.g. via a `vagrant up` trigger).
+#
+if has-repo-already ; then
+    exit 0  #  Considered a success.
+else
+    copy-bootstrap-files
+    run-bootstrap || error "Bootstrap script failed!" 6
+    cleanup  # Don't cleanup if anything above fails (`errexit` will exit before here, if so).
+fi

@@ -1,0 +1,23 @@
+#! /usr/bin/env bash
+# shellcheck source=../share/my/bash/helpers.bash
+source "${XDG_DATA_HOME:-$HOME/.local/share}"/my/bash/helpers.bash
+_my-script-prelude
+
+# Simply wraps `vagrant ssh` to coalesce a given command from multiple arguments into a single
+# one.  Especially useful with the git-remote-ext "remote helper program" of Git as invoked via a
+# URL of the form <transport>::<address> like `ext::vagrant-ssh-coalesce-cmd $MACHINE %S
+# $PATH_TO_REPO` (and remember that the Git option `protocol.ext.allow = always` usually needs to
+# be in effect for this).
+
+readonly machine=$1 command=${*:2}
+
+sshOptsExtra=(
+    -T  # `-T` to separate stdout & stderr.
+)
+if (( "${VERBOSE:-0}" >= 7 )); then
+    for (( i = VERBOSE - 6 ; i > 0 ; i-- )); do
+        sshOptsExtra+=(-v)
+    done
+fi
+
+exec vagrant ssh -c "$command" "$machine" -- "${sshOptsExtra[@]}"

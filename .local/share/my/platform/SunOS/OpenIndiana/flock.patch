@@ -1,0 +1,58 @@
+--- util-linux-2.39.2/lib/c_strtod.c	2023-06-14 02:11:15.538890025 -0700
++++ util-linux-2.39.2/lib/c_strtod.c	2023-10-07 22:19:51.833737893 -0700
+@@ -1,3 +1,5 @@
++#undef HAVE_USELOCALE
++
+ /*
+  * Locale-independent strtod().
+  *
+--- util-linux-2.39.2/lib/monotonic.c	2023-06-14 02:11:15.542890000 -0700
++++ util-linux-2.39.2/lib/monotonic.c	2023-10-07 22:19:11.789057658 -0700
+@@ -1,3 +1,5 @@
++#undef HAVE_SYSINFO
++
+ /*
+  * Please, don't add this file to libcommon because clock_gettime() requires
+  * -lrt on systems with old libc.
+--- util-linux-2.39.2/lib/Makemodule.am	2023-06-20 04:30:07.850293355 -0700
++++ util-linux-2.39.2/lib/Makemodule.am	2023-10-09 22:40:47.869757465 -0700
+@@ -59,7 +59,6 @@
+ if HAVE_DIRFD
+ libcommon_la_SOURCES += lib/path.c
+ libcommon_la_SOURCES += lib/sysfs.c
+-libcommon_la_SOURCES += lib/procfs.c
+ endif
+ endif
+ 
+@@ -106,7 +105,6 @@
+ endif
+ check_PROGRAMS += \
+ 	test_sysfs \
+-	test_procfs \
+ 	test_pager \
+ 	test_caputils \
+ 	test_loopdev \
+@@ -182,13 +180,6 @@
+ test_sysfs_CFLAGS = $(AM_CFLAGS) -DTEST_PROGRAM_SYSFS
+ test_sysfs_LDADD = $(LDADD)
+ 
+-test_procfs_SOURCES = lib/procfs.c lib/path.c lib/fileutils.c lib/strutils.c
+-if HAVE_CPU_SET_T
+-test_procfs_SOURCES += lib/cpuset.c
+-endif
+-test_procfs_CFLAGS = $(AM_CFLAGS) -DTEST_PROGRAM_PROCFS
+-test_procfs_LDADD = $(LDADD)
+-
+ test_pager_SOURCES = lib/pager.c
+ test_pager_CFLAGS = $(AM_CFLAGS) -DTEST_PROGRAM_PAGER
+ 
+--- util-linux-2.39.2/include/Makemodule.am	2023-08-17 00:55:57.011839327 -0700
++++ util-linux-2.39.2/include/Makemodule.am	2023-10-09 22:44:30.368567815 -0700
+@@ -53,7 +53,6 @@
+ 	include/pathnames.h \
+ 	include/pidfd-utils.h \
+ 	include/plymouth-ctrl.h \
+-	include/procfs.h \
+ 	include/pt-bsd.h \
+ 	include/pt-mbr.h \
+ 	include/pt-mbr-partnames.h \

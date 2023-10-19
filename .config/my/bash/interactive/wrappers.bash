@@ -1,6 +1,12 @@
 # Wrappers of utils
 
 
+# shellcheck source=../../../../.local/share/my/gnu/wrappers.bash
+if [ -f "$MY_DATA_HOME"/my/gnu/wrappers.bash ]; then
+    source "$MY_DATA_HOME"/my/gnu/wrappers.bash || return
+fi
+
+
 function du
 {
     ( shopt -s dotglob
@@ -9,7 +15,7 @@ function du
       else
           local ARGS=(*)
       fi
-      command du -s -c -h "${ARGS[@]}" | sort -h )
+      gnu du -s -c -h "${ARGS[@]}" | sort -h )
 }
 
 
@@ -40,7 +46,7 @@ function nix-shell
         # HISTFILE=$MY_BASH_SESSION_HISTFILE, just in case that is not in effect
         # for some reason).  We evaluate $MY_BASH_INTERACTIVE_CONFIG here,
         # because that variable is not present inside `nix-shell --pure`.
-        local MY_COMMAND=("source '$MY_BASH_INTERACTIVE_CONFIG'/history/init.bash;")
+        local MY_COMMAND=("source $(quote "$MY_BASH_INTERACTIVE_CONFIG")/history/init.bash;")
 
         if [ "$GIVEN_COMMAND_IDX" ]; then
             # Allow the given command to control whether it does a "return".

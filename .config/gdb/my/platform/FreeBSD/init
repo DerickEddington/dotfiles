@@ -1,0 +1,8 @@
+target native
+# Requires `target native`.
+set scheduler-locking step
+
+# For some reason, spurious SIGTRAP signals are sometimes received.  This signal seems to be
+# unneeded for breakpoints on x86_64 (presumably because GDB uses hardware breakpoints instead.)
+# You may try uncommenting this:
+#handle SIGTRAP nostop noprint nopass

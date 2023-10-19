@@ -7,7 +7,8 @@
 { config, pkgs, lib, ... }:
 
 let
-  inherit (lib) mkForce;
+  inherit (builtins) pathExists;
+  inherit (lib) mkForce optional;
 in
 
 let
@@ -18,8 +19,9 @@ in
 {
   imports = [
     ./common
-    (./per-host + "/${hostName}")
-  ];
+  ]
+  ++ (let perHostName = ./per-host + "/${hostName}";
+      in optional (pathExists perHostName) perHostName);
 
   # Packages available in per-user profile.
   home.packages = with pkgs; [
@@ -35,6 +37,8 @@ in
   #   toolchains = {
   #   };
   # };
+
+  # my.vagrant.enable = true;
 
   # # Have debug-info and source-code for packages where this is applied.  This is for packages
   # # that normally don't provide these, and this uses my custom approach that overrides and

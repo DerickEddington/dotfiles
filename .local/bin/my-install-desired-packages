@@ -1,0 +1,6 @@
+#! /usr/bin/env bash
+
+# This installs the packages specified in $XDG_CONFIG_HOME/my/platform/config.bash.  This should
+# be run when that changed to specify more.
+
+exec "${XDG_DATA_HOME:-$HOME/.local/share}"/my/deploy-setup/install-desired-packages.bash "$@"

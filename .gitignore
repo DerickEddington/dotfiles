@@ -46,7 +46,9 @@
 /.gnupg/private*
 /.lesshst
 /.lldb/*history
+/.local/my/platform/**/installed/*/*
 /.local/share/*
+!/.local/share/my/
 !/.local/share/rust-script
 /.local/state/*
 !/.local/state/my/
@@ -64,6 +66,11 @@
 !/.ssh/id_*.pub
 /.thumbnails
 /tmp
+/.vagrant.d/*
+!/.vagrant.d/boxes
+!/.vagrant.d/data/
+/.vagrant.d/data/*
+!/.vagrant.d/data/machine-index/
 /.vboxclient*.pid
 /Videos
 /.wget-hsts
@@ -75,8 +82,7 @@
 /.bashrc
 /.config/dconf/
 /.config/environment.d/10-home-manager.conf
-/.config/gdb/my/home-manager-init
-/.config/git/config
+/.config/gdb/my/platform/*/NixOS/init
 /.config/systemd/
 /.config/user-tmpfiles.d/my-home-*-tmp-debug.conf
 /.config/user-tmpfiles.d/my-home-*-tmp-src.conf

@@ -1,0 +1,245 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+
+# # nix-shell -p rubyPackages.pry{,-byebug}
+# require "pry"
+# require "pry-byebug"
+# # ... ; binding.pry ; ...  # Place breakpoint wherever desired.
+
+
+def set_vm_magnitude(config)
+  config.vm.provider "virtualbox" do |vb|
+    vb.cpus = Etc.nprocessors / 2  # Assume hyper-threading is 2*amount-cores.
+    vb.memory = 2 * 1024  # MiB
+  end
+  # Some boxes' (e.g. freebsd/*) default disk size is too small (or too large) for my needs.
+  ENV['VAGRANT_EXPERIMENTAL'] = "disks"  # TODO: Remove w/ Vagrant 2.4 which stabilized this.
+  config.vm.disk :disk, size: "32GB", primary: true
+  ENV.delete('VAGRANT_EXPERIMENTAL')     # TODO: ditto
+end
+
+def set_trigger_deploy_setup(config)
+  config.trigger.after [:up, :provision, :reload] do |trigger|
+    trigger.name = "my-deploy-setup"
+    trigger.ruby do |env, machine|
+      setup_prog = ENV.fetch("MY_DEPLOY_SETUP", "$HOME/.local/bin/my-deploy-setup")
+      system("#{setup_prog} 'vagrant://#{machine.index_uuid}'")
+    end
+  end
+end
+
+def setup_my_way(config)
+  set_vm_magnitude(config)
+  set_trigger_deploy_setup(config)
+ #config.vm.network "public_network"  # Have a bridged interface. Only as public as that is.
+end
+
+def provision_apt_upgrade(vm)
+    vm.provision "apt-update", type: "shell", privileged: true,
+                 inline: "apt-get update"
+    vm.provision "apt-upgrade", type: "shell", privileged: true,
+                 inline: "apt-get upgrade --yes --with-new-pkgs",
+                 reboot: true
+    vm.provision "apt-autoremove", type: "shell", privileged: true,
+                 inline: "apt-get autoremove --yes"
+end
+
+
+# Vagrant is currently configured to create VirtualBox synced folders with
+# the `SharedFoldersEnableSymlinksCreate` option enabled. If the Vagrant
+# guest is not trusted, you may want to disable this option. For more
+# information on this option, please refer to the VirtualBox manual:
+#   https://www.virtualbox.org/manual/ch04.html#sharedfolders
+#
+# This option can be disabled globally with an environment variable:
+#   VAGRANT_DISABLE_VBOXSYMLINKCREATE=1
+#
+# or on a per folder basis within the Vagrantfile:
+#   config.vm.synced_folder '/host/path', '/guest/path', SharedFoldersEnableSymlinksCreate: false
+#
+ENV["VAGRANT_DISABLE_VBOXSYMLINKCREATE"] = "1"
+
+
+Vagrant.configure("2") do |config|
+
+  # TODO: Each does a package update to its repo's latest, as a provision script that also does a
+  # "reload" reboot.  Probably have some helper function for setting this up.
+
+  config.vm.define "deb12", autostart: false do |deb12|
+    deb12.vm.box = "debian/bookworm64"
+    setup_my_way(deb12)
+    provision_apt_upgrade(deb12.vm)
+  end
+
+  config.vm.define "ubu22", autostart: false do |ubu22|
+    ubu22.vm.box = "ubuntu/jammy64"
+    setup_my_way(ubu22)
+    provision_apt_upgrade(ubu22.vm)
+    # When uncommented, to test a HOME shared across multiple OSs, also do this for at least one
+    # more of the VMs (i.e. copy-paste this to those others' definitions).
+   #ubu22.vm.synced_folder "~/tmp/test-shared-home", "/home/bum", owner: "bum",
+   #                       SharedFoldersEnableSymlinksCreate: true
+  end
+
+  config.vm.define "ubu23", autostart: false do |ubu23|
+    ubu23.vm.box = "ubuntu/mantic64"
+    setup_my_way(ubu23)
+    provision_apt_upgrade(ubu23.vm)
+  end
+
+  config.vm.define "arch", autostart: false do |arch|
+    arch.vm.box = "archlinux/archlinux"
+    set_vm_magnitude(arch)
+  end
+
+  config.vm.define "fed38", autostart: false do |fed38|
+    fed38.vm.box = "bento/fedora-38"
+    set_vm_magnitude(fed38)
+  end
+
+  config.vm.define "rhel9", autostart: false do |rhel9|
+    rhel9.vm.box = "roboxes/rhel9"
+    set_vm_magnitude(rhel9)
+  end
+
+  config.vm.define "suse15", autostart: false do |suse15|
+    suse15.vm.box = "opensuse/Leap-15.5.x86_64"
+    set_vm_magnitude(suse15)
+  end
+
+  config.vm.define "alp3", autostart: false do |alp3|
+    alp3.vm.box = "roboxes/alpine318"
+    setup_my_way(alp3)
+    alp3.vm.provision "apk-upgrade", type: "shell", privileged: true,
+                      inline: "apk upgrade",
+                      reboot: true
+  end
+
+  config.vm.define "sol11", autostart: false do |sol11|
+    sol11.vm.box = "openindiana/hipster"
+    setup_my_way(sol11)
+   #sol11.vm.provider "virtualbox" do |vb|
+   #  vb.memory = 32 * 1024  # MiB  # Needed to build ClangD, Bear, and gRPC.
+   #end
+    sol11.vm.provision "pkg-refresh", type: "shell", privileged: true,
+                       inline: "pkg refresh"
+    sol11.vm.provision "pkg-update", type: "shell", privileged: true,
+                       inline: "pkg update --accept --no-refresh || [ $? -eq 4 ]"
+    sol11.vm.provision "check-if-reboot-needed", type: "shell", privileged: false,
+                       inline: "
+                         nextBootEnvActiveness=$(beadm list -H -K date | head -n1 | cut -d';' -f3)
+                         if [ \"$nextBootEnvActiveness\" = R ]; then  # It's new for next reboot.
+                           echo 'Boot Environment updated. Do `vagrant reload --provision $name`.'
+                           exit 1
+                         fi 1>&2
+                       "  # , reboot: true  # unsupported
+  end
+
+  config.vm.define "fbsd13", autostart: false do |fbsd13|
+    fbsd13.vm.box = "freebsd/FreeBSD-13.2-RELEASE"
+   #fbsd13.vm.box = "bento/freebsd-13"
+   #fbsd13.ssh.shell = "sh"
+   #fbsd13.ssh.connect_timeout = 120
+    setup_my_way(fbsd13)
+    fbsd13.vm.provision "pkg-update", type: "shell", privileged: true,
+                        inline: "pkg update"
+    fbsd13.vm.provision "pkg-upgrade", type: "shell", privileged: true,
+                        inline: "pkg upgrade --yes"
+    fbsd13.vm.provision "pkg-autoremove", type: "shell", privileged: true,
+                        inline: "pkg autoremove --yes"
+    fbsd13.vm.provision "freebsd-update-fetch", type: "shell", privileged: true,
+                        inline: "freebsd-update --not-running-from-cron fetch"
+    fbsd13.vm.provision "freebsd-update-install", type: "shell", privileged: true,
+                        inline: "
+                          if freebsd-update updatesready ; then
+                            freebsd-update install || exit
+                            if [ \"$(freebsd-version -k)\" != \"$(freebsd-version -r)\" ]; then
+                              echo 'Kernel updated. Do `vagrant reload --provision $name`.' 1>&2
+                              exit 1
+                            fi
+                          fi
+                        "  # , reboot: true  # unsupported
+  end
+
+  config.vm.define "nbsd9", autostart: false do |nbsd9|
+    nbsd9.vm.box = "NetBSD/NetBSD-9.1"
+    set_vm_magnitude(nbsd9)
+    nbsd9.vm.synced_folder ".", "/vagrant", disabled: true  # Avoid error from Vagrant.
+  end
+
+  config.vm.define "obsd7", autostart: false do |obsd7|
+    obsd7.vm.box = "roboxes/openbsd7"
+    set_vm_magnitude(obsd7)
+  end
+
+  config.vm.define "dbsd6", autostart: false do |dbsd6|
+    dbsd6.vm.box = "roboxes/dragonflybsd6"
+    set_vm_magnitude(dbsd6)
+  end
+
+
+  # Help comments generated by `vagrant init`:
+
+  # The "2" in Vagrant.configure above configures the configuration version (we
+  # support older styles for backwards compatibility). Please don't change it
+  # unless you know what you're doing.
+
+  # The most common configuration options are documented and commented below.
+  # For a complete reference, please see the online documentation at
+  # https://docs.vagrantup.com.
+
+  # Disable automatic box update checking. If you disable this, then
+  # boxes will only be checked for updates when the user runs
+  # `vagrant box outdated`. This is not recommended.
+  # config.vm.box_check_update = false
+
+  # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine. In the example below,
+  # accessing "localhost:8080" will access port 80 on the guest machine.
+  # NOTE: This will enable public access to the opened port
+  # config.vm.network "forwarded_port", guest: 80, host: 8080
+
+  # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine and only allow access
+  # via 127.0.0.1 to disable public access
+  # config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
+
+  # Create a private network, which allows host-only access to the machine
+  # using a specific IP.
+  # config.vm.network "private_network", ip: "192.168.33.10"
+
+  # Create a public network, which generally matched to bridged network.
+  # Bridged networks make the machine appear as another physical device on
+  # your network.
+  # config.vm.network "public_network"
+
+  # Share an additional folder to the guest VM. The first argument is
+  # the path on the host to the actual folder. The second argument is
+  # the path on the guest to mount the folder. And the optional third
+  # argument is a set of non-required options.
+  # config.vm.synced_folder "../data", "/vagrant_data"
+
+  # Provider-specific configuration so you can fine-tune various
+  # backing providers for Vagrant. These expose provider-specific options.
+  # Example for VirtualBox:
+  #
+  # config.vm.provider "virtualbox" do |vb|
+  #   # Display the VirtualBox GUI when booting the machine
+  #   vb.gui = true
+  #
+  #   # Customize the amount of memory on the VM:
+  #   vb.memory = "1024"
+  # end
+  #
+  # View the documentation for the provider you are using for more
+  # information on available options.
+
+  # Enable provisioning with a shell script. Additional provisioners such as
+  # Ansible, Chef, Docker, Puppet and Salt are also available. Please see the
+  # documentation for more information about their specific syntax and use.
+  # config.vm.provision "shell", inline: <<-SHELL
+  #   apt-get update
+  #   apt-get install -y apache2
+  # SHELL
+end

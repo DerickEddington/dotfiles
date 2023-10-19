@@ -4,11 +4,11 @@
 # file, committed to the main branch of the dotfiles repository, if the change
 # should be merged upstream and supplied to all users of the host system.
 
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, nixos-config, ... }:
 
 let
-  inherit (builtins) getEnv;
-  inherit (lib) hm mkDefault mkEnableOption mkIf;
+  inherit (builtins) getEnv pathExists;
+  inherit (lib) hm mkDefault mkEnableOption mkIf optionals;
 in
 
 let
@@ -16,16 +16,26 @@ let
   # (toString avoids the path coercion in antiquotation that would copy to /nix/store/.)
   systemPath = toString /run/current-system/sw;
   userProfilePath = toString ~/.nix-profile;
+
+  early.myLib = import ../../nixpkgs/my/lib { pkgs = null; };
+  inherit (early.myLib) nixosConfigLoc;
+
+  systemWide.debuggingModule.exists =
+    (    nixosConfigLoc.isDefined
+      && (pathExists (nixosConfigLoc.dirName + "/debugging.nix")));
 in
 {
   imports = [
     ./module-args.nix
-    ./debugging.nix
     ./emacs.nix
     ./git-svn.nix
     ./rootless-docker.nix
     ./rust.nix
-  ];
+    ./vagrant.nix
+  ]
+  ++ (optionals systemWide.debuggingModule.exists [
+    ./debugging.nix
+  ]);
 
   options.my = {
     tmpDir = mkEnableOption "`~/tmp` existence";
@@ -63,13 +73,21 @@ in
     # Packages available in per-user profile.  Only add to this that which all users should have,
     # because it is inconvenient for them to need to remove elements from this.
     home.packages = with pkgs; [
+      # Useful to each user because each user's home dir is tracked by Git.  Don't use
+      # `programs.git.enable` because that would generate config files (even an empty one), but we
+      # want those to not be managed by HM so they can be tracked in the dotfiles repo so they're
+      # provided in non-HM-managed homes (e.g. when the dotfiles repo is used in FreeBSD, Solaris,
+      # etc.).
+      config.programs.git.package
+
       # $XDG_CONFIG_HOME/my/bash/interactive/history/ needs this `my-bash_history-combiner`
       # utility.
       (import ../../nixpkgs/my/bash_history-combiner.nix { inherit pkgs; })
-
+    ]
+    ++ (optionals systemWide.debuggingModule.exists [
       # Exercise ../../nixpkgs/my/overlays and its addition of debugging support.
       my-hello-test
-    ];
+    ]);
 
     #---------------------------------------------------------------------------
     # Environment Variables
@@ -107,34 +125,6 @@ in
       initExtra = ''
         source "''${XDG_CONFIG_HOME:-$HOME/.config}/my/bash/interactive/init.bash"
       '';
-    };
-
-    #---------------------------------------------------------------------------
-    # Git
-    #---------------------------------------------------------------------------
-    programs.git = let
-      fetchParallel = 0;  # "some reasonable default"
-    in rec {
-      enable = true;
-      userName  = config.home.username;
-      userEmail = "${userName}@${hostName}";
-      extraConfig = {
-        init = {
-          defaultBranch = "main";
-        };
-        credential = {
-          helper = "cache --timeout ${toString (8 * 60 * 60)}";
-        };
-        fetch = {
-          parallel = fetchParallel;
-        };
-        merge = {
-          conflictStyle = "diff3";
-        };
-        submodule = {
-          fetchJobs = fetchParallel;
-        };
-      };
     };
 
     #---------------------------------------------------------------------------
@@ -274,7 +264,7 @@ in
     # dconf.  Affects GNOME-like desktop environments such as MATE.  The values
     # below were discovered with the CLI tool `dconf dump /`.
     #---------------------------------------------------------------------------
-    dconf.settings = {
+    dconf.settings = mkIf nixos-config.programs.dconf.enable {
 
       "org/mate/power-manager" = {
         action-critical-battery = "suspend";

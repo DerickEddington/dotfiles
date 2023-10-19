@@ -1,0 +1,24 @@
+#! /usr/bin/env bash
+readonly args=("$@")
+# shellcheck source=../.local/share/my/bash/helpers.bash
+source "${XDG_DATA_HOME:-$HOME/.local/share}"/my/bash/helpers.bash
+_my-script-prelude
+
+# Like GCC's -static-libgcc but for Cargo's target.<triple>.linker (i.e. `rustc -C linker=$0`).
+# Derived from: https://github.com/rust-lang/rust/issues/29527#issuecomment-931874664
+
+if [ "${MY_PLATFORM_OS_VARIANT:?}" = SunOS/OpenIndiana ] ; then
+    readonly CC=gcc SHARED=-lgcc_s STATIC=-lgcc_eh
+else
+    error "Unsupported OS: $MY_PLATFORM_OS_VARIANT.  TODO: Try to add support." 1
+fi
+
+for arg in "${args[@]}" ; do
+  shift
+  case "$arg" in
+    ("$SHARED") : ;;  # This is for the shared libgcc, so must exclude.
+    (*) set -- "$@" "$arg" ;;  # Keep all others, in their original order.
+  esac
+done
+
+exec "$CC" "$@" "$STATIC"
