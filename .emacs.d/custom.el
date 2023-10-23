@@ -439,6 +439,7 @@
  '(minibuffer-prompt ((t (:inherit font-lock-keyword-face))))
  '(mode-line ((t (:background "gray79" :foreground "black" :box (:line-width -1 :style released-button)))))
  '(mode-line-inactive ((t (:background "#ABA690" :box (:line-width -1 :style released-button)))))
+ '(nushell-pay-attention-face ((t (:inherit font-lock-preprocessor-face))))
  '(nxml-attribute-local-name ((t (:inherit font-lock-variable-name-face))))
  '(region ((t (:background "#E6DFBF"))))
  '(rust-builtin-formatting-macro ((t (:inherit font-lock-preprocessor-face))))
