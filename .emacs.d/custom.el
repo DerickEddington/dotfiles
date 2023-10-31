@@ -25,6 +25,7 @@
  '(comint-input-ignoredups t)
  '(comint-move-point-for-output 'this)
  '(comint-scroll-show-maximum-output nil)
+ '(comint-terminfo-terminal "eterm-color")
  '(comment-auto-fill-only-comments t)
  '(comment-empty-lines t)
  '(company-abort-manual-when-too-short t)
@@ -38,15 +39,16 @@
  '(ctl-arrow nil)
  '(debug-ignored-errors (cons 'remote-file-error debug-ignored-errors))
  '(default-frame-alist
-    '((menu-bar-lines . 1)
-      (width . 93)
-      (height . 54)
-      (tool-bar-lines . 0)))
+   '((menu-bar-lines . 1)
+     (width . 93)
+     (height . 54)
+     (tool-bar-lines . 0)))
  '(diff-default-read-only t)
  '(diff-switches "-u -r")
  '(dired-create-destination-dirs 'ask)
  '(dired-listing-switches "-l -A -h -F --group-directories-first")
  '(dired-vc-rename-file t)
+ '(dired-x-hands-off-my-keys nil)
  '(eldoc-echo-area-use-multiline-p t)
  '(eldoc-idle-delay 1)
  '(eldoc-minor-mode-string "")
@@ -82,6 +84,7 @@
  '(gud-chdir-before-run nil)
  '(gud-tooltip-modes
    '(gud-mode c-mode c++-mode fortran-mode python-mode rust-mode))
+ '(history-length 10000)
  '(hs-isearch-open nil)
  '(ibuffer-compressed-file-name-regexp
    "\\.\\(arj\\|bgz\\|bz2\\|gz\\|lzh\\|taz\\|tgz\\|xz\\|zip\\|z\\|zst\\)$")
@@ -136,15 +139,25 @@
  '(lsp-lens-enable t)
  '(lsp-modeline-code-actions-segments '(count))
  '(lsp-response-timeout 20)
+ '(lsp-rust-analyzer-binding-mode-hints t)
  '(lsp-rust-analyzer-cargo-watch-command "clippy")
  '(lsp-rust-analyzer-diagnostics-enable t)
  '(lsp-rust-analyzer-diagnostics-enable-experimental t)
  '(lsp-rust-analyzer-display-chaining-hints t)
+ '(lsp-rust-analyzer-display-closure-return-type-hints t)
  '(lsp-rust-analyzer-display-parameter-hints t)
  '(lsp-rust-analyzer-experimental-proc-attr-macros t)
+ '(lsp-rust-analyzer-hide-closure-initialization t)
+ '(lsp-rust-analyzer-hide-named-constructor t)
+ '(lsp-rust-analyzer-lens-references-adt-enable t)
+ '(lsp-rust-analyzer-lens-references-enum-variant-enable t)
+ '(lsp-rust-analyzer-lens-references-method-enable t)
+ '(lsp-rust-analyzer-lens-references-trait-enable t)
  '(lsp-rust-analyzer-max-inlay-hint-length 40)
  '(lsp-rust-analyzer-proc-macro-enable t)
  '(lsp-rust-analyzer-rustfmt-extra-args ["+the-nightly" "--unstable-features"])
+ '(lsp-rust-analyzer-rustfmt-rangeformatting-enable t)
+ '(lsp-rust-analyzer-use-client-watching nil)
  '(lsp-rust-build-on-save t)
  '(lsp-ui-doc-delay 2)
  '(lsp-ui-doc-include-signature t)
@@ -163,8 +176,7 @@
  '(lsp-ui-sideline-update-mode 'line)
  '(magit-blame-styles
    '((headings
-      (heading-format . "%C %.7H %A %a %s
-"))
+      (heading-format . "%C %.7H %A %a %s\12"))
      (margin
       (margin-format "%s%f" "%C %a%f" "%H%f")
       (margin-width . 68)
@@ -215,13 +227,7 @@
  '(markdown-fontify-code-blocks-natively t)
  '(max-mini-window-height 0.5)
  '(message-citation-line-format
-   "
-
-
-
-------------------------------------------------------------
-%N (%Y-%m-%d %H:%M %Z) wrote:
-")
+   "\12\12\12\12------------------------------------------------------------\12%N (%Y-%m-%d %H:%M %Z) wrote:\12")
  '(message-citation-line-function 'message-insert-formatted-citation-line)
  '(message-confirm-send t)
  '(message-kill-buffer-on-exit t)
@@ -249,6 +255,7 @@
  '(remote-file-name-inhibit-locks t)
  '(require-final-newline 'ask)
  '(rg-command-line-flags '("--search-zip" "--no-ignore" "--hidden"))
+ '(rust-format-goto-problem nil)
  '(rust-format-on-save t)
  '(rust-indent-method-chain t)
  '(rust-indent-return-type-to-arguments nil)
@@ -284,20 +291,16 @@
  '(tool-bar-mode nil)
  '(tooltip-mode nil)
  '(tramp-auto-save-directory "~/tmp/tramp-auto-save")
- '(tramp-connection-properties
-   (append
-    '((nil "remote-shell" "bash")
-      ("/vagrant:" "remote-shell-login"
-       ("-l")))
-    tramp-connection-properties))
  '(tramp-copy-size-limit 2097152)
  '(tramp-default-method "ssh")
  '(tramp-histfile-override t)
- '(tramp-remote-path (cons 'tramp-own-remote-path tramp-remote-path))
  '(tramp-sh-extra-args
    '(("\\(\\`\\|/\\)bash\\'" . "-noediting -norc -noprofile")
      ("\\(\\`\\|/\\)zsh\\'" . "-f +Z -V")))
  '(tramp-use-ssh-controlmaster-options t)
+ '(url-history-track t)
+ '(use-package-always-defer t)
+ '(use-package-check-before-init t)
  '(vc-directory-exclusion-list (cons "build" vc-directory-exclusion-list))
  '(vc-handled-backends '(Git SVN))
  '(view-read-only t)
@@ -309,7 +312,7 @@
  '(whitespace-style '(face tabs lines-tail))
  '(woman-fill-frame t)
  '(x-stretch-cursor t)
- '(xref-marker-ring-length 128))
+ '(xref-history-storage 'xref-window-local-history))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -403,11 +406,11 @@
  '(lsp-ui-sideline-global ((t (:box (:line-width 1 :style pressed-button) :slant italic :weight normal :height 0.8))))
  '(lsp-ui-sideline-symbol ((t (:foreground "grey30" :box (:line-width -1 :color "grey30")))))
  '(magit-blame-dimmed ((t (:inherit magit-dimmed :background "#BDB8A0" :underline nil :slant normal :weight normal))))
- '(magit-blame-hash ((t (:inherit magit-hash))) t)
+ '(magit-blame-hash ((t (:inherit magit-hash))))
  '(magit-blame-heading ((t (:inherit magit-blame-highlight :extend t :box (:line-width 7 :color "gray75") :height 0.9))))
  '(magit-blame-highlight ((t (:extend t :background "gray75" :foreground "black" :underline nil :slant normal :weight normal))))
  '(magit-blame-margin ((t (:inherit magit-blame-highlight))))
- '(magit-blame-name ((t (:inherit magit-log-author))) t)
+ '(magit-blame-name ((t (:inherit magit-log-author))))
  '(magit-branch-current ((t (:inherit magit-branch-local :box 2))))
  '(magit-branch-local ((t (:inherit font-lock-string-face :weight bold))))
  '(magit-branch-remote ((t (:inherit font-lock-constant-face :weight bold))))
@@ -457,7 +460,7 @@
  '(tooltip ((((class color)) (:inherit variable-pitch :background "lightyellow" :foreground "black" :height 80))))
  '(trailing-whitespace ((t (:underline (:color "red" :style wave)))))
  '(underline ((t (:underline t))))
- '(warning ((t (:foreground "yellow2" :weight bold))))
+ '(warning ((t (:foreground "yellow2"))))
  '(widget-field ((t (:background "gray75"))))
  '(widget-single-line-field ((t (:inherit widget-field :background "gray85"))))
  '(woman-bold ((((background dark)) (:foreground "red"))))

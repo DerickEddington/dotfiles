@@ -1,16 +1,17 @@
-(require 'vc-hooks)
-(require 'custom)
-
 (defgroup my nil
-  "My own things.")
+  "My own things."
+  :group 'emacs)
+
+
+(use-package vc-hooks)
 
 
 (defun my-disable-vc-mode ()
   (remove-hook 'find-file-hook #'vc-refresh-state)
   (remove-hook 'kill-buffer-hook #'vc-kill-buffer-hook)
-  (setq vc-handled-backends nil
-        vc-ignore-dir-regexp ""
-        auto-revert-check-vc-info nil)
+  (setopt vc-handled-backends nil
+          vc-ignore-dir-regexp ""
+          auto-revert-check-vc-info nil)
   (add-hook 'find-file-hook #'my-maybe-follow-link))
 
 
@@ -63,14 +64,18 @@ visited and a warning displayed."
              )))))
 
 
-(require 'xref)
+(use-package xref
+  :config
+  (unless vc-handled-backends  ;; If VC is disabled.
+    (advice-add 'xref-pop-to-location :around
+                #'my--xref-pop-to-location--around-advice--dont-ask-follow-symlinks)))
 
 (defcustom my-dont-ask-follow-symlinks nil
   "Functions for which non-nil `my-follow-symlinks' will not ask.
 
 Can be used like:
   (defun your-lang-mode-hook ()
-    (setq-local my-dont-ask-follow-symlinks '(xref-pop-to-location)))"
+    (setq-local my-dont-ask-follow-symlinks \\='(xref-pop-to-location)))"
   :type '(set (const xref-pop-to-location)) ;; Could be extended with more items.
   :group 'my)
 
@@ -81,7 +86,3 @@ Can be used like:
                   t)
              my-follow-symlinks)))
     (apply func rest)))
-
-(unless vc-handled-backends  ;; If VC is disabled.
-  (advice-add 'xref-pop-to-location :around
-              #'my--xref-pop-to-location--around-advice--dont-ask-follow-symlinks))

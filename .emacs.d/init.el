@@ -1,9 +1,12 @@
-(setq custom-file
-      ;; (Include a .el extension because custom-file is used in various ways
-      ;; where some probably require it.)
-      (expand-file-name "custom.el" user-emacs-directory))
-;; Load libraries that must already be, before evaluating `custom-file'.
-(require 'tramp)
+(setopt custom-file
+        ;; (Include a .el extension because custom-file is used in various ways
+        ;; where some probably require it.)
+        (expand-file-name "custom.el" user-emacs-directory))
+
+;; Initialize things that must already be, before evaluating `custom-file' and
+;; my "subinit" files.
+(require 'use-package)  ;; Also makes my `scroll-bar-mode' customization work, for some reason.
+
 ;; Load `custom-file' before my "subinit" files, because some of those depend on
 ;; my customized values.
 (load custom-file)
@@ -32,24 +35,18 @@
                    ))
   (load (expand-file-name (concat "init/" subinit) user-emacs-directory)))
 
-;; Ibuffer (instead of default Buffer Menu)
-(global-set-key (kbd "C-x C-b") #'my-ibuffer)
+(use-package dired
+  :config (use-package dired-x :demand t))
 
-;; Load this so it's immediately available (to have `dired-jump') before a
-;; `dired' buffer is created.
-(require 'dired-x)
+(use-package company
+  :bind ("TAB" . company-indent-or-complete-common))
 
-(require 'company)
-(global-set-key (kbd "TAB") #'company-indent-or-complete-common)
+(use-package home-end
+  :bind (("<home>" . home-end-home)
+         ("<end>"  . home-end-end)))
 
-(require 'home-end)
-(global-set-key [home] 'home-end-home)
-(global-set-key [end]  'home-end-end)
-
-(require 'expand-region)
-(global-set-key (kbd "C-=") 'er/expand-region)
-
-(global-set-key (kbd "C-c g") 'magit-file-dispatch)
+(use-package expand-region
+  :bind ("C-=" . er/expand-region))
 
 (global-set-key [remap just-one-space] #'cycle-spacing)
 

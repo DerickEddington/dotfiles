@@ -1,13 +1,17 @@
-(require 'magit)
+(use-package magit
 
-(put 'magit-reset-quickly 'disabled t)
-(add-hook 'magit-status-mode-hook
-          #'(lambda ()
-              (define-key magit-status-mode-map (kbd "x") nil)))
+  :bind (("C-c g" . magit-file-dispatch)
+         :map magit-status-mode-map
+              ("x" . nil))
 
-(advice-add 'magit-process-git-arguments
-            :filter-return
-            #'(lambda (args)
-                (mapcar
-                 #'(lambda (a) (if (tramp-tramp-file-p a) (file-local-name a) a))
-                 args)))
+  :config
+
+  (put 'magit-reset-quickly 'disabled t)
+
+  (advice-add 'magit-process-git-arguments
+              :filter-return
+              #'(lambda (args)
+                  (if (fboundp 'tramp-tramp-file-p)
+                      (mapcar #'(lambda (a) (if (tramp-tramp-file-p a) (file-local-name a) a))
+                              args)
+                    args))))

@@ -1,10 +1,10 @@
 ;; Must be before `(require 'projectile)' is ever done, to have effect for
 ;; non-file non-project buffers.
-;(setq projectile-mode-line-prefix "")
+;(setopt projectile-mode-line-prefix "")
 
-(require 'projectile)
-
-(define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
+(use-package projectile
+  :bind (:map projectile-mode-map
+              ("s-p" . projectile-command-map)))
 
 (defun my-projectile-mode-line ()
   "Report project name, but not type, only if there is a current project."

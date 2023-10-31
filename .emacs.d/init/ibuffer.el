@@ -1,10 +1,52 @@
 ;; TODO: Maybe pre-compile so these execute faster (right?), in the future when stable.
 
-(require 'ibuffer)
-(require 'ibuffer-project)
-(require 'rx)
-(require 'tramp)
-(require 'pcase)
+(use-package pcase)
+(use-package rx)
+(use-package tramp)
+
+
+(use-package ibuffer
+
+  :after ibuffer-project
+
+  :bind (:map ibuffer-mode-map
+              ([remap ibuffer-update] . 'my-ibuffer-update))
+
+  :config
+
+  (define-ibuffer-column my-size
+    (:name "Size"
+           :header-mouse-map ibuffer-size-header-map
+           :summarizer (lambda (&rest args) (apply #'my-size--summarizer args)))
+    (let ((size (buffer-size)))
+      (propertize (file-size-human-readable size) 'my-ibuffer-size size)))
+
+  (define-ibuffer-column my-process-and-relative-filename
+    (:name "Filename/Process"
+           :header-mouse-map ibuffer-project-file-relative-header-map
+           :summarizer (lambda (&rest args)
+                         (apply (get 'ibuffer-make-column-filename-and-process
+                                     'ibuffer-column-summarizer)
+                                args)))
+    (let* ((abbrevname-and-process
+            (ibuffer-make-column-filename-and-process buffer mark))
+           (filename
+            (or (ibuffer-buffer-file-name) ""))
+           (process
+            (if (and (get-buffer-process buffer)
+                     (string-match "^\\((.* .*)\\)" abbrevname-and-process))
+                (match-string 1 abbrevname-and-process)))
+           (project-root
+            (and (length> filename 0) (ibuffer-project-root buffer))))
+      (setq filename
+            (if-let* (project-root
+                      (root-dir (car project-root)))
+                (file-relative-name filename root-dir)
+              (ibuffer--abbreviate-file-name filename)))
+      (if process
+          (concat (propertize process 'font-lock-face 'font-lock-comment-face)
+                  (if (length> filename 0) (format " %s" filename) ""))
+        filename))))
 
 
 (defcustom my-ibuffer-project-root-regexps '()
@@ -16,21 +58,36 @@ apply to remote directories."
   :type '(repeat (choice regexp (cons :tag "Rx-form sequence" (const rx) (repeat sexp))))
   :group 'my)
 
-(setq ibuffer-project-root-functions
-      `((ibuffer-project-project-root . "")
-        ,@(mapcar
-           (lambda (r)
-             (cons (rx-to-string
-                    `(seq string-start
-                          (group (? (regex ,tramp-initial-file-name-regexp))
-                                 ,(pcase r
-                                    (`(rx . ,sexps)  `(seq ,@sexps))
-                                    ((pred stringp) `(regex ,r))
-                                    (_ (error "Bogus `my-ibuffer-project-root-regexps' element: %s" r))))
-                          "/"))
-                   ""))
-           my-ibuffer-project-root-regexps)
-        (identity . "")))
+
+(use-package ibuffer-project
+
+  :defines ibuffer-project-file-relative-header-map
+
+  :custom
+  (ibuffer-project-root-functions
+   `((ibuffer-project-project-root . "")
+     ,@(mapcar
+        (lambda (r)
+          (cons (rx-to-string
+                 `(seq string-start
+                       (group (? (regex ,tramp-initial-file-name-regexp))
+                              ,(pcase r
+                                 (`(rx . ,sexps)  `(seq ,@sexps))
+                                 ((pred stringp) `(regex ,r))
+                                 (_ (error
+                                     "Bogus `my-ibuffer-project-root-regexps' element: %s" r))))
+                       "/"))
+                ""))
+        my-ibuffer-project-root-regexps)
+     (identity . "")))
+
+  :config
+
+  (advice-add 'ibuffer-project-group-name :filter-return
+              #'my-dir-name-w/o-slash-suffix)
+
+  (advice-add 'ibuffer-project-generate-filter-groups :filter-return
+              #'my--ibuffer-project--sort-filter-groups-by-local-vs-remote))
 
 
 (defun my-ibuffer (&optional clear-cache)
@@ -47,6 +104,9 @@ seeing stale state that otherwise would require an extra
     (ibuffer
      other-window-p name qualifiers noselect shrink filter-groups formats)))
 
+;; Use Ibuffer instead of default Buffer Menu.
+(global-set-key (kbd "C-x C-b") #'my-ibuffer)
+
 
 (defun my-ibuffer-update (arg &optional silent)
   "Regenerate filter-groups according to `ibuffer-project', when appropriate.
@@ -60,8 +120,6 @@ otherwise would require an extra `ibuffer' call to see properly."
                           ibuffer-filter-groups))
     (setq ibuffer-filter-groups (ibuffer-project-generate-filter-groups)))
   (ibuffer-update arg silent))
-
-(define-key ibuffer-mode-map [remap ibuffer-update] #'my-ibuffer-update)
 
 
 (defun my-size--summarizer (column-strings)
@@ -78,40 +136,6 @@ otherwise would require an extra `ibuffer' call to see properly."
         (setq total (+ total size))))
     (file-size-human-readable total)))
 
-(define-ibuffer-column my-size
-  (:name "Size"
-   :header-mouse-map ibuffer-size-header-map
-   :summarizer (lambda (&rest args) (apply #'my-size--summarizer args)))
-  (let ((size (buffer-size)))
-    (propertize (file-size-human-readable size) 'my-ibuffer-size size)))
-
-
-(define-ibuffer-column my-process-and-relative-filename
-  (:name "Filename/Process"
-   :header-mouse-map ibuffer-project-file-relative-header-map
-   :summarizer (lambda (&rest args)
-                 (apply (get 'ibuffer-make-column-filename-and-process 'ibuffer-column-summarizer)
-                        args)))
-  (let* ((abbrevname-and-process
-          (ibuffer-make-column-filename-and-process buffer mark))
-         (filename
-          (or (ibuffer-buffer-file-name) ""))
-         (process
-          (if (and (get-buffer-process buffer)
-                   (string-match "^\\((.* .*)\\)" abbrevname-and-process))
-              (match-string 1 abbrevname-and-process)))
-         (project-root
-          (and (length> filename 0) (ibuffer-project-root buffer))))
-    (setq filename
-          (if-let* (project-root
-                    (root-dir (car project-root)))
-              (file-relative-name filename root-dir)
-            (ibuffer--abbreviate-file-name filename)))
-    (if process
-        (concat (propertize process 'font-lock-face 'font-lock-comment-face)
-                (if (length> filename 0) (format " %s" filename) ""))
-      filename)))
-
 
 (defun my-dir-name-w/o-slash-suffix (dir-name)
   "Don't want to see trailing slashes on group names."
@@ -119,9 +143,6 @@ otherwise would require an extra `ibuffer' call to see properly."
            (string-suffix-p "/" dir-name))
       (substring dir-name 0 -1)
     dir-name))
-
-(advice-add 'ibuffer-project-group-name :filter-return
-            #'my-dir-name-w/o-slash-suffix)
 
 
 (defun my--ibuffer-project--filter-group-qualifier-root-dir (filter-group)
@@ -140,9 +161,6 @@ otherwise would require an extra `ibuffer' call to see properly."
                 (root-dir-b (my--ibuffer-project--filter-group-qualifier-root-dir b)))
             (and (not (file-remote-p root-dir-a))
                  (file-remote-p root-dir-b))))))
-
-(advice-add 'ibuffer-project-generate-filter-groups :filter-return
-            #'my--ibuffer-project--sort-filter-groups-by-local-vs-remote)
 
 
 ;; Not used currently.  If ever desired to use, needs to be fixed so that: the

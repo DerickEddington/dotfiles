@@ -56,7 +56,7 @@ in
   config = {
     programs.emacs = {
       enable = true;
-      package = pkgs.emacs-gtk;
+      package = pkgs.emacs29-gtk3;
       extraPackages = epkgs: concatMap (f: f epkgs) config.my.emacs.extraPackages;
       overrides = self: super:
         let listOfAttrs = map (f: f self super) config.my.emacs.overrides;
@@ -67,7 +67,6 @@ in
       extraPackages = [(epkgs: with epkgs; [
         adaptive-wrap
         all-the-icons
-        cargo
         charmap
         cmake-mode
         company
@@ -92,7 +91,7 @@ in
         rg
         rust-mode
         smartparens
-        tramp  # To use version from ELPA that is newer than built-in.
+       #tramp  # To use version from ELPA that is newer than built-in.
         toml-mode
         yaml-mode
       ])];

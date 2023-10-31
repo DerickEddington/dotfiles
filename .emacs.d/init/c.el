@@ -1,24 +1,22 @@
-(require 'cc-mode)
+(use-package cc-mode
+  :bind
+  (:map c-mode-map
+        ([remap sp-forward-slurp-sexp] . sp-slurp-hybrid-sexp)
+        ([remap sp-transpose-sexp]     . sp-transpose-hybrid-sexp))
+  :hook
+  (((c-mode c++-mode) . hs-minor-mode)
+   ((c-mode c++-mode) . imenu-add-menubar-index)))
 
-(require 'eldoc)
+(use-package eldoc)
 
-(require 'flycheck)
+(use-package flycheck)
 
-(require 'lsp-mode)
-(add-hook 'c-mode-hook #'lsp)
-(add-hook 'c++-mode-hook #'lsp)
-(lsp-register-client
- (make-lsp-client :new-connection (lsp-tramp-connection
-                                   #'(lambda () (cons "clangd" lsp-clients-clangd-args)))
-                  :major-modes '(c-mode c++-mode)
-                  :remote? t
-                  :server-id 'clangd-remote))
-
-(require 'smartparens)
-(define-key c-mode-map [remap sp-forward-slurp-sexp] #'sp-slurp-hybrid-sexp)
-(define-key c-mode-map [remap sp-transpose-sexp] #'sp-transpose-hybrid-sexp)
-
-(require 'cmake-mode)
-
-(add-hook 'c-mode-hook #'imenu-add-menubar-index)
-(add-hook 'c-mode-hook #'hs-minor-mode)
+(use-package lsp-mode
+  :hook ((c-mode c++-mode) . lsp)
+  :config
+  (lsp-register-client
+   (make-lsp-client :new-connection (lsp-tramp-connection
+                                     #'(lambda () (cons "clangd" lsp-clients-clangd-args)))
+                    :major-modes '(c-mode c++-mode)
+                    :remote? t
+                    :server-id 'clangd-remote)))

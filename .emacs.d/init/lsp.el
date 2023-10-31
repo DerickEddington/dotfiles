@@ -1,10 +1,11 @@
 ;; -*- lexical-binding: t; -*-
 
-;; This helps performance, especially for lsp-mode with rust-analyzer.
-;; This variable is not customizable, so we set it like this here.
-(setq read-process-output-max (* 2 1024 1024))
 
-(require 'lsp-mode)
+(use-package lsp-mode
+  :custom
+  ;; This variable is not customizable, so we set it like this here.
+  (read-process-output-max (* 1 1024 1024)
+   "Helps performance, especially for `lsp-mode' with `rust-analyzer'."))
 
 (defun my-wait-for-stty-to-take-effect (func &rest args)
   (let* ((timeout 10)

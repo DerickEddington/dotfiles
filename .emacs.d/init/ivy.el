@@ -1,1 +1,2 @@
-(require 'counsel)
+(use-package ivy)
+(use-package counsel)
