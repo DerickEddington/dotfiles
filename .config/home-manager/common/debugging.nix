@@ -110,6 +110,9 @@ in
               dir ${user.tmpLoc} ${sys.tmpLoc}
             ''}
 
+          # So that thread debugging will be available, with NixOS's unusual locations.
+          add-auto-load-safe-path /nix/store/*-glibc-*/lib/libthread_db*
+
           ${optionalString config.my.rust.enable (let
               pp = "/nix/store/*-rustc-*/lib/rustlib/etc/gdb_load_rust_pretty_printers.py";
             in ''
