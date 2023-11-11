@@ -5,7 +5,7 @@
 /.cargo/bin
 /.cargo/credentials
 /.cargo/git
-/.cargo/.package-cache
+/.cargo/.package-cache*
 /.cargo/registry
 /.compose-cache/
 /.config/atril/
