@@ -1,6 +1,23 @@
-_my_bash_prompt_sep_prefix="------------"
-_my_bash_prompt_sep_with_time="----------------------------------------"
-_my_bash_prompt_sep_with_time+=" \D{%F %T %Z} ---"
+_my_bash_prompt_sep_prefix="⏤⏤⏤⏤⏤⏤⏤⏤⏤⏤⏤⏤"
+_my_bash_prompt_sep_with_time="\D{%F %T %Z}⏤⏤⏤"
+
+declare -A _my_bash_prompt_sep_widths=(
+    [prefix]=12
+    [time]=$(( 23 + 3 ))
+)
+
+function _my_bash_prompt_setup_widths()
+{
+    _my_bash_prompt_sep_widths[total]=$(tput cols)
+    _my_bash_prompt_sep_widths[stretch]=$((  _my_bash_prompt_sep_widths[total]
+                                           - (  _my_bash_prompt_sep_widths[prefix]
+                                              + _my_bash_prompt_sep_widths[time]) ))
+    _my_bash_prompt_sep_stretch=""
+    local stretch=${_my_bash_prompt_sep_widths[stretch]}
+    while (( stretch-- >= 1 )); do
+        _my_bash_prompt_sep_stretch+="⏤"
+    done
+}
 
 function _my_bash_prompt_setup()
 {
@@ -10,15 +27,6 @@ function _my_bash_prompt_setup()
         local DO_COLORS=no
     fi
 
-    if [ "$DO_COLORS" = yes ]; then
-        # Note: PS0 does not like having \[ \].
-        local GREY="\e[00;37m"
-        local NO_COLOR="\e[00m"
-    else
-        local GREY=""
-        local NO_COLOR=""
-    fi
-
     # Preserve any preexisting PROMPT_COMMAND and execute it.  NixOS /etc/bashrc
     # sets it for showing info in VTE terminals' window title.  The preexisting
     # command must be executed after, so that _my_bash_prompt_command is
@@ -26,8 +34,7 @@ function _my_bash_prompt_setup()
     # command.
     PROMPT_COMMAND="_my_bash_prompt_command $DO_COLORS ${PROMPT_COMMAND:+;} ${PROMPT_COMMAND:-}"
 
-    PS0="${GREY}${_my_bash_prompt_sep_prefix}"
-    PS0+="${_my_bash_prompt_sep_with_time}${NO_COLOR}\n"
+    _my_bash_prompt_setup_widths
 }
 
 function _my_bash_prompt_command()
@@ -35,6 +42,10 @@ function _my_bash_prompt_command()
     local PREV_EXIT_STATUS=$?
     local - ; set +o xtrace +o verbose  # When user has these enabled, don't want for prompt.
     local DO_COLORS="$1"
+
+    if [ "$(tput cols)" -ne "${_my_bash_prompt_sep_widths[total]}" ]; then
+        _my_bash_prompt_setup_widths
+    fi
 
     # shellcheck disable=SC2034  # Unused variables left for readability.
     if [ "$DO_COLORS" = yes ]; then
@@ -63,27 +74,27 @@ function _my_bash_prompt_command()
         local PAD=""
         local WIDTH=${#PREV_EXIT_STATUS}
         while ((WIDTH++ < 3)); do
-            PAD+="-"
+            PAD+="⏤"
         done
-        local STATUS_PREFIX="${RED}!--- \\\$?=${PREV_EXIT_STATUS} ${PAD}"
+        local STATUS_PREFIX="${RED}!⏤⏤⏤⏤\\\$?=${PREV_EXIT_STATUS}⏤${PAD}"
     fi
 
     if [ $EUID -eq 0 ]; then
         local USER_HOST_COLOR="${MAGENTA}"
         local CWD_COLOR="${BLUE}"
         local SIGIL_COLOR="${RED}"
+        local SIGIL="▪"  # Alts: •▫
     else
         local USER_HOST_COLOR="${GREEN}"
         local CWD_COLOR="${BLUE}"
         local SIGIL_COLOR="${YELLOW}"
+        local SIGIL="▸"  # Alts: ▹‣❭❱⟩⟫〉
     fi
-    PS1="${STATUS_PREFIX}${_my_bash_prompt_sep_with_time}\n"
-    PS1+="${USER_HOST_COLOR}\u@\h ${CWD_COLOR}\w\n"
-    PS1+="${SIGIL_COLOR}\\\$${NO_COLOR} "
 
-    # TODO: Is this still good on NixOS?  It does something similar in
-    # /etc/bashrc, also in addition to what its /etc/bashrc does for VTE
-    # terminals' titles.
+    PS1="${STATUS_PREFIX}${_my_bash_prompt_sep_stretch}${_my_bash_prompt_sep_with_time}\n"
+    PS1+="${USER_HOST_COLOR}\u@\h ${CWD_COLOR}\w\n"
+    PS1+="${SIGIL_COLOR}${SIGIL}${NO_COLOR} "
+
     # Set the title to: user@host dir
     case "$TERM" in
         xterm*|rxvt*|screen|vt100)
@@ -92,6 +103,11 @@ function _my_bash_prompt_command()
         *)
             ;;
     esac
+
+    PS2="${SIGIL_COLOR}⁝${NO_COLOR} "
+
+    PS0="${GREY}${_my_bash_prompt_sep_prefix}${_my_bash_prompt_sep_stretch}"
+    PS0+="${_my_bash_prompt_sep_with_time}${NO_COLOR}\n"
 }
 
 _my_bash_prompt_setup
