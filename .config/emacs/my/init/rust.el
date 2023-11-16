@@ -15,14 +15,4 @@
 (use-package flycheck)
 
 (use-package lsp-mode
-
-  :hook (rust-mode . lsp)
-
-  :autoload (lsp-register-client make-lsp-client lsp-tramp-connection)  ;; Needed by below.
-
-  :config
-  (lsp-register-client
-   (make-lsp-client :new-connection (lsp-tramp-connection "rust-analyzer")
-                    :major-modes '(rust-mode)
-                    :remote? t
-                    :server-id 'rust-analyzer-remote)))
+  :hook (rust-mode . lsp))

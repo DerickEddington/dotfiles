@@ -1,7 +1,8 @@
 ;; -*- lexical-binding: t; -*-
 
 (use-package my-lsp :load-path "my/lib"
-  :autoload my-lsp-tramp-connection--wait-for-stty-to-take-effect)
+  :autoload (my-lsp-stdio-connection--wait-for-stty-to-take-effect
+             my-lsp-resolve-final-command--wait-for-stty-to-take-effect))
 
 
 (use-package lsp-mode
@@ -21,8 +22,10 @@
   ;; https://github.com/emacs-lsp/lsp-mode/issues/2709#issuecomment-864498751
   ;; https://github.com/emacs-lsp/lsp-mode/issues/2375
   ;; https://github.com/emacs-lsp/lsp-mode/issues/1845
-  (advice-add 'lsp-tramp-connection :around
-              #'my-lsp-tramp-connection--wait-for-stty-to-take-effect))
+  (advice-add 'lsp-stdio-connection :filter-return
+              #'my-lsp-stdio-connection--wait-for-stty-to-take-effect)
+  (advice-add 'lsp-resolve-final-command :filter-return
+              #'my-lsp-resolve-final-command--wait-for-stty-to-take-effect))
 
 (use-package lsp-ivy)
 (use-package lsp-ui)

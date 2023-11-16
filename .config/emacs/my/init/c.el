@@ -14,20 +14,6 @@
 (use-package flycheck)
 
 (use-package lsp-mode
-
-  :hook ((c-mode c++-mode) . lsp)
-
-  :autoload (lsp-register-client make-lsp-client lsp-tramp-connection)  ;; Needed by below.
-
-  :config
-
-  (use-package lsp-clangd :ensure nil)  ;; Needed by below.
-
-  (lsp-register-client
-   (make-lsp-client :new-connection (lsp-tramp-connection
-                                     (lambda () (cons "clangd" lsp-clients-clangd-args)))
-                    :major-modes '(c-mode c++-mode)
-                    :remote? t
-                    :server-id 'clangd-remote)))
+  :hook ((c-mode c++-mode) . lsp))
 
 (use-package cmake-mode)
