@@ -240,7 +240,7 @@ function my-install-rustup
     if is-command-found rustup ; then
         # Ensure these are installed, since they might not be if
         # `my-rustup-install--rust-analyzer` ran first.
-        rustup component add cargo rustc rust-std
+        rustup component add cargo rustc rust-std clippy rustfmt rust-docs
     else
         # The advantage of installing Rust & Cargo this way is that it doesn't require superuser
         # privilege.  (That is why this doesn't try to install a host system's `rustup` package.)
@@ -254,7 +254,7 @@ function my-install-rustup
         # executable, which can be useful when without network.  Or e.g. some other version of the
         # Shell script that downloads `rustup-init` like `sh.rustup.rs` does.
         local installer=${MY_RUSTUP_INSTALLER-}
-        local -r installArgs=(-y --default-toolchain stable --profile minimal --no-modify-path
+        local -r installArgs=(-y --default-toolchain stable --profile default --no-modify-path
                               "${@:2}")
         local -r rustupURL=https://sh.rustup.rs
         local invoke=()
