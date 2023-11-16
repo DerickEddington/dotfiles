@@ -260,6 +260,7 @@
  '(rust-rustfmt-switches '("+the-nightly" "--unstable-features"))
  '(shell-command-prompt-show-cwd t)
  '(shell-file-name "bash")
+ '(shell-prompt-pattern "^[^#$%>▸\12]*[#$%>▸] *")
  '(show-paren-delay 0.25)
  '(show-paren-style 'mixed)
  '(show-paren-when-point-inside-paren t)
