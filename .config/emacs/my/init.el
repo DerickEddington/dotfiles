@@ -63,6 +63,7 @@
   :init (show-smartparens-global-mode) (smartparens-global-strict-mode))
 (size-indication-mode)
 (tooltip-mode -1)
+(use-package which-key :commands which-key-mode :init (which-key-mode))
 
 (use-package dired :ensure nil
   :config (use-package dired-x :demand t :ensure nil))

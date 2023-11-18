@@ -19,6 +19,7 @@
                                     magit-wip-mode
                                     smartparens-mode
                                     visual-line-mode
+                                    which-key-mode
                                     )
   "Minor modes to not show in the modeline."
   :type '(repeat symbol)
