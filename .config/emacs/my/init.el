@@ -88,6 +88,7 @@
 (use-package fd-dired)
 (use-package git-modes)
 (use-package lua-mode)
+(use-package markdown-mode)
 (use-package rg)
 (use-package toml-mode)
 (use-package yaml-mode)

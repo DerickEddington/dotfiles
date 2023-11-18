@@ -86,6 +86,7 @@ in
         lsp-ui
         lua-mode
         magit
+        markdown-mode
         multiple-cursors
         nix-mode
         rg
