@@ -241,6 +241,8 @@
  '(native-comp-async-query-on-exit t)
  '(native-comp-async-report-warnings-errors 'silent)
  '(next-error-recenter '(4))
+ '(open-junk-file-find-file-function 'find-file)
+ '(open-junk-file-format "~/tmp/junk/%Y/%m/%d/%H:%M:%S." t)
  '(package-archives nil)
  '(parse-sexp-ignore-comments t)
  '(projectile-enable-cmake-presets t)

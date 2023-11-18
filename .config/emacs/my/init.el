@@ -66,6 +66,7 @@
 (use-package which-key :commands which-key-mode :init (which-key-mode))
 
 (use-package dired :ensure nil
+  :bind ("C-x j" . dired-jump)
   :config (use-package dired-x :demand t :ensure nil))
 
 (use-package company
@@ -82,6 +83,9 @@
   ;; Doing this here is a little faster than elsewhere, because this avoids
   ;; loading the `grep' package until needed.
   :config (setopt grep-command "egrep --color -nH -e "))
+
+(use-package open-junk-file
+  :bind ("C-x C-j" . open-junk-file))
 
 (use-package adaptive-wrap)
 (use-package all-the-icons)

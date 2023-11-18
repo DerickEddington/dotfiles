@@ -89,6 +89,7 @@ in
         markdown-mode
         multiple-cursors
         nix-mode
+        open-junk-file
         rg
         rust-mode
         smartparens
