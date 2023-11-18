@@ -73,6 +73,7 @@ in
         counsel
         counsel-fd
         counsel-tramp
+        define-word
         expand-region
         flycheck
         fd-dired

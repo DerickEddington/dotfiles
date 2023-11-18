@@ -72,6 +72,10 @@
 (use-package company
   :bind ("TAB" . company-indent-or-complete-common))
 
+(use-package define-word
+  :bind (("M-s d"   . define-word-at-point)
+         ("M-s M-d" . define-word)))
+
 (use-package home-end
   :bind (("<home>" . home-end-home)
          ("<end>"  . home-end-end)))
