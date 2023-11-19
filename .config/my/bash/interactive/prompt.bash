@@ -1,10 +1,13 @@
-_my_bash_prompt_sep_prefix="⏤⏤⏤⏤⏤⏤⏤⏤⏤⏤⏤⏤"
-_my_bash_prompt_sep_with_time="\D{%F %T %Z}⏤⏤⏤"
-
 declare -A _my_bash_prompt_sep_widths=(
     [prefix]=12
     [time]=$(( 23 + 3 ))
 )
+declare -A _my_bash_prompt_sep=(
+    [prefix]="------------"
+    [error_prefix]="!-"
+    [with_time]="\D{%F %T %Z}---"
+)
+declare -A _my_bash_prompt_sigil=()
 
 function _my_bash_prompt_setup_widths()
 {
@@ -12,11 +15,21 @@ function _my_bash_prompt_setup_widths()
     _my_bash_prompt_sep_widths[stretch]=$((  _my_bash_prompt_sep_widths[total]
                                            - (  _my_bash_prompt_sep_widths[prefix]
                                               + _my_bash_prompt_sep_widths[time]) ))
-    _my_bash_prompt_sep_stretch=""
+    _my_bash_prompt_sep[stretch]=""
     local stretch=${_my_bash_prompt_sep_widths[stretch]}
     while (( stretch-- >= 1 )); do
-        _my_bash_prompt_sep_stretch+="⏤"
+        _my_bash_prompt_sep[stretch]+="${_my_bash_prompt_sep[char]}"
     done
+}
+
+function _my_bash_prompt_setup_chars()
+{
+    if _my_terminal_supports_unicode ; then
+        local field char="${_my_bash_prompt_sep[char]}"
+        for field in prefix error_prefix with_time ; do
+            _my_bash_prompt_sep[$field]=${_my_bash_prompt_sep[$field]//"-"/"$char"}
+        done
+    fi
 }
 
 function _my_bash_prompt_setup()
@@ -34,7 +47,19 @@ function _my_bash_prompt_setup()
     # command.
     PROMPT_COMMAND="_my_bash_prompt_command $DO_COLORS ${PROMPT_COMMAND:+;} ${PROMPT_COMMAND:-}"
 
+    if _my_terminal_supports_unicode ; then
+        _my_bash_prompt_sep[char]="⏤"
+        _my_bash_prompt_sigil[PS1]="▸"  # Alts: ▹‣❭❱⟩⟫〉
+        _my_bash_prompt_sigil[root_PS1]="▪"  # Alts: •▫
+        _my_bash_prompt_sigil[PS2]="⁝"
+    else
+        _my_bash_prompt_sep[char]="-"
+        _my_bash_prompt_sigil[PS1]="\\$"
+        _my_bash_prompt_sigil[root_PS1]="\\$"
+        _my_bash_prompt_sigil[PS2]=":"
+    fi
     _my_bash_prompt_setup_widths
+    _my_bash_prompt_setup_chars
 }
 
 function _my_bash_prompt_command()
@@ -49,14 +74,14 @@ function _my_bash_prompt_command()
 
     # shellcheck disable=SC2034  # Unused variables left for readability.
     if [ "$DO_COLORS" = yes ]; then
-        local RED="\[\e[00;31m\]"
-        local GREEN="\[\e[00;32m\]"
-        local YELLOW="\[\e[00;33m\]"
-        local BLUE="\[\e[00;34m\]"
-        local WHITE="\[\e[01;37m\]"
-        local GREY="\[\e[00;37m\]"
-        local MAGENTA="\[\e[00;35m\]"
-        local NO_COLOR="\[\e[00m\]"
+        local RED="\e[01;31m"
+        local GREEN="\e[01;32m"
+        local YELLOW="\e[01;33m"
+        local BLUE="\e[01;34m"
+        local WHITE="\e[01;37m"
+        local GREY="\e[00;37m"
+        local MAGENTA="\e[01;35m"
+        local NO_COLOR="\e[00m"
     else
         local RED=""
         local GREEN=""
@@ -69,31 +94,33 @@ function _my_bash_prompt_command()
     fi
 
     if ((PREV_EXIT_STATUS == 0)); then
-        local STATUS_PREFIX="${GREY}${_my_bash_prompt_sep_prefix}"
+        local STATUS_PREFIX="\[${GREY}\]${_my_bash_prompt_sep[prefix]}"
     else
         local PAD=""
-        local WIDTH=${#PREV_EXIT_STATUS}
-        while ((WIDTH++ < 3)); do
-            PAD+="⏤"
+        local PAD_WIDTH=${#_my_bash_prompt_sep[prefix]}
+        (( PAD_WIDTH -= (${#_my_bash_prompt_sep[error_prefix]} + ${#PREV_EXIT_STATUS}) ))
+        while (( PAD_WIDTH-- >= 1 )); do
+            PAD+="${_my_bash_prompt_sep[char]}"
         done
-        local STATUS_PREFIX="${RED}!⏤⏤⏤⏤\\\$?=${PREV_EXIT_STATUS}⏤${PAD}"
+        local STATUS_PREFIX="\[${RED}\]${_my_bash_prompt_sep[error_prefix]}"
+        local STATUS_PREFIX+="${PREV_EXIT_STATUS}${PAD}"
     fi
 
     if [ $EUID -eq 0 ]; then
-        local USER_HOST_COLOR="${MAGENTA}"
-        local CWD_COLOR="${BLUE}"
-        local SIGIL_COLOR="${RED}"
-        local SIGIL="▪"  # Alts: •▫
+        local USER_HOST_COLOR="\[${MAGENTA}\]"
+        local CWD_COLOR="\[${BLUE}\]"
+        local SIGIL_COLOR="\[${RED}\]"
+        local SIGIL="${_my_bash_prompt_sigil[root_PS1]}"
     else
-        local USER_HOST_COLOR="${GREEN}"
-        local CWD_COLOR="${BLUE}"
-        local SIGIL_COLOR="${YELLOW}"
-        local SIGIL="▸"  # Alts: ▹‣❭❱⟩⟫〉
+        local USER_HOST_COLOR="\[${GREEN}\]"
+        local CWD_COLOR="\[${BLUE}\]"
+        local SIGIL_COLOR="\[${YELLOW}\]"
+        local SIGIL="${_my_bash_prompt_sigil[PS1]}"
     fi
 
-    PS1="${STATUS_PREFIX}${_my_bash_prompt_sep_stretch}${_my_bash_prompt_sep_with_time}\n"
+    PS1="${STATUS_PREFIX}${_my_bash_prompt_sep[stretch]}${_my_bash_prompt_sep[with_time]}\n"
     PS1+="${USER_HOST_COLOR}\u@\h ${CWD_COLOR}\w\n"
-    PS1+="${SIGIL_COLOR}${SIGIL}${NO_COLOR} "
+    PS1+="${SIGIL_COLOR}${SIGIL}\[${NO_COLOR}\] "
 
     # Set the title to: user@host dir
     case "$TERM" in
@@ -104,10 +131,11 @@ function _my_bash_prompt_command()
             ;;
     esac
 
-    PS2="${SIGIL_COLOR}⁝${NO_COLOR} "
+    PS2="${SIGIL_COLOR}${_my_bash_prompt_sigil[PS2]}\[${NO_COLOR}\] "
 
-    PS0="${GREY}${_my_bash_prompt_sep_prefix}${_my_bash_prompt_sep_stretch}"
-    PS0+="${_my_bash_prompt_sep_with_time}${NO_COLOR}\n"
+    # (Must not have '\[' & '\]' in PS0.)
+    PS0="${GREY}${_my_bash_prompt_sep[prefix]}${_my_bash_prompt_sep[stretch]}"
+    PS0+="${_my_bash_prompt_sep[with_time]}${NO_COLOR}\n"
 }
 
 _my_bash_prompt_setup

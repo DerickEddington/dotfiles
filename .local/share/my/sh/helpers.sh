@@ -90,6 +90,16 @@ is_stdin_a_tty() {
     std tty > /dev/null
 }
 
+_my_terminal_supports_unicode() {  # Seems like this should be portable across platforms.
+    # TODO: Probably should be better. Could move to ./platform/**/helpers.sh, if needed.
+    case "${TERM-}" in
+        (dumb*|*.dumb*)   return 1 ;;
+        (eterm*|*.eterm*) return 1 ;;
+        (linux*|*.linux*) return 1 ;;
+        (*)               return 0 ;;
+    esac
+}
+
 # POSIX-Shell-quoted form of arbitrary string (http://www.etalabs.net/sh_tricks.html).
 # (Note: Transformations like Bash's `${var@Q}` or `printf %q` are not suitable for
 # POSIX-Shell-conformance portability, because those can produce forms like `$'...\n...'` which
