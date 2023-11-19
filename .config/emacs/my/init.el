@@ -52,6 +52,10 @@
 ;; some reason.
 (column-number-mode)
 (use-package company :commands global-company-mode :init (global-company-mode))
+(use-package diff-hl :commands global-diff-hl-mode :init (global-diff-hl-mode))
+(unless (display-graphic-p)
+  (use-package diff-hl-margin :ensure nil
+    :commands diff-hl-margin-mode :init (diff-hl-margin-mode)))
 (use-package flycheck :commands global-flycheck-mode :init (global-flycheck-mode))
 (global-visual-line-mode)
 (use-package ivy :commands ivy-mode :init (ivy-mode))
@@ -75,6 +79,17 @@
 (use-package define-word
   :bind (("M-s d"   . define-word-at-point)
          ("M-s M-d" . define-word)))
+
+(use-package diff-hl
+  :bind (:map diff-hl-command-map
+         ("R"   . diff-hl-set-reference-rev)
+         ("M-R" . diff-hl-reset-reference-rev))
+  :after magit  ;; Needed for below to not interfere with what `magit' configures.
+  :hook ((magit-pre-refresh  . diff-hl-magit-pre-refresh)
+         (magit-post-refresh . diff-hl-magit-post-refresh)))
+(use-package diff-hl-dired :ensure nil
+  :after dired
+  :hook (dired-mode . diff-hl-dired-mode))
 
 (use-package home-end
   :bind (("<home>" . home-end-home)

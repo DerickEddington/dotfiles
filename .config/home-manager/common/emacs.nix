@@ -74,6 +74,7 @@ in
         counsel-fd
         counsel-tramp
         define-word
+        diff-hl
         expand-region
         flycheck
         fd-dired
