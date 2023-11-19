@@ -10,7 +10,8 @@
          :map magit-status-mode-map
               ("x" . nil))
 
-  :hook ((after-save . magit-after-save-refresh-status))
+  :hook ((after-save . magit-after-save-refresh-status)
+         (magit-diff-visit-file . read-only-mode))
 
   :config
 

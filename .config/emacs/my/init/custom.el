@@ -242,6 +242,7 @@
    '("~/\\.config\\(/my\\)?/[^/]+" "~/.local/bin" "~/.local/lib" "~/.local/my/[^/]+" "~/.local/share\\(/my\\)?/[^/]+" "~/.local/state\\(/my\\)?/[^/]+" "~/\\.emacs\\.d" "~/\\.ssh" "~/\\.nix-defexpr/channels[^/]*/[^/]+" "~/bin" "~/lib" "\\(.*/\\)?\\.?rustup/toolchains/[^/]+" "\\(.*/\\)?\\.?cargo/registry/src/[^/]+/[^/]+" "~/\\.rustup" "~/\\.cargo" "/boot" "/nix/store/[^/]+" "/nix/var/log/nix/drvs" "/nix/var/nix/profiles/per-user/[^/]+/channels[^/]*/[^/]+" "/nix/var/nix/profiles/per-user/[^/]+/[^/]+" "\\(.*/\\)?src/of-pkg-via-my/(build/)?[^/]+" "\\(.*/\\)?\\(debug\\|\\.build-id\\)" "~/\\.nix-profile/[^/]+"))
  '(native-comp-async-query-on-exit t)
  '(native-comp-async-report-warnings-errors 'silent)
+ '(next-error-hook '(read-only-mode))
  '(next-error-recenter '(4))
  '(open-junk-file-find-file-function 'find-file)
  '(open-junk-file-format "~/tmp/junk/%Y/%m/%d/%H:%M:%S." t)
