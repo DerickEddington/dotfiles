@@ -5,6 +5,7 @@
  ;; If there is more than one, they won't work right.
  '(Man-width-max nil)
  '(adaptive-wrap-extra-indent 2)
+ '(ansi-color-bold-is-bright t)
  '(auth-source-save-behavior nil)
  '(auto-revert-buffer-list-filter 'magit-auto-revert-repository-buffer-p)
  '(auto-revert-check-vc-info nil)
@@ -326,6 +327,20 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(default ((t (:background "#BDB8A0" :foreground "black" :height 145 :family "Ubuntu Mono"))))
+ '(ansi-color-blue ((t (:background "#161CCC" :foreground "#161CCC"))))
+ '(ansi-color-bold ((t nil)))
+ '(ansi-color-bright-blue ((t (:inherit ansi-color-blue))))
+ '(ansi-color-bright-cyan ((t (:inherit ansi-color-cyan))))
+ '(ansi-color-bright-green ((t (:inherit ansi-color-green))))
+ '(ansi-color-bright-magenta ((t (:inherit ansi-color-magenta))))
+ '(ansi-color-bright-red ((t (:inherit ansi-color-red))))
+ '(ansi-color-bright-yellow ((t (:inherit ansi-color-yellow))))
+ '(ansi-color-cyan ((t (:background "#007880" :foreground "#007880"))))
+ '(ansi-color-green ((t (:background "#006E10" :foreground "#006E10"))))
+ '(ansi-color-magenta ((t (:background "#780080" :foreground "#780080"))))
+ '(ansi-color-red ((t (:background "#820000" :foreground "#820000"))))
+ '(ansi-color-white ((t (:background "#888A85" :foreground "#888A85"))))
+ '(ansi-color-yellow ((t (:background "#FCE94F" :foreground "#FCE94F"))))
  '(bold ((t (:weight bold))))
  '(bold-italic ((t (:inherit bold :slant italic))))
  '(breakpoint-disabled ((t (:foreground "grey35"))))

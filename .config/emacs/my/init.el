@@ -69,6 +69,10 @@
 (tooltip-mode -1)
 (use-package which-key :commands which-key-mode :init (which-key-mode))
 
+(use-package ansi-color :ensure nil
+  :after compile
+  :hook (compilation-filter . ansi-color-compilation-filter))
+
 (use-package dired :ensure nil
   :bind ("C-x j" . dired-jump)
   :config (use-package dired-x :demand t :ensure nil))
@@ -105,6 +109,13 @@
 
 (use-package open-junk-file
   :bind ("C-x C-j" . open-junk-file))
+
+(use-package term :ensure nil
+  :hook (term-mode . (lambda ()
+                       (setq-local mouse-yank-at-point t
+                                   show-trailing-whitespace nil
+                                   tab-width 8)
+                       (auto-fill-mode -1))))
 
 (use-package adaptive-wrap)
 (use-package all-the-icons)
