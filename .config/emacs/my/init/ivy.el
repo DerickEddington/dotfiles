@@ -1,13 +1,15 @@
 ;; -*- lexical-binding: t; -*-
 
 (use-package my-ivy :load-path "my/lib"
-  :autoload my-ivy-sort-matches-fall-thru)
+  :autoload (my-ivy-sort-matches-fall-thru my-ivy--recompute-index--unless-0))
 
 
 (use-package ivy
   :after counsel  ;; Needed for below to not interfere with what `counsel' configures for `ivy'.
   :functions ivy-string<
+
   :config
+
   ;; Set here, after loading `ivy', because these need the variables from that.
   (setopt
    ivy-sort-functions-alist (append `((counsel-M-x . ,#'ivy-string<)
@@ -22,7 +24,10 @@
                                               (if (eq t (car pair))
                                                   `(t . ,#'my-ivy-sort-matches-fall-thru)
                                                 pair))
-                                            ivy-sort-matches-functions-alist)))
+                                            ivy-sort-matches-functions-alist))
+
+  (advice-add 'ivy--recompute-index :around
+              #'my-ivy--recompute-index--unless-0))
 
 (use-package ivy-hydra)
 (use-package counsel)
