@@ -11,7 +11,7 @@
 def set_vm_magnitude(config)
   config.vm.provider "virtualbox" do |vb|
     vb.cpus = Etc.nprocessors / 2  # Assume hyper-threading is 2*amount-cores.
-    vb.memory = 2 * 1024  # MiB
+    vb.memory = 4 * 1024  # MiB.  At least 4 GiB is needed for my non-trivial uses.
   end
   # Some boxes' (e.g. freebsd/*) default disk size is too small (or too large) for my needs.
   ENV['VAGRANT_EXPERIMENTAL'] = "disks"  # TODO: Remove w/ Vagrant 2.4 which stabilized this.
@@ -136,21 +136,21 @@ Vagrant.configure("2") do |config|
                        "  # , reboot: true  # unsupported
   end
 
-  config.vm.define "fbsd13", autostart: false do |fbsd13|
-    fbsd13.vm.box = "freebsd/FreeBSD-13.2-RELEASE"
-   #fbsd13.vm.box = "bento/freebsd-13"
-   #fbsd13.ssh.shell = "sh"
-   #fbsd13.ssh.connect_timeout = 120
-    setup_my_way(fbsd13)
-    fbsd13.vm.provision "pkg-update", type: "shell", privileged: true,
+  config.vm.define "fbsd14", autostart: false do |fbsd14|
+    fbsd14.vm.box = "freebsd/FreeBSD-14.0-RELEASE"
+   #fbsd14.vm.box = "bento/freebsd-14"
+   #fbsd14.ssh.shell = "sh"
+   #fbsd14.ssh.connect_timeout = 120
+    setup_my_way(fbsd14)
+    fbsd14.vm.provision "pkg-update", type: "shell", privileged: true,
                         inline: "pkg update"
-    fbsd13.vm.provision "pkg-upgrade", type: "shell", privileged: true,
+    fbsd14.vm.provision "pkg-upgrade", type: "shell", privileged: true,
                         inline: "pkg upgrade --yes"
-    fbsd13.vm.provision "pkg-autoremove", type: "shell", privileged: true,
+    fbsd14.vm.provision "pkg-autoremove", type: "shell", privileged: true,
                         inline: "pkg autoremove --yes"
-    fbsd13.vm.provision "freebsd-update-fetch", type: "shell", privileged: true,
+    fbsd14.vm.provision "freebsd-update-fetch", type: "shell", privileged: true,
                         inline: "freebsd-update --not-running-from-cron fetch"
-    fbsd13.vm.provision "freebsd-update-install", type: "shell", privileged: true,
+    fbsd14.vm.provision "freebsd-update-install", type: "shell", privileged: true,
                         inline: "
                           if freebsd-update updatesready ; then
                             freebsd-update install || exit
