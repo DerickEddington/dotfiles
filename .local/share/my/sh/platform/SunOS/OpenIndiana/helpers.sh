@@ -20,10 +20,14 @@ gnu() {
 }
 
 _my_terminal_supports_colors() {
-    case "${TERM:-}" in
-        (*color*) return 0 ;;
-        (*)       return 1 ;;
-    esac
+    if gnu tput setaf 1 > /dev/null 2>&1 ; then
+        true
+    else
+        case "${TERM:-}" in
+            (*color*) return 0 ;;
+            (*)       return 1 ;;
+        esac
+    fi
 }
 
 _my_flock() {

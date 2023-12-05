@@ -11,7 +11,7 @@ declare -A _my_bash_prompt_sigil=()
 
 function _my_bash_prompt_setup_widths()
 {
-    _my_bash_prompt_sep_widths[total]=$(tput cols)
+    _my_bash_prompt_sep_widths[total]=$(gnu tput cols)
     _my_bash_prompt_sep_widths[stretch]=$((  _my_bash_prompt_sep_widths[total]
                                            - (  _my_bash_prompt_sep_widths[prefix]
                                               + _my_bash_prompt_sep_widths[time]) ))
@@ -68,7 +68,7 @@ function _my_bash_prompt_command()
     local - ; set +o xtrace +o verbose  # When user has these enabled, don't want for prompt.
     local DO_COLORS="$1"
 
-    if [ "$(tput cols)" -ne "${_my_bash_prompt_sep_widths[total]}" ]; then
+    if [ "$(gnu tput cols)" -ne "${_my_bash_prompt_sep_widths[total]}" ]; then
         _my_bash_prompt_setup_widths
     fi
 
