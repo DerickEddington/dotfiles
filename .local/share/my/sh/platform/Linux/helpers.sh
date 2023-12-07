@@ -60,6 +60,10 @@ _my_terminal_supports_colors()
     fi
 }
 
+_my_terminal_width() {
+    std tput cols
+}
+
 _my_flock() {
     std flock "$@"
 }

@@ -30,6 +30,13 @@ _my_terminal_supports_colors() {
     fi
 }
 
+_my_terminal_width() {
+    # Use the ncurses `tput`, which is located under /usr/gnu/, because it uses ncurses' better
+    # support for a larger variety of $TERM types.  This enables supporting, e.g.,
+    # `screen.xterm-256color` which Solaris' own default `/usr/bin/tput` does not.
+    gnu tput cols
+}
+
 _my_flock() {
     "$(_my_platspec_install_dir)"/bin/flock "$@"  # The `flock` of util-linux.
 }
