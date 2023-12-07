@@ -266,6 +266,9 @@
  '(rust-indent-return-type-to-arguments nil)
  '(rust-indent-where-clause nil)
  '(rust-rustfmt-switches '("+the-nightly" "--unstable-features"))
+ '(safe-local-variable-values
+   '((lsp-rust-analyzer-rustfmt-extra-args .
+                                           ["+nightly" "--unstable-features"])))
  '(shell-command-prompt-show-cwd t)
  '(shell-file-name "bash")
  '(shell-prompt-pattern "^[^#$%>▸\12]*[#$%>▸] *")
