@@ -31,7 +31,7 @@ MY_PLATFORM_PACKAGES_DESIRED=(
 )
 
 case "${MY_PLATFORM_OS_VARIANT}" in
-    (Linux/Alpine)  MY_PLATFORM_PACKAGES_DESIRED+=(man-db man-pages tzdata) ;;
+    (Linux/Alpine)  MY_PLATFORM_PACKAGES_DESIRED+=(man-db man-pages tput tzdata) ;;
     (FreeBSD)       MY_PLATFORM_PACKAGES_DESIRED+=(groff pkg-provides terminfo-db) ;;
 esac
 
