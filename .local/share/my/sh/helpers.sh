@@ -24,6 +24,11 @@ println()  { std printf '%s\n' "$*" ;}
 eprint()   { print   "$@" 1>&2 ;}
 eprintln() { println "$@" 1>&2 ;}
 
+info() {
+    println "Info${1:+: $1}"
+    return "${2:-0}"
+}
+
 warn() {
     eprintln "Warning${1:+: $1}"
     return "${2:-0}"

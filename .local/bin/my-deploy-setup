@@ -20,7 +20,7 @@ fi
 
 readonly defaultDotfilesRepo=$HOME/.dotfiles
 # '$USER' is a placeholder that will be substituted with the target user's name.
-readonly defaultDotfilesRefspecs="HEAD:user/\$USER main"
+readonly defaultDotfilesRefspecs="main:user/\$USER main"
 
 
 # Functions
@@ -92,6 +92,8 @@ function process-env-vars
 
     [ -r "$localDotfilesRepo" ] || error "Invalid dotfiles repo: ${localDotfilesRepo@Q}!" 4
 
+    # Note: The HEAD of the repo, which usually is the branch for the user that ran this script,
+    # could be included, e.g.: 'HEAD:of-user-that-deployed'.
     # The first refspec is considered the primary.
     dotfilesRefspecs=${MY_DEPLOY_SETUP_DOTFILES_FROM_REFSPECS:-$defaultDotfilesRefspecs}
     split-on-words "$dotfilesRefspecs" dotfilesRefspecs
@@ -127,7 +129,7 @@ function has-repo-already
 {
     if rsh-cd "$targetHomeDirExpr" '[ -e .dotfiles ] || [ -e .git ] || [ -e .git-hidden ]'
     then
-        println "Info: Already have a repository in $targetHomeDirExpr. Skipping."
+        info "Already have a repository in $targetHomeDirExpr. Skipping."
         return 0
     else
         return 1
