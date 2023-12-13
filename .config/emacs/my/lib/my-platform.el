@@ -23,7 +23,7 @@
             (setq exit-code (shell-command cmd stdout-buf stderr-buf))
             (if (= 0 exit-code)
                 (let ((out-str (with-current-buffer stdout-buf (buffer-string))))
-                  (pcase (string-split out-str "[\n]")
+                  (pcase (split-string out-str "[\n]")
                     (`(,config-home ,data-home ,state-home ,cache-home
                        ,arch ,os ,variant ,version ,os-var-ver-arch)
                      `((config-home . ,config-home) (data-home  . ,data-home)

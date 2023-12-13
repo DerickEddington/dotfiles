@@ -11,38 +11,39 @@
 (defconst my-state-dir (concat (alist-get 'state-home my-platform) "/my/emacs"))
 
 
-;; These are "built-in", i.e. not `provide'd by a library, which is why `use-package' isn't used.
+;; These are "built-in", i.e. not `provide'd by a library, which is why `eval-after-load' isn't
+;; used.
 (setopt
  auto-save-list-file-prefix (concat my-state-dir "/auto-save-list/.saves-"))
 
 
-;; These do `:config (setopt ...)' because `:custom' wouldn't always work (e.g. that wouldn't work
-;; for `tramp-persistency-file-name' due to `tramp-loaddefs'.)
+;; These use `eval-after-load' directly (instead of using `use-package') so that these still work
+;; when `use-package' is unavailable (e.g. not yet installed).
 
-(use-package savehist :config
+(eval-after-load 'savehist
   (setopt
    savehist-file (concat my-state-dir "/history")))
 
-(use-package tramp-cache :ensure nil :config
+(eval-after-load 'tramp-cache
   (setopt
    tramp-persistency-file-name (concat my-cache-dir "/tramp")))
 
-(use-package tramp :config
+(eval-after-load 'tramp
   (setopt
    tramp-auto-save-directory (concat my-state-dir "/tramp-auto-save")))
 
-(use-package transient :config
+(eval-after-load 'transient
   (setopt
    transient-history-file (concat my-state-dir "/transient/history.el")))
 
-(use-package url-cache :ensure nil :config
+(eval-after-load 'url-cache
   (setopt
    url-cache-directory (concat my-cache-dir "/url/cache")))
 
-(use-package url-cookie :ensure nil :config
+(eval-after-load 'url-cookie
   (setopt
    url-cookie-file (concat my-state-dir "/url/cookies")))
 
-(use-package url-history :ensure nil :config
+(eval-after-load 'url-history
   (setopt
    url-history-file (concat my-state-dir "/url/history")))

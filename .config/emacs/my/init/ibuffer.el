@@ -27,7 +27,7 @@
               #'my-ibuffer-project--sort-filter-groups-by-local-vs-remote))
 
 
-(use-package ibuffer
+(use-package ibuffer :ensure nil
 
   :after ibuffer-project
 

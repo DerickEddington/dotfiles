@@ -8,14 +8,30 @@
   ;; platforms for similar reasons.
   (push my-eln-cache-dir native-comp-eln-load-path))
 
+(unless (fboundp 'setopt) (defalias 'setopt #'setq-default))  ;; For Emacs versions less-than 29.
+
 (setq custom-file
       ;; (Include a .el extension because custom-file is used in various ways
       ;; where some probably require it.)
       (locate-user-emacs-file "my/init/custom.el"))
 
-;; Initialize things that must already be, before evaluating `custom-file' and
-;; my "subinit" files.
-(require 'use-package)  ;; Also makes my `scroll-bar-mode' setting work, for some reason.
+;; Note: For Emacs versions less-than 29, `use-package' is not built-in and so must be installed
+;; for the user.  `require'ing it here also makes my `scroll-bar-mode' setting work, for some
+;; reason.
+;;
+(if (require 'use-package nil t)
+    ;; Ensure that my chosen `.el's are byte-compiled (and thus also native-compiled) and that
+    ;; their `.elc's (and so `.eln's also) are kept up-to-date, automatically.  (Note: some of my
+    ;; `.el's have compilation disabled, as controlled by my dir-local and file-local variables.)
+    (with-demoted-errors "Ignored error while byte-compiling \"my\" directory: %S"
+      (byte-recompile-directory (concat user-emacs-directory "my") 0))
+  ;; When `use-package' is unavailable, ignore all top-level forms that need it.
+  (defmacro _vanish (&rest _args))
+  (defalias 'use-package #'_vanish)
+  (defalias 'when-have-library #'_vanish))
+
+;; The above initializes things that must already be, before evaluating `custom-file' and my
+;; "subinit" files.
 
 ;; Load `custom-file' before my "subinit" files, because doing so is faster, for
 ;; some reason, and because some of the "subinit" files depend on my customized
@@ -102,7 +118,7 @@
 (use-package expand-region
   :bind ("C-=" . er/expand-region))
 
-(use-package grep
+(use-package grep :ensure nil
   ;; Doing this here is a little faster than elsewhere, because this avoids
   ;; loading the `grep' package until needed.
   :config (setopt grep-command "egrep --color -nH -e "))
@@ -151,7 +167,7 @@
 
 
 ;; Kill the *Compile-Log* when nothing was byte-compiled, which is the usual case when my `.elc's
-;; are already up-to-date.  This is needed because my `./early-init.el' always does
+;; are already up-to-date.  This is needed because the above always does
 ;; `byte-recompile-directory' which causes this buffer to always be created even when nothing
 ;; happened.  When something was byte-compiled without issue, this buffer won't be killed and
 ;; won't be shown but remains as a note that byte-compilation happened.  When there was an issue,

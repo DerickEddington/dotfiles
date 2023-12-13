@@ -29,7 +29,7 @@ apply to remote directories."
 
 (defun my-dir-name-w/o-slash-suffix (dir-name)
   "Don't want to see trailing slashes on group names."
-  (if (and (length> (file-local-name dir-name) 1)
+  (if (and (> (length (file-local-name dir-name)) 1)
            (string-suffix-p "/" dir-name))
       (substring dir-name 0 -1)
     dir-name))

@@ -12,14 +12,12 @@
 (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
 
-;; Ensure that my chosen `.el's are byte-compiled (and thus also native-compiled) and that their
-;; `.elc's (and so `.eln's also) are kept up-to-date, automatically.  (Note: some of my `.el's
-;; have compilation disabled, as controlled by my dir-local and file-local variables.)
-(byte-recompile-directory (concat user-emacs-directory "my") 0)
+(when (version< emacs-version "27")
+  (warn "Unsure if my config will work with this old Emacs version."))
 
 
-(use-package my-platform :load-path "my/lib" :demand t
-  :autoload my-platform-info)
+(let ((load-path (cons (concat user-emacs-directory "my/lib") load-path)))
+  (require 'my-platform))  ;; (Don't use `use-package` yet, in case it's not available yet.)
 
 ;; Get my scheme of platform-specific identifiers and XDG-BDS locations.
 (defconst my-platform (my-platform-info) "The values of `$MY_*' of `my/sh/helpers.sh'")

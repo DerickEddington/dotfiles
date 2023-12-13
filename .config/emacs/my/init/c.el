@@ -1,6 +1,6 @@
 ;; -*- lexical-binding: t; -*-
 
-(use-package cc-mode
+(use-package cc-mode :ensure nil
   :bind
   (:map c-mode-map
         ([remap sp-forward-slurp-sexp] . sp-slurp-hybrid-sexp)
@@ -9,7 +9,7 @@
   (((c-mode c++-mode) . hs-minor-mode)
    ((c-mode c++-mode) . imenu-add-menubar-index)))
 
-(use-package eldoc)
+(use-package eldoc :ensure nil)
 
 (use-package flycheck)
 

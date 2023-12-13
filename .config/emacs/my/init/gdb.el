@@ -4,7 +4,7 @@
   :autoload my-gdb-allow-io-win-switch)
 
 
-(use-package gdb-mi
+(use-package gdb-mi :ensure nil
 
   ;; Using the hook would be like:
   ;; :hook (gdb-many-windows . my-gdb-allow-io-win-switch)
