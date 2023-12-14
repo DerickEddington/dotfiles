@@ -288,12 +288,27 @@ function prepare-home
 {
     install-dotfiles
 
+    # These are important enough to always ensure their permissions are good, regardless of what
+    # the branch's hooks do for other things.
+    local -r privateThings=(
+        .ssh
+        .gnupg .local/share/my/emacs/elpa/gnupg
+    )
+
     # Ensure permissions on and in ~/ are good
     #
     ( cd "$targetHome"
-      std chmod o-rwx .
-      std chmod -R go-rwx .ssh
-    ) || warn 'Failed to chmod something(s) in ~/.'
+
+      function chmod-or-warn { std chmod "$@" || warn "Failed to \`chmod $*\`." ;}
+
+      chmod-or-warn o-rwx .
+
+      for X in "${privateThings[@]}" ; do
+          if [ -e "$X" ]; then
+              chmod-or-warn -R go-rwx "$X"
+          fi
+      done
+    )
 
     # Delegate to the branch's approach for any further preparation of the target home.  Must only
     # be done after installing and checking-out the dotfiles.
