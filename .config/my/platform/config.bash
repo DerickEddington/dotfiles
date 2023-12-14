@@ -14,7 +14,7 @@
 MY_PLATFORM_PACKAGES_DESIRED=(
     bash-completion
     command-not-found
-    emacs-nox
+    emacs-nox my-emacs-packages
     fd-find
     flock  # Of util-linux. Needed by _my_lock_combined_histfile.
     git  # Always useful for each user's ~/.dotfiles repository, at least.

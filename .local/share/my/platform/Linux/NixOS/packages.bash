@@ -44,6 +44,7 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
                                   [lsof]=dummy
                                   [most]=dummy
               [my-bash-history-combiner]=dummy
+                     [my-emacs-packages]=dummy
                                   [nano]=dummy
                                    [npm]=dummy
                                 [psmisc]=dummy

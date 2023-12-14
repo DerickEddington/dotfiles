@@ -611,3 +611,59 @@ function my-build-and-install--bear
         std rm -r -f "$workDir"
     fi
 }
+
+
+function my-install-emacs-packages
+{
+    function elisp-expr-to-call-prep-func {
+        local -r func=${1:?}
+        print "\
+(let ((load-path (cons (concat user-emacs-directory \"my/lib\") load-path)))
+  (when (and (require 'my-prepare-to-install-packages nil t)
+             (fboundp '$func))
+    ($func)))"
+    }
+
+    function do-emacs {
+        local a args=(--batch --user='')  # Load the user's init, in batch mode.
+        for a ; do args+=(--eval="$(elisp-expr-to-call-prep-func "$a")") ; done
+
+        emacs "${args[@]}" --kill  # (End with --kill in case --batch is ever disabled.)
+    }
+
+    local -r name=${1:?}
+    [ "$name" = my-emacs-packages ] || exit
+    [ "${MY_PLATFORM_VARIANT-}" != NixOS ] || exit
+
+    # Ensure that Emacs is installed.
+    my-platform-install-packages emacs-nox || return
+
+  ( export MY_EMACS_DISABLE_COMPILING_MY_DIR=true  # Avoid problems byte-compiling could cause.
+
+    # First, configure things needed to install `use-package` and needed for the branch's use of
+    # it.  (Such configuration is often not already present in my primary branches used in NixOS
+    # (where instead I have Home Manager install the Emacs packages), and so doing this is needed
+    # to prepare it for other OSs.)  (If `use-package-always-ensure` is already enabled and
+    # `use-package` is already installed, this will instead do what the "final" step below
+    # describes doing.)
+    do-emacs my-prepare-needed-for-use-of-use-package || exit
+
+    # Second, ensure that `use-package` is installed (needed for Emacs versions less-than 29).
+    # (If `use-package` is already installed and `use-package-always-ensure` was enabled by the
+    # "first" step above, this will instead do what the "final" step below describes doing, due to
+    # `use-package-always-ensure` now being true.)
+    do-emacs my-install-use-package || exit
+
+    # Finally, allow `use-package`'s "ensure"ing to automatically install the packages specified
+    # by the init files.  (If this was already done (per above comments) then this just does
+    # nothing.)
+    do-emacs
+  ) || return
+
+    # Further, byte-compile my `.el`s, now that the packages are installed (and assuming that the
+    # init file will do so, now that the disabling env var is no longer present).  Not necessary,
+    # but this is an appropriate point to do so and it fits with setting-up the libraries.
+    do-emacs || return
+
+    unset -f do-emacs elisp-expr-to-call-prep-func || exit
+}
