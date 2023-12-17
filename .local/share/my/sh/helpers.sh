@@ -240,6 +240,66 @@ prepend_and_subs_to_LD_LIBRARY_PATH_if_ok() {
     prepend_and_subs_to_colon_list_var_export_if_ok "${1:?}" LD_LIBRARY_PATH
 }
 
+split_colon_list_into_lines() {
+    println "${1?}" | std tr ':' '\n'
+}
+
+join_lines_into_colon_list() { (
+    joined=$(std tr '\n' ':')
+    print "${joined%:}"
+) }
+
+filter_line_from_lines() {
+    std grep -F -x -v -e "${1?}"
+}
+
+remove_from_colon_list() {
+    split_colon_list_into_lines "${2?}" \
+    | filter_line_from_lines "${1?}"    \
+    | join_lines_into_colon_list
+}
+
+remove_from_colon_list_var_export() {
+    eval "$(
+        element=${1?}
+        varName=${2:?}
+        eval "varValue=\${${varName}-}"
+        element=$(quote "$element")
+        varValue=$(quote "$varValue")
+        print "${varName}=\$(remove_from_colon_list $element $varValue)"
+    )" || return
+    eval "export ${2:?}"
+}
+
+remove_from_PATH() {
+    remove_from_colon_list_var_export "${1?}" PATH
+}
+
+# Useful for wrapper scripts that have the same name as what they wrap and must avoid infinite
+# recursion when the wrapper is also in the PATH when the wrappee must be invoked.  This finds the
+# absolute pathname of the wrappee so that it can be invoked without accidentally invoking the
+# wrapper again.
+find_in_PATH_not_self() { (
+    executableName=${1:?}
+    selfReal=$(gnu realpath "${2:-${self:-$0}}") || exit
+    first=$(command -v "$executableName") || exit
+    candidate="$first"
+
+    while true ; do
+        candidateReal=$(gnu realpath "$candidate") || exit
+
+        if [ "$selfReal" = "$candidateReal" ]; then
+            candidateDir=$(std dirname "$candidate") || exit
+            remove_from_PATH "$candidateDir" || exit  # (Only affects the PATH of this subshell.)
+            next=$(command -v "$executableName") || exit
+            candidate="$next"
+        else
+            println "$candidate"
+            break
+        fi
+    done
+) }
+
 _my_script_prelude() {
     set -e -u  # -o errexit -o nounset
 
