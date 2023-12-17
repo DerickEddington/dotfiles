@@ -6,11 +6,13 @@ _my_install_git()               { sudo pkg install --no-refresh git  || [ $? -eq
 gnu() {
     # shellcheck disable=SC2145  # I know how `some"$@"` behaves and it's correct.
 
-    if [ -x /usr/gnu/bin/"${1:?}" ]; then
+    if [ -x /usr/gnu/bin/"$(std isainfo -n)"/"${1:?}" ]; then
+        /usr/gnu/bin/"$(std isainfo -n)"/"$@"
+    elif [ -x /usr/gnu/bin/"${1:?}" ]; then
         /usr/gnu/bin/"$@"
     else
         case "$1" in
-            (sha*sum) /usr/bin/"$@" ;;
+            (realpath|sha*sum) /usr/bin/"$@" ;;
             (*)
                 error "No GNU utility found for $(quote "$1")!"
                 return 2
