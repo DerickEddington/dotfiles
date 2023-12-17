@@ -1,0 +1,12 @@
+#! /usr/bin/env bash
+# shellcheck source=../bash/helpers.bash
+source "${XDG_DATA_HOME:-$HOME/.local/share}"/my/bash/helpers.bash
+_my-script-prelude
+
+
+for platformID in "${MY_PLATFORM_IDS[@]}"
+do
+    prepend_to_PATH_if_ok "$MY_DATA_HOME"/my/gnu/platform/"$platformID"/bin
+done
+
+exec "$@"

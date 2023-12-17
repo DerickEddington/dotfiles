@@ -1,0 +1,16 @@
+#! /usr/bin/env sh
+# shellcheck source=../sh/helpers.sh
+. "${XDG_DATA_HOME:-$HOME/.local/share}"/my/sh/helpers.sh
+_my_script_prelude
+
+
+# Add the GNU utilities, that were built for the current non-GNU platform, to the PATH of the
+# `emacs` process, so that Emacs will use these utilities for commands it runs (e.g. it runs `ls`,
+# `diff`, etc.) (instead of using the platform's default/stock utilities which probably have
+# incompatible arguments/behavior).
+
+# Must only invoke the `emacs` in PATH that is not our script, to avoid infinite recursion.
+#
+emacsCmd=$(find_in_PATH_not_self emacs) || error "Cannot find another \`emacs\` in PATH!" 1
+
+exec "$MY_DATA_HOME"/my/gnu/with-gnu-path "$emacsCmd" "$@"
