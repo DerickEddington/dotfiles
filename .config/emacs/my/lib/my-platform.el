@@ -6,10 +6,10 @@
 (defun my-platform-info ()
   (let ((cmd "sh -c '. \"${XDG_DATA_HOME:-${HOME:?}/.local/share}\"/my/sh/helpers.sh \\
                          > /dev/null || exit
-                     println \"${MY_CONFIG_HOME:?}\"
-                     println \"${MY_DATA_HOME:?}\"
-                     println \"${MY_STATE_HOME:?}\"
-                     println \"${MY_CACHE_HOME:?}\"
+                     println \"${MY_CONFIG_HOME:?}\"/
+                     println \"${MY_DATA_HOME:?}\"/
+                     println \"${MY_STATE_HOME:?}\"/
+                     println \"${MY_CACHE_HOME:?}\"/
                      println \"${MY_PLATFORM_ARCH:?}\"
                      println \"${MY_PLATFORM_OS:?}\"
                      println \"${MY_PLATFORM_VARIANT-}\"

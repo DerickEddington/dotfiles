@@ -30,10 +30,10 @@
 ;;
 (when (featurep 'native-compile)
   (defconst my-eln-cache-dir (concat (alist-get 'cache-home my-platform)
-                                     "/my/emacs/platform/"
+                                     "my/emacs/platform/"
                                      (alist-get 'os-var-ver-arch my-platform)
-                                     "/eln-cache"))
+                                     "/eln-cache/"))
   (startup-redirect-eln-cache my-eln-cache-dir))
 (setq
  package-user-dir (concat (alist-get 'data-home my-platform)
-                          "/my/emacs/elpa"))
+                          "my/emacs/elpa/"))

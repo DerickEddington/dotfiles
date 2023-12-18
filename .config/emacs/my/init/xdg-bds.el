@@ -7,14 +7,14 @@
 (eval-when-compile (defvar my-platform))  ;; Silence byte compiler.
 
 
-(defconst my-cache-dir (concat (alist-get 'cache-home my-platform) "/my/emacs"))
-(defconst my-state-dir (concat (alist-get 'state-home my-platform) "/my/emacs"))
+(defconst my-cache-dir (concat (alist-get 'cache-home my-platform) "my/emacs/"))
+(defconst my-state-dir (concat (alist-get 'state-home my-platform) "my/emacs/"))
 
 
 ;; These are "built-in", i.e. not `provide'd by a library, which is why `eval-after-load' isn't
 ;; used.
 (setopt
- auto-save-list-file-prefix (concat my-state-dir "/auto-save-list/.saves-"))
+ auto-save-list-file-prefix (concat my-state-dir "auto-save-list/.saves-"))
 
 
 ;; These use `eval-after-load' directly (instead of using `use-package') so that these still work
@@ -22,28 +22,28 @@
 
 (eval-after-load 'savehist
   (setopt
-   savehist-file (concat my-state-dir "/history")))
+   savehist-file (concat my-state-dir "history")))
 
 (eval-after-load 'tramp-cache
   (setopt
-   tramp-persistency-file-name (concat my-cache-dir "/tramp")))
+   tramp-persistency-file-name (concat my-cache-dir "tramp")))
 
 (eval-after-load 'tramp
   (setopt
-   tramp-auto-save-directory (concat my-state-dir "/tramp-auto-save")))
+   tramp-auto-save-directory (concat my-state-dir "tramp-auto-save")))
 
 (eval-after-load 'transient
   (setopt
-   transient-history-file (concat my-state-dir "/transient/history.el")))
+   transient-history-file (concat my-state-dir "transient/history.el")))
 
 (eval-after-load 'url-cache
   (setopt
-   url-cache-directory (concat my-cache-dir "/url/cache")))
+   url-cache-directory (concat my-cache-dir "url/cache")))
 
 (eval-after-load 'url-cookie
   (setopt
-   url-cookie-file (concat my-state-dir "/url/cookies")))
+   url-cookie-file (concat my-state-dir "url/cookies")))
 
 (eval-after-load 'url-history
   (setopt
-   url-history-file (concat my-state-dir "/url/history")))
+   url-history-file (concat my-state-dir "url/history")))

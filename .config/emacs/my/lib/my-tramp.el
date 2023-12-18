@@ -19,18 +19,18 @@
 
 (defun my-setup-tramp-ssh-multiplexing ()
   (if-let (((bound-and-true-p my--ssh-control-sockets-dir))
-           (tramp-dir (concat my--ssh-control-sockets-dir "/t"))
+           (tramp-dir (concat my--ssh-control-sockets-dir "t/"))
            (docker-codename  "d")
            (ssh-codename     "s")
            (vagrant-codename "v"))
       (progn
         ;; Ensure these directories exist if not already.
         (dolist (method-subdir (list docker-codename ssh-codename vagrant-codename))
-          (make-directory (concat tramp-dir "/" method-subdir) t))
+          (make-directory (concat tramp-dir method-subdir) t))
 
         ;; Configure the `/ssh:' method.
-        (let* ((method-dir (concat tramp-dir "/" ssh-codename))
-               (sock-path (concat method-dir "/%%C")))  ;; (`%C' expands to a constant-length.)
+        (let* ((method-dir (concat tramp-dir ssh-codename "/"))
+               (sock-path (concat method-dir "%%C")))  ;; (`%C' expands to a constant-length.)
           (setq tramp-ssh-controlmaster-options  ;; (The double-`%' are needed for this.)
                 (string-join
                  `("-o ControlMaster=auto"
@@ -43,7 +43,7 @@
         ;; `vagrant-tramp/bin/vagrant-tramp-ssh' (which doesn't support passing options for `ssh'
         ;; through `vagrant ssh').  This coordinates with the corresponding special `Match exec'
         ;; block in `~/.ssh/config'.
-        (let ((method-dir (concat tramp-dir "/" vagrant-codename)))
+        (let ((method-dir (concat tramp-dir vagrant-codename "/")))
           (setq
            tramp-methods
            (mapcar
@@ -66,7 +66,7 @@
                                           (list key
                                                 (cons
                                                  (list (concat "MY_SSH_CONTROL_SOCKETS_DIR="
-                                                               method-dir)
+                                                               (directory-file-name method-dir))
                                                        ;; Preserve the original program.
                                                        login-program)
                                                  ;; Preserve the original arguments.

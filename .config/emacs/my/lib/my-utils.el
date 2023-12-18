@@ -31,7 +31,8 @@
 (defmacro my-include-multi-rel (basedir &rest filenames)
   (declare (indent 1))
   (let ((basedir (eval basedir)))
-    `(my-include-multi ,@(mapcar (lambda (filename) (concat basedir "/" filename))
+    `(my-include-multi ,@(mapcar (lambda (filename)
+                                   (concat (file-name-as-directory basedir) filename))
                                  filenames))))
 
 (defmacro when-have-library (library-name &rest body)

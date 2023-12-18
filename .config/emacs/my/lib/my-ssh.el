@@ -2,7 +2,9 @@
 
 (defconst my--ssh-control-sockets-dir
   (if-let ((runtime-dir (getenv "XDG_RUNTIME_DIR")))
-      (format "%s/my/emacs/%d" runtime-dir (emacs-pid)))
+      (concat (file-name-as-directory runtime-dir)
+              "my/emacs/"
+              (format "%d/" (emacs-pid))))
   "The length of this must be minimized,
 due to the size limit of `sockaddr_un.sun_path'.")
 
