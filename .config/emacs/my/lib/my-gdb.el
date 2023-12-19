@@ -1,5 +1,8 @@
 ;; -*- lexical-binding: t; -*-
 
+(eval-when-compile (require 'use-package))
+
+
 (use-package gdb-mi
   :autoload gdb-get-buffer)  ;; Needed by my function below.
 

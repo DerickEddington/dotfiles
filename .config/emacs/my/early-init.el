@@ -25,15 +25,23 @@
 
 ;; Compute these dynamically based on the current environment variables, instead of hard-coding
 ;; values in `custom.el' or elsewhere.  Must be done here, in the early-init file, not in
-;; `./init/xdg-bds.el', so these take effect ASAP.  Must not use `setopt' (nor other parts of
-;; Customize) because it's too early for those.
+;; `./init/xdg-bds.el', so these take effect ASAP for the startup phase between here and the
+;; beginning of the normal init file, which includes the loading of the site-wide startup file
+;; (and includes the expressions in this file after here).  We don't use
+;; `startup-redirect-eln-cache' (which is only available in Emacs 29+) because the above already
+;; changed the variable (and because that function isn't in Emacs 28).  Must not use `setopt'
+;; (which is only available in Emacs 29+) nor other parts of Customize because it's too early for
+;; those.
 ;;
 (when (featurep 'native-compile)
   (defconst my-eln-cache-dir (concat (alist-get 'cache-home my-platform)
                                      "my/emacs/platform/"
                                      (alist-get 'os-var-ver-arch my-platform)
                                      "/eln-cache/"))
-  (startup-redirect-eln-cache my-eln-cache-dir))
+  ;; Remove the `~/.config/emacs/eln-cache/' element that the earlier startup placed as first.
+  (setq native-comp-eln-load-path (cdr native-comp-eln-load-path))
+  ;; Replace the original first element with our platform-specific dir that's under `~/.cache/'.
+  (push my-eln-cache-dir native-comp-eln-load-path))
 (setq
  package-user-dir (concat (alist-get 'data-home my-platform)
                           "my/emacs/elpa/"))

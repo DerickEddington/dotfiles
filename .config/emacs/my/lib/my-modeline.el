@@ -1,5 +1,8 @@
 ;; -*- lexical-binding: t; -*-
 
+(eval-when-compile (require 'use-package))
+
+
 (use-package my-utils :load-path "my/lib"
   :autoload my-alist-remove)
 

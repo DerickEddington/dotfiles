@@ -1,5 +1,8 @@
 ;; -*- lexical-binding: t; -*-
 
+(eval-when-compile (require 'use-package))
+
+
 (use-package my-ssh :load-path "my/lib" :demand t)
 (use-package tramp :demand t)
 (use-package tramp-sh :demand t :ensure nil)

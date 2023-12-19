@@ -1,5 +1,8 @@
 ;; -*- lexical-binding: t; -*-
 
+(eval-when-compile (require 'use-package))
+
+
 (use-package ibuffer :ensure nil
   ;; Needed by my functions below.
   :commands (ibuffer-update)

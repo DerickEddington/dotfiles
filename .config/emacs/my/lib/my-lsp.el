@@ -1,5 +1,8 @@
 ;; -*- lexical-binding: t; -*-  ;; To capture `orig-command' in the closure below.
 
+(eval-when-compile (require 'use-package))
+
+
 (use-package lsp-mode
   :autoload (lsp-resolve-final-command lsp-warn))
 
