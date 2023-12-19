@@ -7,6 +7,25 @@
 ;; (debug-on-entry #'package-activate-all)  ;; ditto
 
 
+(when (featurep 'native-compile)
+  ;; Disable native compilation during the below until ready to re-enable it.  This prevents
+  ;; attempting writing (and wasting work compiling) new `.eln's for any libraries loaded during
+  ;; the below that don't already have a `.eln', which is needed for Debian 12's Emacs 28 and
+  ;; possibly other OSs where not having a writable first element of `native-comp-eln-load-path'
+  ;; (as done next) would cause an error.
+  (if (boundp 'native-comp-jit-compilation)
+      (setq native-comp-jit-compilation nil)      ;; Emacs 29+
+    (setq native-comp-deferred-compilation nil))  ;; Emacs 28
+  ;; Remove the `~/.config/emacs/eln-cache/' element that the earlier startup placed as first.
+  ;; This also prevents writing any new `.eln's (for Emacs 29+ but not 28 it seems) during the
+  ;; below until the further changing of this variable is ready below, and this prepares the value
+  ;; for that changing.  (We don't add some temporary dummy dir as first element because, while it
+  ;; would work to have a writable one, it would cause recompiling every time Emacs starts every
+  ;; time the temp dir was removed, and it would place such `.eln's in an undesirable location
+  ;; different from where the rest are.)
+  (setq native-comp-eln-load-path (cdr native-comp-eln-load-path)))
+
+
 ;; To avoid seeing these even briefly.
 (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
@@ -38,10 +57,20 @@
                                      "my/emacs/platform/"
                                      (alist-get 'os-var-ver-arch my-platform)
                                      "/eln-cache/"))
-  ;; Remove the `~/.config/emacs/eln-cache/' element that the earlier startup placed as first.
-  (setq native-comp-eln-load-path (cdr native-comp-eln-load-path))
   ;; Replace the original first element with our platform-specific dir that's under `~/.cache/'.
-  (push my-eln-cache-dir native-comp-eln-load-path))
+  (push my-eln-cache-dir native-comp-eln-load-path)
+  ;; Re-enable native compilation, now that `native-comp-eln-load-path' is ready.  (For the
+  ;; unlikely case that the Emacs build actually had this as `nil' originally but has the
+  ;; `native-compile' feature, this will actually enable native compilation when it would've been
+  ;; disabled otherwise, which is also what I'd want.)
+  (if (boundp 'native-comp-jit-compilation)
+      (setq native-comp-jit-compilation t)       ;; Emacs 29+
+    (setq native-comp-deferred-compilation t)))  ;; Emacs 28
+
 (setq
  package-user-dir (concat (alist-get 'data-home my-platform)
                           "my/emacs/elpa/"))
+
+
+(when noninteractive       ;; Emacs is running in `--batch --user' mode.
+  (package-activate-all))  ;; Because batch mode doesn't do this (unlike normal mode which does).

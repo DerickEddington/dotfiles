@@ -1,12 +1,14 @@
 ;; -*- lexical-binding: t; -*-
 
 (when (featurep 'native-compile)
-  ;; Prepend this again (after my `./early-init.el' already added this) to ensure
-  ;; `my-eln-cache-dir' is at the front of the list so it takes precedence over whatever the
-  ;; `site-start.el' might've added to this list.  This is needed, e.g., with Nixpkgs'
-  ;; `site-start' which adds subdirectories from `NIX_PROFILES', and this might be needed in other
-  ;; platforms for similar reasons.
-  (push my-eln-cache-dir native-comp-eln-load-path))
+  (unless (equal my-eln-cache-dir (car native-comp-eln-load-path))
+    ;; Prepend this again (after my `./early-init.el' already added this) to ensure
+    ;; `my-eln-cache-dir' is at the front of the list so it takes precedence over whatever the
+    ;; `site-start.el' might've added to this list.  This is needed, e.g., with Nixpkgs'
+    ;; `site-start' which adds subdirectories from `NIX_PROFILES', and this might be needed in
+    ;; other platforms for similar reasons.
+    (setq native-comp-eln-load-path (delete my-eln-cache-dir native-comp-eln-load-path))
+    (push my-eln-cache-dir native-comp-eln-load-path)))
 
 (unless (fboundp 'setopt) (defalias 'setopt #'setq-default))  ;; For Emacs versions less-than 29.
 

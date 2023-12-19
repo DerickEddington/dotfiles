@@ -1,4 +1,4 @@
-;; -*- lexical-binding: t; -*-
+;; -*- lexical-binding: t; no-byte-compile: t; -*-  # Prevent possibility of outdated .elc.
 
 (eval-when-compile (require 'pcase))
 
