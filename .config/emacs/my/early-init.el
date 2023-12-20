@@ -72,5 +72,5 @@
                           "my/emacs/elpa/"))
 
 
-(when noninteractive       ;; Emacs is running in `--batch --user' mode.
-  (package-activate-all))  ;; Because batch mode doesn't do this (unlike normal mode which does).
+(when noninteractive     ;; Emacs is running in `--batch --user' mode.
+  (package-initialize))  ;; Because batch mode doesn't do this (unlike normal mode which does).

@@ -1,5 +1,8 @@
 ;; -*- lexical-binding: t; -*-
 
+;; Emacs 26- doesn't support loading early-init.el automatically.
+(load (locate-user-emacs-file "my/early-init"))
+
 (when (featurep 'native-compile)
   (unless (equal my-eln-cache-dir (car native-comp-eln-load-path))
     ;; Prepend this again (after my `./early-init.el' already added this) to ensure
