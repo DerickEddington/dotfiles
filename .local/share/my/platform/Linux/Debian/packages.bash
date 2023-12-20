@@ -72,8 +72,6 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
                               [binutils]=my-apt-install
                        [build-essential]=my-apt-install
                                  [cargo]=my-apt-install
-           ["$(_my_greatest_pkg clang)"]=my-apt-install
-          ["$(_my_greatest_pkg clangd)"]=my-apt-install
                      [command-not-found]=my-apt-install
                              [coreutils]=my-apt-install
     [corrector_of_llvm_xray_stack_flame]=my-cargo-install-from-my-repo
@@ -102,6 +100,7 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
                             [shellcheck]=my-apt-install
                             [util-linux]=my-apt-install
                                    [wrk]=my-apt-install
+          ["$(_my_greatest_pkg clangd)"]=my-apt-install
 )
 
 unset -f _my_greatest_pkg

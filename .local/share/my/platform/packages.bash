@@ -11,12 +11,12 @@ _my_bash_sourced_already local/share/my/platform/packages && return
 # keys of MY_PLATFORM_SPECIFIC_PACKAGES_METHODS.
 # shellcheck disable=SC2034
 #
-declare -A -r github=(
+declare -A github=(
     [fd-find]=https://github.com/sharkdp/fd.git
     [ripgrep]=https://github.com/BurntSushi/ripgrep.git
 )
 
-declare -A -r jedsoft=(
+declare -A jedsoft=(
     [most]=https://www.jedsoft.org/releases/most/most-5.2.0.tar.gz
     [most-5.2.0.tar.gz.sha1sum]=322073ee6e8c45ce084f4fccd08d3f026aa1f66d
 )
@@ -31,7 +31,6 @@ function my-platform-install-packages
     local - ; set -o nounset
     local names=("$@")
     remove-dups names  # Not required, but why not.
-    readonly names
     local name method errPlatform=${MY_PLATFORM_OS_VARIANT:-unknown}
 
     if ! is-var-assoc-array MY_PLATFORM_SPECIFIC_PACKAGES_NAMES \
@@ -138,10 +137,10 @@ function my-cargo-install-single
 {
     local - ; set -o nounset
     (( $# >= 1 )) || return
-    local -r args=("$@")
-    local -r crate="${args[-1]}" opts=("${args[@]:0:${#args[@]}-1}")
+    local args=("$@")
+    local crate="${args[-1]}" opts=("${args[@]:0:${#args[@]}-1}")
     local via=()
-    local -r installDir="$(_my_platspec_install_dir)"
+    local installDir="$(_my_platspec_install_dir)"
 
     if ! is-command-found cargo ; then
         # Ensure Rust & Cargo are installed.
@@ -183,8 +182,8 @@ function my-cargo-install-single
 function _my-cargo-install-multiple
 {
     # shellcheck disable=SC2206
-    local -r opts=(${opts-})  # From env var. Want word-splitting (and globbing, I guess).
-    local -r installSingle=${1:?}
+    local opts=(${opts-})  # From env var. Want word-splitting (and globbing, I guess).
+    local installSingle=${1:?}
     local crate
     for crate in "${@:2}" ; do
         "$installSingle" "${opts[@]}" "$crate"
@@ -198,8 +197,8 @@ function my-cargo-install {
 function my-cargo-install--fd-find
 {
     local features=() patches=()
-    local -r noJEmalloc=(--no-default-features --features completions)  # No `use-jemalloc`.
-    local -r patchUsersDep=(  # Needed for support for illumos, and maintained.
+    local noJEmalloc=(--no-default-features --features completions)  # No `use-jemalloc`.
+    local patchUsersDep=(  # Needed for support for illumos, and maintained.
         --config
         patch.crates-io.users.git=\""${MY_PERSONAL_GIT_REPOSITORY:?}"/uzers-as-users.git\"  # TOML
     )
@@ -219,14 +218,14 @@ function my-cargo-install-single-from-my-repo
 {
     local - ; set -o nounset
     (( $# >= 1 )) || return
-    local -r args=("$@")
-    local -r specName="${args[-1]}" opts=("${args[@]:0:${#args[@]}-1}")
+    local args=("$@")
+    local specName="${args[-1]}" opts=("${args[@]:0:${#args[@]}-1}")
 
     if ! [ "${MY_PERSONAL_GIT_REPOSITORY:-}" ]; then
         error "MY_PERSONAL_GIT_REPOSITORY not defined!"
         return 2
     fi
-    local -r crate=$MY_PERSONAL_GIT_REPOSITORY/$(printf "%s.git" "$specName")
+    local crate=$MY_PERSONAL_GIT_REPOSITORY/$(printf "%s.git" "$specName")
 
     my-cargo-install-single "${opts[@]}" "$crate"
 }
@@ -246,17 +245,17 @@ function my-install-rustup
         # privilege.  (That is why this doesn't try to install a host system's `rustup` package.)
 
         if [ "${1-}" ]; then
-            local -r installDir=$1
+            local installDir=$1
         else
-            local -r installDir="$(_my_platspec_install_dir)"
+            local installDir="$(_my_platspec_install_dir)"
         fi
         # You may provide this as an environment variable.  E.g. a pre-downloaded `rustup-init`
         # executable, which can be useful when without network.  Or e.g. some other version of the
         # Shell script that downloads `rustup-init` like `sh.rustup.rs` does.
         local installer=${MY_RUSTUP_INSTALLER-}
-        local -r installArgs=(-y --default-toolchain stable --profile default --no-modify-path
+        local installArgs=(-y --default-toolchain stable --profile default --no-modify-path
                               "${@:2}")
-        local -r rustupURL=https://sh.rustup.rs
+        local rustupURL=https://sh.rustup.rs
         local invoke=()
 
         if ! [ "$installer" ]; then
@@ -293,12 +292,12 @@ function my-install-rustup
 
 function my-rustup-install--rust-analyzer
 {
-    local -r name=${1:?}
+    local name=${1:?}
     [ "$name" = rust-analyzer ] || exit
 
     if ! is-command-found "$name"
     then
-        local -r installDir=$(_my_platspec_install_dir)
+        local installDir=$(_my_platspec_install_dir)
 
         if is-command-found rustup
         then
@@ -336,7 +335,7 @@ function my-deps-install
     my-platform-install-packages "${deps[@]}" || return
 
     if [ "${1-}" = "--" ]; then
-        local -r mainCmd=("${@:2}")
+        local mainCmd=("${@:2}")
         "${mainCmd[@]}"
     fi
 }
@@ -344,16 +343,16 @@ function my-deps-install
 
 function my-jedsoft-build-and-install
 {
-    local -r name=${1:?}
+    local name=${1:?}
 
     if ! is-command-found "$name"
     then
-        local -r url=${jedsoft[$name]:?}
-        local -r file=$(std basename "$url")
-        local -r checksum=${jedsoft["$file".sha1sum]:?}
-        local -r dir=${file%.tar.gz}
-        local -r installDir=$(_my_platspec_install_dir)
-        local -r workDir=$(gnu mktemp -d)
+        local url=${jedsoft[$name]:?}
+        local file=$(std basename "$url")
+        local checksum=${jedsoft["$file".sha1sum]:?}
+        local dir=${file%.tar.gz}
+        local installDir=$(_my_platspec_install_dir)
+        local workDir=$(gnu mktemp -d)
 
         my-platform-install-packages build-essential lib/slang/dev || return
 
@@ -388,23 +387,23 @@ function my-build-and-install--flock
     # it also providing the same underlying API (I assume).  My very-basic testing of this build
     # of `flock` in OpenIndiana showed that it seems to be working.
 
-    local -r name=${1:?}
+    local name=${1:?}
     [ "$name" = flock ] || exit
 
     if ! is-command-found "$name"
     then
-        local -r ver=2.39.2
-        local -r dir=util-linux-$ver
-        local -r file=$dir.tar.xz
-        local -r mirror=https://mirrors.edge.kernel.org/pub/linux/utils
-        local -r url=$mirror/util-linux/v${ver%.2}/$file
-        local -r checksum=87abdfaa8e490f8be6dde976f7c80b9b5ff9f301e1b67e3899e1f05a59a1531f
+        local ver=2.39.2
+        local dir=util-linux-$ver
+        local file=$dir.tar.xz
+        local mirror=https://mirrors.edge.kernel.org/pub/linux/utils
+        local url=$mirror/util-linux/v${ver%.2}/$file
+        local checksum=87abdfaa8e490f8be6dde976f7c80b9b5ff9f301e1b67e3899e1f05a59a1531f
 
-        local -r thisFuncDefDir=$(std dirname "${BASH_SOURCE[0]}")
-        local -r patch=$thisFuncDefDir/"${MY_PLATFORM_OS_VARIANT:?}"/flock.patch
+        local thisFuncDefDir=$(std dirname "${BASH_SOURCE[0]}")
+        local patch=$thisFuncDefDir/"${MY_PLATFORM_OS_VARIANT:?}"/flock.patch
 
-        local -r installDir=$(_my_platspec_install_dir)
-        local -r workDir=$(gnu mktemp -d)
+        local installDir=$(_my_platspec_install_dir)
+        local workDir=$(gnu mktemp -d)
 
         my-platform-install-packages build-essential || return
 
@@ -435,26 +434,26 @@ function my-build-and-install--flock
 
 function my-build-and-install--clangd
 {
-    local -r name=${1:?}
+    local name=${1:?}
     [ "$name" = clangd ] || exit
 
     if ! is-command-found "$name"
     then
-        local -r ver=15.0.7  # The last version that works in OpenIndiana.
-        local -r dir=llvm-project-$ver.src
-        local -r file=$dir.tar.xz
-        local -r site=https://github.com/llvm/llvm-project/releases/download
-        local -r url=$site/llvmorg-$ver/$file
-        local -r checksum=8b5fcb24b4128cf04df1b0b9410ce8b1a729cb3c544e6da885d234280dedeac6
+        local ver=15.0.7  # The last version that works in OpenIndiana.
+        local dir=llvm-project-$ver.src
+        local file=$dir.tar.xz
+        local site=https://github.com/llvm/llvm-project/releases/download
+        local url=$site/llvmorg-$ver/$file
+        local checksum=8b5fcb24b4128cf04df1b0b9410ce8b1a729cb3c544e6da885d234280dedeac6
 
-        local -r installDir=$(_my_platspec_install_dir)
-        local -r workDir=$(TMPDIR=/var/tmp  gnu mktemp -d)
+        local installDir=$(_my_platspec_install_dir)
+        local workDir=$(TMPDIR=/var/tmp  gnu mktemp -d)
 
         my-platform-install-packages build-essential cmake ninja || return
 
         # # Using Clang to build it enables statically linking to LLVM's libc++.  Might as well use
         # # the same Clang version.
-        # local -r cc=clang cxxc=clang++
+        # local cc=clang cxxc=clang++
         # local comp
         # for comp in "$cc" "$cxxc" ; do
         #     if ! is-command-found "$comp" ; then
@@ -473,7 +472,7 @@ function my-build-and-install--clangd
         # Reduce build time by not building unneeded support for various ISAs.  Giving at least
         # one is required (even though `clangd` probably never generates machine code for it).
         case "${MY_PLATFORM_ARCH:?}" in
-            (*86*|amd64) local -r targetArch=X86 ;;
+            (*86*|amd64) local targetArch=X86 ;;
             (*) error "Unsure which LLVM target ISA to choose." && return 4 ;;
         esac
 
@@ -511,23 +510,23 @@ function my-build-and-install--clangd
 
 function my-build-and-install--gRPC
 {
-    local -r name=${1:?}
+    local name=${1:?}
     [ "$name" = gRPC ] || exit
 
     if ! is-command-found grpc_cpp_plugin
     then
-        local -r ver=1.59.1
-        local -r file=v$ver.tar.gz
-        local -r site=https://github.com/grpc/grpc
-        local -r url=$site/archive/refs/tags/$file
-        local -r checksum=916f88a34f06b56432611aaa8c55befee96d0a7b7d7457733b9deeacbc016f99
-        local -r dir=grpc-$ver
+        local ver=1.59.1
+        local file=v$ver.tar.gz
+        local site=https://github.com/grpc/grpc
+        local url=$site/archive/refs/tags/$file
+        local checksum=916f88a34f06b56432611aaa8c55befee96d0a7b7d7457733b9deeacbc016f99
+        local dir=grpc-$ver
 
-        local -r thisFuncDefDir=$(std dirname "${BASH_SOURCE[0]}")
-        local -r patch=$thisFuncDefDir/"${MY_PLATFORM_OS_VARIANT:?}"/grpc.patch
+        local thisFuncDefDir=$(std dirname "${BASH_SOURCE[0]}")
+        local patch=$thisFuncDefDir/"${MY_PLATFORM_OS_VARIANT:?}"/grpc.patch
 
-        local -r installDir=$(_my_platspec_install_dir)
-        local -r workDir=$(gnu mktemp -d)
+        local installDir=$(_my_platspec_install_dir)
+        local workDir=$(gnu mktemp -d)
 
         my-platform-install-packages build-essential cmake ninja                        \
                                      protobuf openssl lib/c/c-ares lib/c++/{abseil,re2} \
@@ -561,23 +560,23 @@ function my-build-and-install--gRPC
 
 function my-build-and-install--bear
 {
-    local -r name=${1:?}
+    local name=${1:?}
     [ "$name" = bear ] || exit
 
     if ! is-command-found "$name"
     then
-        local -r ver=3.1.3
-        local -r file=$ver.tar.gz
-        local -r site=https://github.com/rizsotto/Bear
-        local -r url=$site/archive/refs/tags/$file
-        local -r checksum=8314438428069ffeca15e2644eaa51284f884b7a1b2ddfdafe12152581b13398
-        local -r dir=Bear-$ver
+        local ver=3.1.3
+        local file=$ver.tar.gz
+        local site=https://github.com/rizsotto/Bear
+        local url=$site/archive/refs/tags/$file
+        local checksum=8314438428069ffeca15e2644eaa51284f884b7a1b2ddfdafe12152581b13398
+        local dir=Bear-$ver
 
-        local -r thisFuncDefDir=$(std dirname "${BASH_SOURCE[0]}")
-        local -r patch=$thisFuncDefDir/"${MY_PLATFORM_OS_VARIANT:?}"/bear.patch
+        local thisFuncDefDir=$(std dirname "${BASH_SOURCE[0]}")
+        local patch=$thisFuncDefDir/"${MY_PLATFORM_OS_VARIANT:?}"/bear.patch
 
-        local -r installDir=$(_my_platspec_install_dir)
-        local -r workDir=$(gnu mktemp -d)
+        local installDir=$(_my_platspec_install_dir)
+        local workDir=$(gnu mktemp -d)
 
         my-platform-install-packages build-essential cmake ninja         \
                                      protobuf gRPC lib/c++/nlohmann-json \
@@ -616,7 +615,7 @@ function my-build-and-install--bear
 function my-install-emacs-packages
 {
     function elisp-expr-to-call-prep-func {
-        local -r func=${1:?}
+        local func=${1:?}
         print "\
 (let ((load-path (cons (concat user-emacs-directory \"my/lib\") load-path)))
   (when (and (require 'my-prepare-to-install-packages nil t)
@@ -631,7 +630,7 @@ function my-install-emacs-packages
         emacs "${args[@]}" --kill  # (End with --kill in case --batch is ever disabled.)
     }
 
-    local -r name=${1:?}
+    local name=${1:?}
     [ "$name" = my-emacs-packages ] || exit
     [ "${MY_PLATFORM_VARIANT-}" != NixOS ] || exit
 
