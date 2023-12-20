@@ -106,13 +106,14 @@ function has-tag {
 
 function start-dotfiles-repo
 {
-    git init --initial-branch=preexisting
+    git init
     git add --all --ignore-errors
 
     git config user.name "$userName"
     git config user.email "$userEmail"
 
     commit-if-staged 'As was.'
+    git branch --move preexisting
 
     git tag preexisting || warn "Failed to tag \`preexisting\`"
 }
@@ -230,7 +231,7 @@ function merge-dotfiles
 
     case "$recovery" in
         (none|reattempt)
-            git fetch --no-write-fetch-head "$GIT_DIR" "$mergeBranch":"$userBranch"
+            git fetch "$GIT_DIR" "$mergeBranch":"$userBranch"
             git checkout "$userBranch"
             git branch --delete --force "$mergeBranch"
             ;;
