@@ -52,6 +52,7 @@
 /.local/state/my/bash/interactive/history/by-time/
 /.local/state/my/emacs/
 !/.local/state/nix/
+/.local/state/nix/profiles/
 /Maildir
 /Music
 /Pictures
