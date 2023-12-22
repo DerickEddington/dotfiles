@@ -51,11 +51,9 @@
 /.local/state/my/bash/interactive/history/combined
 /.local/state/my/bash/interactive/history/by-time/
 /.local/state/my/emacs/
+!/.local/state/nix/
 /Maildir
 /Music
-/.nix-defexpr/channels
-/.nix-defexpr/channels_root
-/.nix-profile
 /Pictures
 /.pki/
 /.rustup/update-hashes
