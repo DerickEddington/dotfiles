@@ -46,6 +46,7 @@
 !/.local/share/my/emacs/elpa/.dir-locals.el
 !/.local/share/my/emacs/elpa/gnupg/
 !/.local/share/rust-script
+!/.local/share/user-tmpfiles.d/
 /.local/state/*
 !/.local/state/my/
 /.local/state/my/bash/interactive/history/combined
@@ -80,6 +81,7 @@
 /.config/environment.d/10-home-manager.conf
 /.config/gdb/my/platform/*/NixOS/init
 /.config/systemd/
+/.config/user-tmpfiles.d/home-manager.conf
 /.config/user-tmpfiles.d/my-home-*-tmp-debug.conf
 /.config/user-tmpfiles.d/my-home-*-tmp-src.conf
 /.local/share/home-manager/
