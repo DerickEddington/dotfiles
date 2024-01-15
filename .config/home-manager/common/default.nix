@@ -166,6 +166,7 @@ in
             "browser.startup.page" = restorePreviousSession;
             "browser.sessionstore.warnOnQuit" = true;
             "browser.aboutConfig.showWarning" = false;
+            "browser.download.always_ask_before_handling_new_types" = true;
 
             "browser.newtabpage.enabled" = false;
             "browser.newtabpage.enhanced" = false;
@@ -179,6 +180,7 @@ in
             "browser.newtabpage.activity-stream.section.highlights.includeVisited" = false;
             "browser.newtabpage.activity-stream.showSearch" = false;
             "browser.newtabpage.activity-stream.showSponsored" = false;
+            "browser.tabs.warnOnClose" = true;
 
             "font.default.x-western" = "sans-serif";
             "font.size.variable.x-western" = 15;
@@ -186,7 +188,6 @@ in
             "font.minimum-size.x-western" = 14;
             "browser.display.use_document_fonts" = 0;
             "browser.display.background_color" = "#9a9996";
-
             "general.smoothScroll" = false;
 
             "browser.search.suggest.enabled" = false;
@@ -202,12 +203,16 @@ in
             "app.shield.optoutstudies.enabled" = false;
             "datareporting.healthreport.uploadEnabled" = false;
             "datareporting.policy.dataSubmissionEnabled" = false;
+            "signon.firefoxRelay.feature" = "disabled";
             # Do not report what I download to Mozilla's masters.
             "browser.safebrowsing.downloads.enabled" = false;
             "browser.safebrowsing.downloads.remote.block_potentially_unwanted" = false;
             "browser.safebrowsing.downloads.remote.block_uncommon" = false;
 
             "privacy.donottrackheader.enabled" = true;
+            "privacy.globalprivacycontrol.enabled" = true;
+            "privacy.globalprivacycontrol.functionality.enabled" = true;
+            "privacy.globalprivacycontrol.was_ever_enabled" = true;
             "privacy.trackingprotection.enabled" = true;
             "privacy.trackingprotection.socialtracking.enabled" = true;
             "browser.contentblocking.category" = "custom";
