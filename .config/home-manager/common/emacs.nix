@@ -73,6 +73,7 @@ in
         counsel
         counsel-fd
         counsel-tramp
+        csv-mode
         define-word
         diff-hl
         expand-region

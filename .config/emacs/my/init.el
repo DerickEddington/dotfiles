@@ -145,6 +145,7 @@
 (use-package adaptive-wrap)
 (use-package all-the-icons)
 (use-package charmap)
+(use-package csv-mode)
 (use-package fd-dired)
 (use-package git-modes)
 (use-package lua-mode)
