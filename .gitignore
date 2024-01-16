@@ -1,4 +1,5 @@
 *~
+*.kdbx
 /.*_history
 /.bzr.log
 /.cache/
@@ -45,6 +46,7 @@
 /.local/share/my/emacs/elpa/*
 !/.local/share/my/emacs/elpa/.dir-locals.el
 !/.local/share/my/emacs/elpa/gnupg/
+!/.local/share/my/keepass/template.kdbx
 !/.local/share/rust-script
 !/.local/share/user-tmpfiles.d/
 /.local/state/*
@@ -77,6 +79,7 @@
 # Things managed by home-manager
 /.bash_profile
 /.bashrc
+/.config/chromium/NativeMessagingHosts/org.keepassxc.keepassxc_browser.json
 /.config/dconf/
 /.config/environment.d/10-home-manager.conf
 /.config/gdb/my/platform/*/NixOS/init

@@ -7,8 +7,9 @@
 { config, pkgs, lib, nixos-config, ... }:
 
 let
-  inherit (builtins) getEnv pathExists;
+  inherit (builtins) elem getEnv pathExists;
   inherit (lib) hm mkDefault mkEnableOption mkIf optionals;
+  inherit (lib.attrsets) optionalAttrs;
 in
 
 let
@@ -142,6 +143,62 @@ in
     programs.man.generateCaches = true;
 
     #---------------------------------------------------------------------------
+    # KeePassXC
+    #---------------------------------------------------------------------------
+    home.file = let
+      isInstalled = pkg: (    (elem pkg nixos-config.environment.systemPackages)
+                           || (elem pkg config.home.packages));
+    in
+      # These files are what enable web browsers with the KeePassXC-Browser extension to
+      # communicate with KeePassXC.  We install these our self, instead of having KeePassXC manage
+      # them, to ensure these are always present and to ensure these cannot be changed, not even
+      # by KeePassXC, so that their contents as defined here are tracked in our ~/.dotfiles
+      # repository.  This requires having `UpdateBinaryPath=false` in
+      # ~/.config/keepassxc/keepassxc.ini, to tell KeePassXC to not manage them.  Otherwise, if
+      # KeePassXC managed them, the `"path":` value would be a /nix/store/... pathname (since it
+      # was compiled with such hardcoded) which would frequently change after `nixos-rebuild`s
+      # which would be a hassle for tracking these in the repo; and, further, these could
+      # accidentally be messed with if they weren't immutable which could break the critical
+      # browser extension; and, further, any `"path":` value for one OS would be invalid when the
+      # home dir is shared across multiple different OSs because the value must be absolute and
+      # PATH searching isn't done.  By creating them here via Home Manager, these are only
+      # installed when the OS is NixOS, where I assume that's the only OS such a home dir will be
+      # used with.  For other OSs, it shouldn't be assumed how this should be handled, and the
+      # stuff here won't be used.
+      mkIf (isInstalled pkgs.keepassxc) ({
+        # Unneeded for Firefox, since this is installed system-wide by my NixOS config, which will
+        # naturally stay up-to-date automatically without the concerns mentioned above.
+       #".mozilla/native-messaging-hosts/org.keepassxc.keepassxc_browser.json".text = ''
+       #  {
+       #      "allowed_extensions": [
+       #          "keepassxc-browser@keepassxc.org"
+       #      ],
+       #      "description": "KeePassXC integration with native messaging support",
+       #      "name": "org.keepassxc.keepassxc_browser",
+       #      "path": "/run/current-system/sw/bin/keepassxc-proxy",
+       #      "type": "stdio"
+       #  }
+       #'';
+      } // (optionalAttrs (     (isInstalled pkgs.ungoogled-chromium)
+                            && !(isInstalled pkgs.chromium)) {
+        # Provide for Chromium, because the Nixpkgs don't have a way to have this system-wide.
+        # Only provide for the Ungoogled variant, because I wouldn't trust the normal Chromium
+        # with my secrets.
+        ".config/chromium/NativeMessagingHosts/org.keepassxc.keepassxc_browser.json".text = ''
+          {
+              "allowed_origins": [
+                  "chrome-extension://pdffhmdngciaglkoonimfcmckehcpafo/",
+                  "chrome-extension://oboonakemofpalcgghocfoadofidjkkk/"
+              ],
+              "description": "KeePassXC integration with native messaging support",
+              "name": "org.keepassxc.keepassxc_browser",
+              "path": "/run/current-system/sw/bin/keepassxc-proxy",
+              "type": "stdio"
+          }
+          '';
+      }));
+
+    #---------------------------------------------------------------------------
     # Firefox
     #---------------------------------------------------------------------------
     programs.firefox = {
@@ -197,6 +254,11 @@ in
             "browser.urlbar.placeholderName.private" = "DuckDuckGo";
             "browser.urlbar.suggest.quicksuggest" = false;
             "browser.urlbar.suggest.quicksuggest.sponsored" = false;
+
+            # Password management. Disabled because the KeePassXC-Browser addon is used instead.
+            "signon.rememberSignons" = false;
+            "signon.autofillForms" = false;
+            "signon.management.page.breach-alerts.enabled" = false;  # KeePassXC can do alerts.
 
             # Anti-telemetry
             "toolkit.telemetry.pioneer-new-studies-available" = false;
