@@ -98,6 +98,8 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
                                   [rust]=my-pkg-install
                          [rust-analyzer]=my-pkg-install
                                 [screen]=my-pkg-install
+                         [hs-ShellCheck]=my-pkg-install
+                           [terminfo-db]=my-pkg-install
                                          # `flock` is needed by _my_lock_combined_histfile.  Might
                                          # as well enable most of the other "options" since we're
                                          # building it anyway, and I'm more familiar with using
@@ -111,8 +113,6 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_METHODS=(
                                          # its standard utilities will still be the ones used by
                                          # default.  I could arrange some other way(s) to use the
                                          # util-linux ones by default, if I want.
-                         [hs-ShellCheck]=my-pkg-install
-                           [terminfo-db]=my-pkg-install
                       [devel/util-linux]='single my-port-install WITH="CAL FLOCK GETOPT HARDLINK"'
                             [wrk-luajit]=my-pkg-install
 )
@@ -131,7 +131,7 @@ function is-pkg-installed {
 
 # Install GNU `coreutils` immediately, because it's used for installing other packages.
 if ! is-pkg-installed coreutils ; then
-    my-pkg-install coreutils
+    my-pkg-install coreutils || warn "Couldn't install GNU coreutils. Hopefully it already is."
 fi
 
 

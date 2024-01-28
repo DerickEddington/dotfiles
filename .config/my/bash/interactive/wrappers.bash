@@ -15,7 +15,7 @@ function du
       else
           local ARGS=(*)
       fi
-      gnu du -s -c -h "${ARGS[@]}" | sort -h )
+      gnu du -s -c -h "${ARGS[@]}" | gnu sort -h )
 }
 
 

@@ -1,5 +1,6 @@
 *~
 *.kdbx
+secring.gpg
 /.*_history
 /.bzr.log
 /.cache/
