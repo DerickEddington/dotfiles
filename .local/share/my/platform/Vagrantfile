@@ -164,8 +164,24 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "nbsd9", autostart: false do |nbsd9|
     nbsd9.vm.box = "NetBSD/NetBSD-9.1"
-    set_vm_magnitude(nbsd9)
+    setup_my_way(nbsd9)
     nbsd9.vm.synced_folder ".", "/vagrant", disabled: true  # Avoid error from Vagrant.
+    nbsd9.vm.provision "pkgin-update", type: "shell", privileged: true,
+                       inline: "pkgin -y update"
+    nbsd9.vm.provision "pkgin-upgrade", type: "shell", privileged: true,
+                       inline: "pkgin -y upgrade"
+    nbsd9.vm.provision "pkgin-autoremove", type: "shell", privileged: true,
+                       inline: "pkgin -y autoremove"
+    nbsd9.vm.provision "maybe-say-to-reboot", type: "shell", privileged: true,
+                       inline: "
+                         if [ -e /var/tmp/already-said-to-reboot ]; then
+                           rm /var/tmp/already-said-to-reboot
+                         else
+                           echo 'Do `vagrant reload --provision $name`, just in case.' 1>&2
+                           touch /var/tmp/already-said-to-reboot
+                           exit 1
+                         fi
+                       "  # , reboot: true  # unsupported
   end
 
   config.vm.define "obsd7", autostart: false do |obsd7|

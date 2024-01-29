@@ -47,6 +47,16 @@ in
         fi
         alias ps="ps dxu"
         ;;
+    (NetBSD)
+        if [ -x /usr/pkg/bin/gls ]; then  # GNU ls
+            # (Same reason as above.)
+            # shellcheck disable=SC2139  # Want this to be expanded when defined.
+            alias ls=g"$_my_gnu_ls_alias"
+        else
+            alias ls='ls -Fh'
+        fi
+        alias ps="ps dxu"
+        ;;
     (SunOS)
         # shellcheck disable=SC2139  # Want this to be expanded when defined.
         alias ls="$_my_gnu_ls_alias"

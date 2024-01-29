@@ -1,0 +1,2 @@
+# Both NetBSD 9's & 10's GDB is too old, doesn't load init files from ~/.config/gdb/, and doesn't
+# have Python support.  Not sure if much of my config could be used with such.
