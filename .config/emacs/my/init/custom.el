@@ -138,6 +138,7 @@
  '(lsp-modeline-code-actions-segments '(count))
  '(lsp-response-timeout 20)
  '(lsp-rust-analyzer-binding-mode-hints t)
+ '(lsp-rust-analyzer-cargo-unset-test ["core" "alloc" "std"])
  '(lsp-rust-analyzer-cargo-watch-command "clippy")
  '(lsp-rust-analyzer-diagnostics-enable t)
  '(lsp-rust-analyzer-diagnostics-enable-experimental t)
@@ -267,7 +268,8 @@
  '(rust-indent-where-clause nil)
  '(rust-rustfmt-switches '("+the-nightly" "--unstable-features"))
  '(safe-local-variable-values
-   '((lsp-rust-analyzer-rustfmt-extra-args .
+   '((my-rust-lang-proj--is? . t)
+     (lsp-rust-analyzer-rustfmt-extra-args .
                                            ["+nightly" "--unstable-features"])))
  '(shell-command-prompt-show-cwd t)
  '(shell-file-name "bash")
