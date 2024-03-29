@@ -148,6 +148,7 @@ in
               extensions = [
                 "clippy"
                 "rustfmt"
+                "rust-analyzer" "rust-src"
               ];
               inherit targets;
             });
