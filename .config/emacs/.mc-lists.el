@@ -69,12 +69,15 @@
         find-file-read-only
         gud-tooltip-mouse-motion
         handle-switch-frame
+        hs-hide-all
         ivy-switch-buffer
         lsp-signature-stop
+        lsp-ui-doc--handle-mouse-movement
         magit-status
         overwrite-mode
         read-only-mode
         suspend-frame
         undo-redo
         wdired-exit
+        widget-button-click
         ))
