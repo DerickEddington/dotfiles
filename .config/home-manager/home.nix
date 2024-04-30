@@ -88,9 +88,6 @@ in
     # };
   };
 
-  # TODO: Maybe this should change to 21.11 for when I install that new release
-  # on new laptop.
-  #
   # This value determines the Home Manager release that your
   # configuration is compatible with. This helps avoid breakage
   # when a new Home Manager release introduces backwards
