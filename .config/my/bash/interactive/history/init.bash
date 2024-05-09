@@ -155,6 +155,7 @@ function _my_histfile_combining {
             local PREV_COMBINED
             PREV_COMBINED=$(gnu mktemp "$MY_BASH_HISTDIR"/combined-prev-XXXXXXXXXX) || return
             std cp "$MY_BASH_HISTDIR"/combined "$PREV_COMBINED" || return
+            std chmod a-w "$PREV_COMBINED"  # Might as well.
 
             if is-command-found my-bash_history-combiner ; then
                 # Use it wherever it currently is from.
@@ -175,10 +176,13 @@ function _my_histfile_combining {
                 local MY_BASH_HISTORY_COMBINER=~/.local/$BIN_DIR/my-bash_history-combiner
             fi
 
+            std chmod u+w "$MY_BASH_HISTDIR"/combined  # In case it somehow became read-only.
+
             if ! $MY_BASH_HISTORY_COMBINER "$PREV_COMBINED" "$MY_BASH_SESSION_HISTFILE" \
                    > "$MY_BASH_HISTDIR"/combined  # Write to original, to preserve inode.
             then
                 std cp -f "$PREV_COMBINED" "$MY_BASH_HISTDIR"/combined  # Restore if error.
+                std chmod u+w "$MY_BASH_HISTDIR"/combined  # In case of `-f` of `cp`.
             fi
             std rm -f "$PREV_COMBINED"
 
