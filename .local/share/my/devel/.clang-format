@@ -1,0 +1,77 @@
+AlignAfterOpenBracket: Align
+AlignArrayOfStructures: Right
+AlignConsecutiveAssignments: None  # Or maybe: Consecutive
+AlignConsecutiveBitFields: AcrossEmptyLinesAndComments
+AlignConsecutiveDeclarations: AcrossEmptyLinesAndComments
+AlignConsecutiveMacros: AcrossEmptyLinesAndComments
+AlignEscapedNewlines: Right
+AlignOperands: AlignAfterOperator
+AllowAllArgumentsOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakAfterReturnType: All
+BinPackParameters: false
+BitFieldColonSpacing: Both
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: true
+  AfterControlStatement: Always
+  AfterEnum: false
+  AfterFunction: true
+  AfterStruct: false
+  AfterUnion: false
+  AfterExternBlock: true
+  BeforeElse: true
+  BeforeWhile: true
+  IndentBraces: true  # But not for functions...
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+BreakBeforeTernaryOperators: true
+BreakStringLiterals: true
+ColumnLimit: 80
+ContinuationIndentWidth: 2
+DeriveLineEnding: true
+ForEachMacros:
+  - foreach_array
+  - foreach_array_i
+  - foreach_array_adr
+  - foreach_array_adr_i
+  - foreach_array_reverse
+  - foreach_array_reverse_i
+  - foreach_structArray
+  - foreach_structArray_i
+  - foreach_structArray_reverse
+  - foreach_structArray_reverse_i
+  - foreach_count
+  - foreach_count_i
+  - foreach_count_reverse_i
+  - foreach_counti
+  - foreach_counti_reverse
+  - foreach_ARRAY
+  - foreach_ARRAYStruct
+# IfMacros:  TODO?: The with_memPool etc macros?
+IncludeBlocks: Preserve
+# IncludeCategories: TODO
+IndentCaseBlocks: true
+IndentCaseLabels: true
+IndentWidth: 2
+# MacroBlockBegin:  TODO?: Use for the with_memPool macros?
+PointerAlignment: Right
+ReflowComments: true
+SeparateDefinitionBlocks: Leave
+SpaceAfterCStyleCast: true
+SpaceAroundPointerQualifiers: Both
+SpaceBeforeCaseColon: false
+SpaceBeforeParens: ControlStatements
+SpacesBeforeTrailingComments: 2
+SpacesInLineCommentPrefix:
+  Minimum: 1
+  Maximum: 1
+Standard: c++17  # Or: Auto
+TabWidth: 8

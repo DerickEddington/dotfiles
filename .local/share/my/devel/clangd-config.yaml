@@ -1,0 +1,89 @@
+# My personal settings that are applied globally (per-user) and with higher precedence than
+# per-project-directory `.clangd` files.  This must only have settings that should be applied to
+# *every* source file that `clangd` processes (but note: `If`-block conditions may be used to
+# limit which settings here apply to which projects and files).  These settings will be merged
+# with any provided by a project's `.clangd` file.
+#
+# This is intended to be placed (maybe via symlink) at ~/.config/clangd/config.yaml if desired.
+#
+# See: https://clangd.llvm.org/config
+
+Diagnostics:
+  UnusedIncludes: Strict
+
+InlayHints:
+  Enabled: Yes
+
+Hover:
+  ShowAKA: Yes
+
+# TODO: Would this avoid the `std::bad_alloc` bug in `clangd` versions 16 & 17 in OpenIndiana
+# (which seemed to happen when it tried to index the standard library)?
+#
+#Index:
+#  StandardLibrary: No
+
+---
+
+If:
+  PathMatch: [ '.*' ]
+ #PathExclude: [ ... , ... ]
+
+CompileFlags:
+  Remove: [
+    -Werror,
+    -std=*,  # TODO: Is this OK for *every* source file?
+  ]
+  Add: [
+    -std=gnu17,  # TODO: Is this OK for *every* source file?
+    -O3,  # Needed for complete diagnostics.
+    -Wall, -Wextra, -Wconversion, -Wpedantic,
+    -Werror=implicit-function-declaration,
+    -Werror=incompatible-pointer-types,
+   #-Wno-error=unknown-warning-option,
+    -Wbad-function-cast, -Wcast-function-type, -Wcast-function-type-strict, -Wcast-qual, -Wcast-align,
+    -Wswitch-default, -Wswitch-enum,
+    -Wmaybe-uninitialized, -Wstrict-overflow=5,  # Needs optimizations enabled.
+    -Wunsafe-loop-optimizations,
+    -Wpointer-arith,
+    -Wwrite-strings,
+    -Winit-self,
+    -Wjump-misses-init,
+    -Wlogical-op,
+    -Wnormalized,
+    -Wshift-overflow=2,
+    -Wformat=2, -Wformat-overflow=2, -Wformat-nonliteral, -Wformat-security, -Wformat-signedness, -Wformat-truncation=2, -Wno-format-pedantic,
+    -Wshadow,
+    -Wno-error=duplicated-cond,
+   #-Wpacked, -Wpadded, # -Wno-error=padded,
+    -Wredundant-decls, -Wextra-semi-stmt,
+    -Wstrict-prototypes, -Wold-style-definition, -Wmissing-prototypes, -Wmissing-declarations,
+    -Wno-language-extension-token,
+    -Wno-gnu-statement-expression,
+    -Wno-gnu-zero-variadic-macro-arguments,
+    -Wno-gnu-alignof-expression,
+
+    # Sometimes helpful with some codebases:
+   #-Wno-conversion,  # Only needed to actually no-error sign-conversion.
+   #-Wno-sign-conversion,
+   #-Wno-cast-qual,
+   #-Wno-incompatible-pointer-types-discards-qualifiers,
+   #-Wno-extra-semi-stmt,
+  ]
+
+#---
+#
+# Sometimes helpful to manually tell `clangd` to use particular compiler flags (e.g. `-I/dir`,
+# `-DFOO=bar`, `-m64`, etc.) for some project, when `compile_commands.json` can't be generated for
+# it for some reason (i.e. when `bear` can't even be used), and when a `.clangd` file shouldn't be
+# added in the project's directory.  A directory specified here with `CompilationDatabase:` must
+# contain either `compile_commands.json` or `compile_flags.txt`, and you'd manually populate the
+# contents of such file.
+#
+#If:
+#  PathMatch: '(.*/)?something/special/.+'
+#
+#CompileFlags:
+#  CompilationDatabase: ../my/clangd/something-special/
+#
+#---

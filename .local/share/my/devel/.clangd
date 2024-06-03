@@ -1,0 +1,13 @@
+# My personal settings that are only applied to projects under a directory where this file is
+# placed (maybe via symlink) if desired.  This is intended only for my own projects where this
+# doesn't need to worry about what others' projects have.
+#
+# This is merged with ~/.config/clangd/config.yaml (if present there) which has greater
+# precedence, and so this can only add to that.
+
+CompileFlags:
+  Add: [
+    -pedantic-errors,
+    -Wno-error=unknown-warning-option,
+    -Wpacked, # -Wpadded, -Wno-error=padded,
+  ]
