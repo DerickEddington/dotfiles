@@ -154,7 +154,6 @@ do
         # with the name of a platform variant, version, or architecture.  (These are under ~/bin/
         # & ~/lib/ because these are for the same purpose as those.)  Including the
         # sub-directories can be especially convenient for symlink'ing like:
-
         # ~/lib/my/platform/Linux/lib/acme-3.2.1 -> ~/tmp/acme-3.2.1/lib
         #
         prepend_and_subs_to_PATH_if_ok            "$HOME"/bin/"$_my_platspec"/bin
