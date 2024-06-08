@@ -17,6 +17,7 @@ in
 
   # Allow and show only select "unfree" packages.
   allowUnfreePredicate = pkg: elem (getName pkg) [
+    "vagrant"  # Vagrant 2.4+ has a different license than previous versions, it seems.
     # "${name}"
   ];
 

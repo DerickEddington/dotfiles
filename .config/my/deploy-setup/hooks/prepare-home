@@ -43,7 +43,7 @@ function prepare-home-manager
 
 function prepare-nixos-unstable
 {
-    local -r URL=https://nixos.org/channels/nixos-unstable
+    local -r URL=https://channels.nixos.org/nixos-unstable
 
     nix-channel --add "$URL" nixos-unstable
     nix-channel --update nixos-unstable

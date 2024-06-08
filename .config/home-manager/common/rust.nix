@@ -142,7 +142,7 @@ in
           # The Nightly from the same date as the release of `the-stable`, so this derivation is
           # only updated when that is (otherwise the latest would be updated every day).
           the-nightly = let
-            dateOfStable = rust-bin.manifests.stable.latest.date;
+            dateOfStable = rust-bin.stable.latest._manifest.date;
           in
             mkDefault (rust-bin.nightly.${dateOfStable}.minimal.override {
               extensions = [
