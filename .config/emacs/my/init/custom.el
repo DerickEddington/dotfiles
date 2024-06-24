@@ -154,7 +154,6 @@
  '(lsp-rust-analyzer-max-inlay-hint-length 40)
  '(lsp-rust-analyzer-proc-macro-enable t)
  '(lsp-rust-analyzer-rustfmt-extra-args ["+the-nightly" "--unstable-features"])
- '(lsp-rust-analyzer-rustfmt-rangeformatting-enable t)
  '(lsp-rust-analyzer-server-command '("wont-be-found--to-force-fallback-logic"))
  '(lsp-rust-analyzer-use-client-watching nil)
  '(lsp-rust-build-on-save t)
