@@ -29,7 +29,7 @@ directory that contains The Rust Project source-code."
 
     `(:check (:invocationLocation "root" :invocationStrategy "once"
               :overrideCommand ,x-check-cmd
-              :allTargets ,false)  ; Alt: Could remove this line.
+              :allTargets ,false)
       :checkOnSave ,false  ; Alt: Could remove this line.
       :linkedProjects [
         "Cargo.toml"
@@ -44,7 +44,8 @@ directory that contains The Rust Project source-code."
               :sysrootSrc "./library"
               :sysrootQueryMetadata t  ; Alt: Could remove this line.
               :sysroot nil  ; Seems to be needed to avoid some issues.
-              :extraEnv (:RUSTC_BOOTSTRAP "1"))  ; Allows "stable" rustc to act like "nightly".
+              :extraEnv (:RUSTC_BOOTSTRAP "1")  ; Allows "stable" rustc to act like "nightly".
+              :allTargets ,false)
       :rustc (:source "./Cargo.toml")
       :rustcSource ,remove  ; Because `lsp-rust.el' adds this but it's deprecated.
       :procMacro (:server ,proc-macro-srv))))
