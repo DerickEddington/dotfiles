@@ -39,4 +39,38 @@ define hook-quit
 end
 
 
+define my if_exited_normally_then_quit
+  if $_isvoid($_exitsignal)
+    if ! $_isvoid($_exitcode)
+      quit $_exitcode
+    end
+  end
+end
+document my if_exited_normally_then_quit
+Quit GDB with the program's exit-code,
+if the program being debugged terminated normally;
+else, the program crashed, so don't do anything, to allow GDB to remain for usage.
+
+This can be especially useful when using GDB in a shell command (or GDB "command file").
+E.g. to repeatedly run a program until it crashes:
+
+  while
+      gdb -ex "break $PANIC_FUNC" \ 
+          -ex 'run' \ 
+          -ex 'my if_exited_normally_then_quit' \ 
+          -ex 'thread apply all backtrace' \ 
+          -ex 'interrupt -a' \ 
+          --args $PROG ${ARGS[@]}
+  do
+      echo; echo; date
+  done
+
+Such use of this command enables a shell command to continue when the $PROG exits with success,
+without executing the other `-ex` commands that follow the `-ex 'my if_exited_normally_then_quit'`,
+but also enables stopping in GDB if the $PROG crashes, with executing the other `-ex` commands,
+so you may see the threads' backtraces and stop them all,
+and so you may then use GDB interactively to investigate.
+end
+
+
 source-subinit my/cov
