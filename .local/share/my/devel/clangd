@@ -1,0 +1,40 @@
+#! /usr/bin/env sh
+# shellcheck source=../../my/sh/helpers.sh
+. "${XDG_DATA_HOME:-$HOME/.local/share}"/my/sh/helpers.sh
+_my_script_prelude
+
+# This helps clangd do better with where projects get the system headers (instead of clangd
+# guessing via heuristics).  E.g. with a project that compiles with `-nostdinc` (and sometimes
+# `-isystem`, in such case) (to use custom "system" headers from some location of its own that is
+# not the host's normal ones), this is needed so that the "query driver" approach of locating the
+# system headers is used instead.  Otherwise, clangd's "guessing heuristics" approach would use
+# the host's normal ones even with `-nostdinc`, but that would be wrong for such a project.  The
+# "query driver" approach recognizes `-nostdinc` in the compile commands and passes it when it
+# queries the compiler for where headers are searched for, which causes exclusion of the host's
+# normal ones, which prevents clangd from using those, and causes clangd to instead use the custom
+# "system" headers from `-isystem` when given.
+#
+# For projects that don't use `-nostdinc`, which is most projects, the "query driver" approach
+# also works fine, and it's probably also better for other unusual compiles.
+#
+# See:
+# https://clangd.llvm.org/guides/system-headers#query-driver
+# https://clangd.llvm.org/design/compile-commands#query-driver
+# https://clangd.llvm.org/config#compiler
+
+
+# Must only invoke the `clangd` in PATH that is not our script, to avoid infinite recursion.
+#
+clangdCmd=$(find_in_PATH_not_self clangd) || error "Cannot find another \`clangd\` in PATH!" 1
+
+# The purpose of this wrapper script is to always pass `--query-driver` to list which executables
+# that I consider safe to execute.  This list might need to be adjusted for my future situations.
+#
+exec "$clangdCmd" \
+     --query-driver="\
+/nix/store/*-gcc-*/bin/gcc*,\
+/nix/store/*-clang-*/bin/clang*,\
+/usr/bin/gcc*,\
+/usr/bin/clang*\
+" \
+     "$@"
