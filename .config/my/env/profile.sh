@@ -185,6 +185,14 @@ then
 fi
 
 
+# My wrappers that take precedence and that can, via find_in_PATH_not_self, use underlying
+# commands of the same name as found in PATH as setup above.
+#
+if [ "${HOME-}" ]; then  # (Just in case.)
+    prepend_and_subs_to_PATH_if_ok "$HOME"/bin/wrappers
+fi
+
+
 # Miscellaneous
 
 export TZ=:America/Los_Angeles  # (The `:` complies with POSIX for implementation-defined.)

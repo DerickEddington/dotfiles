@@ -225,9 +225,10 @@ prepend_and_subs_to_colon_list_var_export_if_ok() {
     # Include sub-dirs also.  This can be especially convenient for symlink'ing like:
     # ~/bin/thing-0.42 -> ~/tmp/thing-0.42/bin.
     for subDir in "$1"/* ; do
-        if [ "$(std basename "$subDir")" != "my" ]; then  # Exclude the special `my` sub-dir.
-            prepend_to_colon_list_var_export_if_ok "$subDir" "$2"
-        fi
+        case "$(std basename "$subDir")" in
+            (my|wrappers) ;;  # Exclude the special sub-dirs.
+            (*) prepend_to_colon_list_var_export_if_ok "$subDir" "$2" ;;
+        esac
     done
     unset subDir
 }
