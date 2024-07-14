@@ -61,6 +61,13 @@ secring.gpg
 /Music
 /Pictures
 /.pki/
+/.radicle/*
+!/.radicle/config.json
+!/.radicle/cobs/
+/.radicle/cobs/*.db
+!/.radicle/keys/
+/.radicle/keys/*
+!/.radicle/keys/*.pub
 /.rustup/update-hashes
 /.ssh/id_*
 !/.ssh/id_*.pub
