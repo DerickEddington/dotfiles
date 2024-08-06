@@ -213,3 +213,18 @@ elif [ -z "$(trap -p EXIT)" ]; then  # Don't replace any preexisting trap.
 else
     warn "Unable to setup _my_histfile_combining for exit."
 fi
+
+# Also trap on SIGHUP, because that signal is received when the terminal is forcibly closed.  In
+# such case, this is needed to make the EXIT trap work to its completion to do our
+# _my_histfile_combining (otherwise Bash kills itself by sending itself another SIGHUP, before it
+# finishes the EXIT trap).  This SIGHUP trap causes Bash to run it instead of killing itself,
+# before the later exiting, which is why it has an effect, and this enables Bash to complete our
+# _my_histfile_combining and then to exit normally.  (Specifically, this causes Bash to install
+# and call `trap_handler` upon SIGHUP, instead of `termsig_sighandler` that would cause calling
+# `termsig_handler` that would call `kill_shell`.)  Bash still does its exiting upon SIGHUP even
+# with a trap for it is registered.
+if [ -z "$(trap -p SIGHUP)" ]; then  # Don't replace any preexisting trap.
+    trap : SIGHUP
+else
+    warn "Unable to setup \`:\` trap for SIGHUP."
+fi
