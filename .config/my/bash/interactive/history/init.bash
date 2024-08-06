@@ -143,6 +143,8 @@ is-function-undef _my_histfile_combining || return
 function _my_histfile_combining {
     local - ; set -o nounset +o errexit
 
+    [ "${MY_BASH_HISTORY_COMPLETED_COMBINING:-}" ] && return
+
     history -a || true  # Ensure this session's history file is completed.
 
     [ "${MY_BASH_SESSION_HISTFILE:-}" ] && [ "${MY_BASH_HISTDIR:-}" ] || return
@@ -178,9 +180,11 @@ function _my_histfile_combining {
 
             std chmod u+w "$MY_BASH_HISTDIR"/combined  # In case it somehow became read-only.
 
-            if ! $MY_BASH_HISTORY_COMBINER "$PREV_COMBINED" "$MY_BASH_SESSION_HISTFILE" \
-                   > "$MY_BASH_HISTDIR"/combined  # Write to original, to preserve inode.
+            if $MY_BASH_HISTORY_COMBINER "$PREV_COMBINED" "$MY_BASH_SESSION_HISTFILE" \
+                 > "$MY_BASH_HISTDIR"/combined  # Write to original, to preserve inode.
             then
+                readonly MY_BASH_HISTORY_COMPLETED_COMBINING=true
+            else
                 std cp -f "$PREV_COMBINED" "$MY_BASH_HISTDIR"/combined  # Restore if error.
                 std chmod u+w "$MY_BASH_HISTDIR"/combined  # In case of `-f` of `cp`.
             fi
