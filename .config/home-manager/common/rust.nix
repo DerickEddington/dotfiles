@@ -61,6 +61,8 @@ in
         (name: toolchainDrv:
           runCommandLocal "srcdir-for-rustup-custom-toolchain--${name}"
             { nativeBuildInputs = with pkgs; [ dwarfdump ripgrep ]; }
+            # TODO: Unsure if still correct for newer Nightly which changed some of this.
+            # TODO: Those changes might eventually be in Stable and so this'll need to work then.
             ''
               shopt -s nullglob
               set -o errexit -o nounset -o pipefail # -o xtrace
@@ -79,7 +81,12 @@ in
               libstd=(libstd-*.so)
               [ ''${#libstd[@]} -eq 1 ]  # If not, fail intentionally.
               compDir=()
-              for rx in '^library/std/src/lib\.rs' '^src/libstd/lib\.rs' ; do
+              compDirRegexs=(
+                '^std/src/lib\.rs'          # As newer Nightly has.
+                '^library/std/src/lib\.rs'  # As Stable and older Nightly has.
+                '^src/libstd/lib\.rs'       # Their older layout.
+              )
+              for rx in "''${compDirRegexs[@]}"; do
                 compDir+=(
                   $(dwarfdump --search-regex="$rx" --search-print-parent --format-dense \
                               "$libstd"                                                 \
@@ -89,9 +96,13 @@ in
               popd
               [ ''${#compDir[@]} -eq 1 ]  # If not, fail intentionally.
 
-              outSubDir="$out/src/of-pkg-via-my/$(dirname "$compDir")"
+              # The newer Nightly now includes the trailing `/library`.
+              [[ "$compDir" =~ ^(/rustc/[[:xdigit:]]{40})(/library)?$ ]]  # If not, fail.
+              hashIdDir=''${BASH_REMATCH[1]}
+
+              outSubDir="$out/src/of-pkg-via-my/$(dirname "$hashIdDir")"
               mkdir -p "$outSubDir"
-              ln -v -s "$rustSrc" "$outSubDir/$(basename "$compDir")"
+              ln -v -s "$rustSrc" "$outSubDir/$(basename "$hashIdDir")"
             '')
         cfg.toolchains);
 
