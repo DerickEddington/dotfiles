@@ -97,7 +97,7 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "rhel9", autostart: false do |rhel9|
-    rhel9.vm.box = "roboxes/rhel9"
+    rhel9.vm.box = "rockylinux/9"
     set_vm_magnitude(rhel9)
   end
 
