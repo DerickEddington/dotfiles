@@ -30,10 +30,12 @@
         goto-line
         home-end-end
         home-end-home
+        ignore-preserving-kill-region
         indent-for-tab-command
         kill-region
         magit-section-toggle
         markdown-cycle
+        markdown-end-of-line
         markdown-outdent-or-delete
         query-replace
         sp-backward-delete-char
