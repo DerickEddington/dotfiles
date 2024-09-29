@@ -28,6 +28,7 @@ in
 {
   imports = [
     ./module-args.nix
+    ./devel-utils.nix
     ./emacs.nix
     ./git-svn.nix
     ./rootless-docker.nix

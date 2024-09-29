@@ -613,6 +613,52 @@ function my-build-and-install--bear
 }
 
 
+function my-build-and-install--noctty
+{
+    local -r name=${1:?}
+    [ "$name" = noctty ] || exit
+
+    if ! is-command-found "$name"
+    then
+        local -r ver=0.0.2
+        local -r file=$ver.tar.gz
+        local -r site=https://github.com/DerickEddington/noctty
+        local -r url=$site/archive/refs/tags/$file
+        local -r checksum=1d42ba5375fcafed5a22e2d2d1eae6abc0602ed3c025509ea8ca3557a656ee5b
+        local -r dir=noctty-$ver
+
+        local -r installDir=$(_my_platspec_install_dir)
+        local -r workDir=$(gnu mktemp -d)
+
+        my-platform-install-packages build-essential || return
+
+        if is-command-found gcc ; then
+            local -r cc=gcc
+        elif is-command-found clang ; then
+            local -r cc=clang
+        else
+            local -r cc=cc
+        fi
+
+        ( cd "$workDir" || exit
+          set -o pipefail
+
+          _my-download-https "$url" > "$file" || exit
+          gnu sha256sum -c <<<"$checksum *$file"$'\n' || exit
+          gnu tar -x -z -f "$file" || exit
+
+          cd "$dir" || exit
+          CC="$cc"  std sh ./build.sh "$ver"  |&  std tee build.out  || exit
+
+          my-install-files ./noctty ./unused-terminal "$installDir"/bin/ || exit
+
+        ) || return
+
+        std rm -r -f "$workDir"
+    fi
+}
+
+
 function my-install-emacs-packages
 {
     function elisp-expr-to-call-prep-func {

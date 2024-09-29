@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if [ $# -eq 1 ]; then
+    exec xdg-terminal-exec sh -c "$1"
+elif [ $# -eq 0 ]; then
+    exec xdg-terminal-exec
+else
+    echo "error: Invalid amount of arguments." 1>&2
+    exit 1
+fi

@@ -39,6 +39,28 @@ define hook-quit
 end
 
 
+define my sep-tty
+  shell command -v noctty >& /dev/null
+  if $_shell_exitcode == 0
+    eval "shell xdg-terminal 'exec noctty > /tmp/my-gdb-%u/sep-tty.name'", $myGDBtmpDirID
+    if $_shell_exitcode == 0
+      eval "shell until [ -s /tmp/my-gdb-%u/sep-tty.name ]; do :; done", $myGDBtmpDirID
+      eval "shell printf 'set inferior-tty %%s\\n' \"$(cat /tmp/my-gdb-%u/sep-tty.name)\" \
+                    > /tmp/my-gdb-%u/sep-tty.gdb", $myGDBtmpDirID, $myGDBtmpDirID
+      eval "source /tmp/my-gdb-%u/sep-tty.gdb", $myGDBtmpDirID
+      eval "shell rm -f /tmp/my-gdb-%u/sep-tty.*", $myGDBtmpDirID
+    else
+      echo Warning: Failed invoking `xdg-terminal`.\n
+    end
+  else
+    echo Warning: Failed. Missing utility `noctty`.\n
+  end
+end
+document my sep-tty
+Use a separate new terminal window as the tty for the program being debugged.
+end
+
+
 define my if_exited_normally_then_quit
   if $_isvoid($_exitsignal)
     if ! $_isvoid($_exitcode)

@@ -32,6 +32,8 @@ in
     ]
   )];
 
+  # my.devel-utils.enable = true;
+
   # my.rust = {
   #   enable = true;
   #   toolchains = {
