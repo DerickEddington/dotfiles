@@ -86,14 +86,21 @@ Vagrant.configure("2") do |config|
     provision_apt_upgrade(ubu23.vm)
   end
 
+  config.vm.define "ubu24", autostart: false do |ubu24|
+    # Ubuntu dropped support for Vagrant (! due to changed license), starting with 24.04.
+    ubu24.vm.box = "bento/ubuntu-24.04"
+    setup_my_way(ubu24)
+    provision_apt_upgrade(ubu24.vm)
+  end
+
   config.vm.define "arch", autostart: false do |arch|
     arch.vm.box = "archlinux/archlinux"
     set_vm_magnitude(arch)
   end
 
-  config.vm.define "fed38", autostart: false do |fed38|
-    fed38.vm.box = "bento/fedora-38"
-    set_vm_magnitude(fed38)
+  config.vm.define "fed40", autostart: false do |fed40|
+    fed40.vm.box = "bento/fedora-40"
+    set_vm_magnitude(fed40)
   end
 
   config.vm.define "rhel9", autostart: false do |rhel9|
@@ -102,12 +109,12 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "suse15", autostart: false do |suse15|
-    suse15.vm.box = "opensuse/Leap-15.5.x86_64"
+    suse15.vm.box = "opensuse/Leap-15.6.x86_64"
     set_vm_magnitude(suse15)
   end
 
   config.vm.define "alp3", autostart: false do |alp3|
-    alp3.vm.box = "roboxes/alpine318"
+    alp3.vm.box = "roboxes/alpine319"
     setup_my_way(alp3)
     alp3.vm.provision "apk-upgrade", type: "shell", privileged: true,
                       inline: "apk upgrade",
@@ -135,7 +142,7 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "fbsd14", autostart: false do |fbsd14|
-    fbsd14.vm.box = "freebsd/FreeBSD-14.0-RELEASE"
+    fbsd14.vm.box = "freebsd/FreeBSD-14.1-RELEASE"
    #fbsd14.vm.box = "bento/freebsd-14"
    #fbsd14.ssh.shell = "sh"
    #fbsd14.ssh.connect_timeout = 120
@@ -161,13 +168,23 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "nbsd9", autostart: false do |nbsd9|
-    nbsd9.vm.box = "NetBSD/NetBSD-9.1"
+    nbsd9.vm.box = "roboxes/netbsd9"
     setup_my_way(nbsd9)
     nbsd9.vm.synced_folder ".", "/vagrant", disabled: true  # Avoid error from Vagrant.
     nbsd9.vm.provision "pkgin-update", type: "shell", privileged: true,
                        inline: "pkgin -y update"
     nbsd9.vm.provision "pkgin-upgrade", type: "shell", privileged: true,
                        inline: "pkgin -y upgrade"
+    nbsd9.vm.provision "ca-certificates", type: "shell", privileged: true,
+                       inline: "
+                         if [ -e /usr/pkg/etc/ca-certificates-dir.conf ]; then
+                           sed -e '/ *#\\{1,\\} *ETCCERTSDIR=/ s/ *#\\{1,\\} *//' \
+                             /usr/pkg/etc/ca-certificates-dir.conf                \
+                             > /tmp/ca-certificates-dir.conf
+                           mv /tmp/ca-certificates-dir.conf /usr/pkg/etc/ca-certificates-dir.conf
+                           update-ca-certificates
+                         fi
+                       "
     nbsd9.vm.provision "pkgin-autoremove", type: "shell", privileged: true,
                        inline: "pkgin -y autoremove"
     nbsd9.vm.provision "maybe-say-to-reboot", type: "shell", privileged: true,
