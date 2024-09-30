@@ -42,7 +42,7 @@
 (use-package my-rust-lang-proj :load-path "my/lib"
   :autoload (my--lsp-rust-analyzer--make-init-options--extend-for-rust-lang-proj))
 
-(use-package lsp-rust
+(use-package lsp-rust :ensure nil
   :config
   (advice-add 'lsp-rust-analyzer--make-init-options :filter-return
               #'my--lsp-rust-analyzer--make-init-options--extend-for-rust-lang-proj))
