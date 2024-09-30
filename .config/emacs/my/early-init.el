@@ -5,6 +5,7 @@
 ;; (toggle-debug-on-error)
 ;; (debug)  ;; Must run `emacs' in terminal, else it aborts.
 ;; (debug-on-entry #'package-activate-all)  ;; ditto
+;; (debug-on-entry #'package-refresh-contents)  ;; Want the refreshing to not be called, usually.
 
 
 (when (featurep 'native-compile)

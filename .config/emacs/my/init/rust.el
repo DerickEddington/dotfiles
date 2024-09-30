@@ -15,7 +15,7 @@
                      rust-format-on-save nil  ;; Disable, because it always runs local `rustfmt'.
                      rust-rustfmt-switches '()))))))
 
-(use-package eldoc)
+(use-package eldoc :ensure nil)
 
 (use-package flycheck)
 

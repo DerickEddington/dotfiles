@@ -4,7 +4,7 @@
   :autoload my--xref-pop-to-location--maybe-dont-ask-follow-symlinks)
 
 
-(use-package xref
+(use-package xref :ensure nil
   :config
   (advice-add 'xref-pop-to-location :around
               #'my--xref-pop-to-location--maybe-dont-ask-follow-symlinks))

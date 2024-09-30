@@ -15,7 +15,7 @@
     :after tramp))
 
 
-(use-package tramp
+(use-package tramp :ensure nil
   :config
 
   ;; Set here, after loading `tramp', because these need variables from that.
