@@ -7,6 +7,7 @@ secring.gpg
 /.cargo/bin
 /.cargo/credentials
 /.cargo/git
+/.cargo/.global-cache
 /.cargo/.package-cache*
 /.cargo/registry
 /.compose-cache/
