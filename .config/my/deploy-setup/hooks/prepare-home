@@ -28,7 +28,7 @@ function change-gitignore
 
 function prepare-home-manager
 {
-    # This only prepares the channel.  Home Manager is later installed by
+    # This only prepares the channel and state version.  Home Manager is later installed by
     # ~/.local/share/my/platform/Linux/NixOS/packages.bash (typically by ./install-packages by
     # ~/.local/share/my/deploy-setup/bootstrap/start1.bash).
 
@@ -39,6 +39,13 @@ function prepare-home-manager
 
     nix-channel --add "$URL" home-manager
     nix-channel --update home-manager
+
+    # Ensure the state version that this Home Manager installation will be initialized with is the
+    # current latest.
+    local -r stateVerRe='home\.stateVersion *= *"[^"]+"'
+    local -r stateVerNew="home.stateVersion = \"$nixOSver\""
+    gnu sed -E -s -i -e "s/$stateVerRe/$stateVerNew/" .config/home-manager/home.nix \
+        || warn 'Failed to update stateVersion in home.nix.'
 }
 
 function prepare-nixos-unstable
