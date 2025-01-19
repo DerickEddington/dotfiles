@@ -9,6 +9,12 @@
 let
   inherit (builtins) pathExists;
   inherit (lib) mkForce optional;
+
+  # TODO: Move this definition to the system-wide /etc/nixos/lib/, and import from myLib.
+  lowerPrio = let
+    inherit (lib.meta) setPrio defaultPriority;
+  in
+    pkg: setPrio ((pkg.meta.priority or defaultPriority) + 10) pkg;
 in
 
 let
