@@ -9,5 +9,16 @@ CompileFlags:
   Add: [
     -pedantic-errors,
     -Wno-error=unknown-warning-option,
+    -Warray-bounds-pointer-arithmetic,
+    -Wcomma,
+    -Wcompound-token-split,
+    -Wdeprecated,
+    -Wdisabled-macro-expansion,
+    -Widiomatic-parentheses,
+   #-Wimplicit-fallthrough, -Wmissing-noreturn,  # Requires more-modern C standard.
+    -Wmissing-include-dirs, -Wnonportable-system-include-path,
+    -Wnewline-eof,
     -Wpacked, # -Wpadded, -Wno-error=padded,
+    -Wsigned-enum-bitfield,
+   #-Wzero-as-null-pointer-constant,  # C++ only, IIUC.
   ]

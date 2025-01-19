@@ -34,7 +34,11 @@ exec "$clangdCmd" \
      --query-driver="\
 /nix/store/*-gcc-*/bin/gcc*,\
 /nix/store/*-clang-*/bin/clang*,\
+$HOME/.nix-profile/bin/gcc*,\
+$HOME/.nix-profile/bin/clang*,\
 /usr/bin/gcc*,\
-/usr/bin/clang*\
+/usr/bin/clang*,\
+/usr/local/bin/gcc*,\
+/usr/local/bin/clang*\
 " \
      "$@"

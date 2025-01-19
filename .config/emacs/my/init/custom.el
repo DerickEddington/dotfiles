@@ -117,8 +117,10 @@
  '(kill-emacs-query-functions '(custom-prompt-customize-unsaved-options))
  '(load-prefer-newer t)
  '(lsp-before-save-edits nil)
+ '(lsp-clangd-version "999.999.999")
  '(lsp-clients-clangd-args
-   '("--header-insertion-decorators=0" "--header-insertion=never"))
+   '("--rename-file-limit=0" "--function-arg-placeholders" "--header-insertion-decorators=0" "--header-insertion=never"))
+ '(lsp-clients-clangd-executable "clangd-with-my-extra-args")
  '(lsp-diagnostic-clean-after-change t)
  '(lsp-diagnostics-attributes
    '((unnecessary :foreground "gray30")
