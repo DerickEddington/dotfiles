@@ -26,6 +26,7 @@ readonly -A MY_PLATFORM_SPECIFIC_PACKAGES_NAMES=(
     [corrector-of-llvm-xray-stack-flame]=dummy
                              [emacs-nox]=dummy
                                [fd-find]=dummy
+                            [fs-monitor]=dummy
                                  [flock]=dummy
                                    [gcc]=dummy
                                    [gdb]=dummy

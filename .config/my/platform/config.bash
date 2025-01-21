@@ -16,6 +16,7 @@ MY_PLATFORM_PACKAGES_DESIRED=(
     command-not-found
     emacs-nox my-emacs-packages
     fd-find
+    fs-monitor
     flock  # Of util-linux. Needed by _my_lock_combined_histfile.
     git  # Always useful for each user's ~/.dotfiles repository, at least.
     gnu-coreutils gnu-grep gnu-sed gnu-tar

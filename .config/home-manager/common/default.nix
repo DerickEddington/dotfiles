@@ -85,6 +85,11 @@ in
       # $XDG_CONFIG_HOME/my/bash/interactive/history/ needs this `my-bash_history-combiner`
       # utility.
       (import ../../nixpkgs/my/bash_history-combiner.nix { inherit pkgs; })
+
+      # This is sometimes helpful when doing other things that can use this (e.g. if this user's
+      # home is accessed via TRAMP of Emacs).  Some users will never use this, but installing it
+      # for all users doesn't hurt anything and it's tiny.
+      inotify-tools
     ]
     ++ (optionals systemWide.debuggingModule.exists [
       # Exercise ../../nixpkgs/my/overlays and its addition of debugging support.
