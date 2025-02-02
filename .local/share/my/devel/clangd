@@ -36,6 +36,8 @@ exec "$clangdCmd" \
 /nix/store/*-clang-*/bin/clang*,\
 $HOME/.nix-profile/bin/gcc*,\
 $HOME/.nix-profile/bin/clang*,\
+$HOME/bin/**/gcc*,\
+$HOME/bin/**/clang*,\
 /usr/bin/gcc*,\
 /usr/bin/clang*,\
 /usr/local/bin/gcc*,\
