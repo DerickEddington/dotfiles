@@ -8,20 +8,12 @@
 #
 # See: https://clangd.llvm.org/config
 
-Diagnostics:
-  UnusedIncludes: Strict
-
 InlayHints:
   Enabled: Yes
+  TypeNameLimit: 0
 
 Hover:
   ShowAKA: Yes
-
-# TODO: Would this avoid the `std::bad_alloc` bug in `clangd` versions 16 & 17 in OpenIndiana
-# (which seemed to happen when it tried to index the standard library)?
-#
-#Index:
-#  StandardLibrary: No
 
 ---
 
@@ -32,43 +24,8 @@ If:
 CompileFlags:
   Remove: [
     -Werror,
-    -std=*,  # TODO: Is this OK for *every* source file?
   ]
   Add: [
-    -std=gnu17,  # TODO: Is this OK for *every* source file?
-    -O3,  # Needed for complete diagnostics.
-    -Wall, -Wextra, -Wconversion, -Wpedantic,
-    -Werror=implicit-function-declaration,
-    -Werror=incompatible-pointer-types,
-   #-Wno-error=unknown-warning-option,
-    -Wbad-function-cast, -Wcast-function-type, -Wcast-function-type-strict, -Wcast-qual, -Wcast-align,
-    -Wswitch-default, -Wswitch-enum,
-    -Wmaybe-uninitialized, -Wstrict-overflow=5,  # Needs optimizations enabled.
-    -Wunsafe-loop-optimizations,
-    -Wpointer-arith,
-    -Wwrite-strings,
-    -Winit-self,
-    -Wjump-misses-init,
-    -Wlogical-op,
-    -Wnormalized,
-    -Wshift-overflow=2,
-    -Wformat=2, -Wformat-overflow=2, -Wformat-nonliteral, -Wformat-security, -Wformat-signedness, -Wformat-truncation=2, -Wno-format-pedantic,
-    -Wshadow,
-    -Wno-error=duplicated-cond,
-   #-Wpacked, -Wpadded, # -Wno-error=padded,
-    -Wredundant-decls, -Wextra-semi-stmt,
-    -Wstrict-prototypes, -Wold-style-definition, -Wmissing-prototypes, -Wmissing-declarations,
-    -Wno-language-extension-token,
-    -Wno-gnu-statement-expression,
-    -Wno-gnu-zero-variadic-macro-arguments,
-    -Wno-gnu-alignof-expression,
-
-    # Sometimes helpful with some codebases:
-   #-Wno-conversion,  # Only needed to actually no-error sign-conversion.
-   #-Wno-sign-conversion,
-   #-Wno-cast-qual,
-   #-Wno-incompatible-pointer-types-discards-qualifiers,
-   #-Wno-extra-semi-stmt,
   ]
 
 #---
