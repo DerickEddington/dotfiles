@@ -312,6 +312,8 @@
  '(visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
  '(wdired-allow-to-change-permissions t)
  '(wdired-use-dired-vertical-movement 'sometimes)
+ '(wgrep-auto-save-buffer t)
+ '(wgrep-too-many-file-length 200)
  '(what-cursor-show-names t)
  '(which-key-add-column-padding 1)
  '(which-key-idle-delay 2.0)
