@@ -31,6 +31,7 @@ in
     ./devel-utils.nix
     ./emacs.nix
     ./git-svn.nix
+    ./python.nix
     ./rootless-docker.nix
     ./rust.nix
     ./vagrant.nix

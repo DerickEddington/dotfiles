@@ -38,6 +38,15 @@ in
     ]
   )];
 
+  # my.python = {
+  #   enable = true;
+  #   extraPackages = [(pypkgs:
+  #     with pypkgs; [
+  #       more-itertools
+  #     ]
+  #   )];
+  # };
+
   # my.devel-utils.enable = true;
 
   # my.rust = {
