@@ -7,6 +7,7 @@
         beginning-of-defun
         beginning-of-visual-line
         c-electric-brace
+        c-electric-colon
         c-electric-paren
         c-electric-pound
         c-electric-semi&comma
@@ -34,6 +35,7 @@
         indent-for-tab-command
         kill-region
         magit-section-toggle
+        markdown-beginning-of-line
         markdown-cycle
         markdown-end-of-line
         markdown-outdent-or-delete
@@ -72,6 +74,7 @@
         gud-tooltip-mouse-motion
         handle-switch-frame
         hs-hide-all
+        hs-show-all
         ivy-switch-buffer
         lsp-signature-stop
         lsp-ui-doc--handle-mouse-movement
