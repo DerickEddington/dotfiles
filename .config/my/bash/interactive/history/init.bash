@@ -22,6 +22,43 @@ unset MYSELF_RELDIR
 [ "${MY_STATE_HOME:-}" ] || return
 readonly MY_BASH_HISTDIR=$MY_STATE_HOME/my/bash/interactive/history
 
+# Initial creation of the `combined` history file and of the history directory, to make them be
+# inaccessible to other users by default.  This must be done before anything else would otherwise
+# create them with less-restricted modes.  The owning user may later choose to manually change
+# either of their modes, to make them be accessible to other users if desired, and such will be
+# kept.
+if ! [ -e "$MY_BASH_HISTDIR" ]
+then
+    std mkdir -p -m go='' "$MY_BASH_HISTDIR" \
+    || warn "Unable to create history directory with restricted mode"
+fi
+if ! [[ -d "$MY_BASH_HISTDIR" && -O "$MY_BASH_HISTDIR"
+        && -w "$MY_BASH_HISTDIR" && -x "$MY_BASH_HISTDIR" ]]
+then
+    error "Bad state of history directory ${MY_BASH_HISTDIR@Q}!"
+    return 1
+fi
+if ! [ -r "$MY_BASH_HISTDIR" ]
+then
+    warn "Unreadable history directory ${MY_BASH_HISTDIR@Q}"
+fi
+if ! [ -e "$MY_BASH_HISTDIR"/combined ]
+then
+    { std touch "$MY_BASH_HISTDIR"/combined \
+      && std chmod go='' "$MY_BASH_HISTDIR"/combined ;} \
+    || warn "Unable to create \`combined\` history file with restricted mode"
+fi
+if ! [[ -f "$MY_BASH_HISTDIR"/combined && -O "$MY_BASH_HISTDIR"/combined
+        && -w "$MY_BASH_HISTDIR"/combined && ! -x "$MY_BASH_HISTDIR"/combined ]]
+then
+    error "Bad state of \`combined\` history file!"
+    return 1
+fi
+if ! [ -r "$MY_BASH_HISTDIR"/combined ]
+then
+    warn "Unreadable \`combined\` history file"
+fi
+
 # Use the `combined` history file as the lock file for locking itself.  It's important that the
 # lock file be the same file when the $HOME (actually, more precisely: $MY_BASH_HISTDIR) directory
 # is shared across multiple hosts.  Modern Linux can lock over NFS or CIFS (SMB), and hopefully
@@ -67,6 +104,8 @@ else
     # HISTFILE was already setup according to my custom scheme, so keep using that.
     MY_BASH_SESSION_HISTFILE=$HISTFILE
 fi
+# (Note: The per-session history files don't need us to change their modes to be inaccessible to
+# other users, because Bash already does that to the $HISTFILE for us.)
 
 # Cause timestamps to be written to the history file, which is also needed for `lithist` to
 # preserve single-entry of a multi-line entry.  Also used when the `history` builtin command
