@@ -28,7 +28,7 @@ CompileFlags:
     -Werror=incompatible-pointer-types,
    #-Wno-error=unknown-warning-option,
     -Wbad-function-cast, -Wcast-function-type, -Wcast-qual, -Wcast-align,
-    -Wswitch-enum, -Wcovered-switch-default,
+    -Wcovered-switch-default, # -Wswitch-enum,
     -Wconditional-uninitialized, -Wstrict-overflow=5,
     -Wloop-analysis,
     -Wpointer-arith, -Wnullable-to-nonnull-conversion,
