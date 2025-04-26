@@ -10,6 +10,7 @@ shopt -s checkjobs
 shopt -s dirspell
 #shopt -s dotglob
 shopt -s extglob
+shopt -u xpg_echo
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
