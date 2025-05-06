@@ -31,7 +31,8 @@ secring.gpg
 /.config/session-state/
 /.config/VirtualBox/
 /.dbus/
-/Desktop
+/Desktop/*
+!/Desktop/TODO*
 /.docker/.buildNodeID
 /.docker/.token_seed
 /.docker/.token_seed.lock
