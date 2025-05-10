@@ -1,7 +1,7 @@
 ;; -*- lexical-binding: t; -*-
 
 (use-package my-gdb :load-path "my/lib"
-  :autoload my-gdb--setup-windows--customize)
+  :autoload (my-gdb--setup-windows--customize my-gdb--gud-find-file--read-only))
 
 
 (use-package gdb-mi :ensure nil
@@ -16,3 +16,9 @@
   ;; time.  This is also run when the `gdb-many-windows' minor mode is toggled on and so adding it
   ;; to the hook is unnecessary.
   (advice-add 'gdb-setup-windows :after #'my-gdb--setup-windows--customize))
+
+
+(use-package gud :ensure nil
+  :config
+  ;; When GUD visits a file, make it do so as `read-only-mode'.
+  (advice-add 'gud-find-file :filter-return #'my-gdb--gud-find-file--read-only))

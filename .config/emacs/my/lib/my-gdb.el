@@ -42,4 +42,9 @@
   (my-gdb-kill-buffer-menu))
 
 
+(defun my-gdb--gud-find-file--read-only (buf)
+  (with-current-buffer buf (read-only-mode 1))
+  buf)
+
+
 (provide 'my-gdb)
