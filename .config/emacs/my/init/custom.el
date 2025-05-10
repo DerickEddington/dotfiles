@@ -71,6 +71,7 @@
  '(flycheck-idle-change-delay 5)
  '(gc-cons-threshold 100000000)
  '(gdb-debug-log-max 2048)
+ '(gdb-default-window-configuration-file "my/gud-gdb-many-windows.el")
  '(gdb-display-io-nopopup t)
  '(gdb-many-windows t)
  '(gdb-restore-window-configuration-after-quit t)

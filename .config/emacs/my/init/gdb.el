@@ -1,13 +1,12 @@
 ;; -*- lexical-binding: t; -*-
 
 (use-package my-gdb :load-path "my/lib"
-  :autoload my-gdb-allow-io-win-switch)
+  :autoload my-gdb--setup-windows--customize)
 
 
 (use-package gdb-mi :ensure nil
 
-  ;; Using the hook would be like:
-  ;; :hook (gdb-many-windows . my-gdb-allow-io-win-switch)
+  ;; :hook (gdb-mode . my-gdb-mode-hook)
 
   :config
   ;; This advice is needed because `gdb-many-windows-hook' is insufficient because
@@ -16,4 +15,4 @@
   ;; to dedicated again, which would prevent being able to switch it, so we must undo that each
   ;; time.  This is also run when the `gdb-many-windows' minor mode is toggled on and so adding it
   ;; to the hook is unnecessary.
-  (advice-add 'gdb-setup-windows :after #'my-gdb-allow-io-win-switch))
+  (advice-add 'gdb-setup-windows :after #'my-gdb--setup-windows--customize))
