@@ -27,6 +27,20 @@
     ;; their `.elc's (and so `.eln's also) are kept up-to-date, automatically.  (Note: some of my
     ;; `.el's have compilation disabled, as controlled by my dir-local and file-local variables.)
     (unless (getenv-internal "MY_EMACS_DISABLE_COMPILING_MY_DIR")
+      ;; Avoid odd issue where the *Compile-Log* buffer would be incorrectly polluted with
+      ;; contents, when the `byte-recompile-directory' next is done, which would interfere with
+      ;; and undesirably prevent the conditional killing of *Compile-Log* done farther below.
+      ;; (That'd be caused by the indirect interplay between `byte-compile-file' calling
+      ;; `normal-mode' while `byte-compile-current-file' is already bound to a non-nil value and
+      ;; then byte-compilation being done during what `normal-mode' does which involves `(require
+      ;; 'project)' and that causing `byte-compile-log-file' to be called which decides whether to
+      ;; insert contents into *Compile-Log* based on `byte-compile-current-file' (which is a
+      ;; `defvar' and so is always dynamically bound even when lexical-binding is in-effect).
+      ;; Maybe this will be fixed in future Emacs versions?  By doing `(require 'project)' here
+      ;; first, that byte-compilation is completed without that problematic binding, before the
+      ;; `normal-mode' call and so then that call doesn't cause it.)
+      (when (version<= "29" emacs-version)
+        (require 'project))
       (with-demoted-errors "Ignored error while byte-compiling \"my\" directory: %S"
         (byte-recompile-directory (concat user-emacs-directory "my") 0)))
   ;; When `use-package' is unavailable, ignore all top-level forms that need it.
