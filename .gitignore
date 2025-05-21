@@ -49,6 +49,7 @@ secring.gpg
 /.local/share/my/emacs/elpa/*
 !/.local/share/my/emacs/elpa/.dir-locals.el
 !/.local/share/my/emacs/elpa/gnupg/
+/.local/share/my/emacs/elpa/gnupg/tofu.db
 !/.local/share/my/keepass/template.kdbx
 !/.local/share/rust-script
 !/.local/share/user-tmpfiles.d/

@@ -32,7 +32,7 @@
 (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
 
-(when (version< emacs-version "27")
+(when (version< emacs-version "28")
   (warn "Unsure if my config will work with this old Emacs version."))
 
 

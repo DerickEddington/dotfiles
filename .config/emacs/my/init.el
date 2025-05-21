@@ -39,8 +39,7 @@
       ;; Maybe this will be fixed in future Emacs versions?  By doing `normal-mode' here first,
       ;; that byte-compilation is completed without that problematic binding, before the other
       ;; `normal-mode' call and so then that call doesn't cause it.)
-      (when (version<= "29" emacs-version)
-        (with-temp-buffer (normal-mode)))
+      (with-temp-buffer (normal-mode))
       (with-demoted-errors "Ignored error while byte-compiling \"my\" directory: %S"
         (byte-recompile-directory (concat user-emacs-directory "my") 0)))
   ;; When `use-package' is unavailable, ignore all top-level forms that need it.
@@ -106,7 +105,7 @@
   :init (show-smartparens-global-mode) (smartparens-global-strict-mode))
 (size-indication-mode)
 (tooltip-mode -1)
-(use-package which-key :commands which-key-mode :init (which-key-mode))
+(use-package which-key :commands which-key-mode :init (which-key-mode)) ;; Built-in since Emacs 30
 
 (use-package ansi-color :ensure nil
   :after compile
@@ -156,7 +155,10 @@
                                    tab-width 8)
                        (auto-fill-mode -1))))
 
-(use-package adaptive-wrap)
+(if (version<= "30" emacs-version)
+    (use-package visual-wrap :ensure nil) ;; Is built-in and renamed since Emacs 30.
+  (use-package adaptive-wrap))            ;; Was `adaptive-wrap' before Emacs 30.
+
 (use-package all-the-icons)
 (use-package charmap)
 (use-package csv-mode)
@@ -178,10 +180,6 @@
 ;; Protect myself from dangerous mistypes
 (put 'kill-emacs 'disabled t)
 (global-set-key (kbd "C-x 5 0") nil)
-
-;; It'd be nice to have this, but Adaptive-Wrap-Prefix mode usually causes too
-;; much slow-down for moving around buffers.  Instead, I selectively enable it.
-;(add-hook 'visual-line-mode-hook #'adaptive-wrap-prefix-mode)
 
 ;; Enable some functions
 (put 'downcase-region 'disabled nil)

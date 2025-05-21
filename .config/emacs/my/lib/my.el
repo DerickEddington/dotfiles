@@ -82,4 +82,16 @@ Can be used like:
     (apply func rest)))
 
 
+(cond
+ ((version<= "30" emacs-version)
+  (defun my--custom-save-all--pretty-print-old-way (func &rest rest)
+    (let ((pp-default-function #'pp-28))
+      (apply func rest))))
+ ((version<= "29" emacs-version)
+  (with-suppressed-warnings ((obsolete pp-use-max-width))
+    (defun my--custom-save-all--pretty-print-old-way (func &rest rest)
+      (let ((pp-use-max-width nil))
+        (apply func rest))))))
+
+
 (provide 'my)

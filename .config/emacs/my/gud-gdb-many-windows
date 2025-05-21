@@ -1,3 +1,4 @@
+;; -*- mode: lisp-data; -*-
 (((min-height . 12)
   (min-width . 20)
   (min-height-ignore . 7)
