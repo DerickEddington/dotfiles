@@ -1,6 +1,7 @@
 ((magit-commit
   (magit-commit-reshelve . 5)
   (magit-commit:--date . 5)
+  (magit:--signoff . 5)
   (t . 5))
  (magit-rebase
   (magit-reshelve-since . 5)

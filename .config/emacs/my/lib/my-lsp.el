@@ -28,7 +28,7 @@
     result))
 
 (defun my-wait-for-stty-to-take-effect (func &rest args)
-  (let* ((timeout 10)
+  (let* ((timeout 20)
          (result
           ;; Call the `:connect' function of `lsp-stdio-connection'.
           (apply func args))

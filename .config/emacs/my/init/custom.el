@@ -1,4 +1,4 @@
-;; -*- lexical-binding: t; -*-
+;; -*- lexical-binding: t; coding: utf-8; -*-
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -34,6 +34,7 @@
  '(company-tooltip-flip-when-above t)
  '(company-tooltip-limit 15)
  '(compilation-message-face 'bold)
+ '(compilation-scroll-output 'first-error)
  '(confirm-kill-emacs 'yes-or-no-p)
  '(counsel-find-file-at-point t)
  '(ctl-arrow nil)
@@ -43,6 +44,7 @@
      (width . 93)
      (height . 54)
      (tool-bar-lines . 0)))
+ '(delete-selection-mode t)
  '(diff-default-read-only t)
  '(diff-hl-draw-borders nil)
  '(diff-hl-goto-hunk-old-revisions t)
@@ -53,6 +55,7 @@
  '(dired-movement-style 'bounded)
  '(dired-vc-rename-file t)
  '(dired-x-hands-off-my-keys nil)
+ '(ediff-window-setup-function 'ediff-setup-windows-plain)
  '(eldoc-echo-area-use-multiline-p t)
  '(eldoc-idle-delay 1)
  '(eldoc-minor-mode-string "")
@@ -73,6 +76,7 @@
  '(flycheck-display-errors-delay 0.5)
  '(flycheck-global-modes '(rust-mode sh-mode))
  '(flycheck-idle-change-delay 5)
+ '(frame-inhibit-implied-resize t)
  '(gc-cons-threshold 100000000)
  '(gdb-debug-log-max 2048)
  '(gdb-default-window-configuration-file "my/gud-gdb-many-windows")
@@ -83,6 +87,8 @@
  '(gdb-show-main t)
  '(gdb-switch-when-another-stopped nil)
  '(git-commit-style-convention-checks '(non-empty-second-line overlong-summary-line))
+ '(global-so-long-mode t)
+ '(global-visual-wrap-prefix-mode t)
  '(grep-use-headings t)
  '(gud-chdir-before-run nil)
  '(gud-highlight-current-line t)
@@ -147,6 +153,7 @@
  '(lsp-lens-enable t)
  '(lsp-modeline-code-actions-segments '(count))
  '(lsp-response-timeout 20)
+ '(lsp-rust-all-features t)
  '(lsp-rust-analyzer-cargo-unset-test ["core" "alloc" "std"])
  '(lsp-rust-analyzer-cargo-watch-command "clippy")
  '(lsp-rust-analyzer-diagnostics-enable t)
@@ -248,6 +255,8 @@
       (propertized-buffer-identification "%b"))
      " " mode-line-modes mode-line-misc-info mode-line-end-spaces))
  '(mode-line-percent-position '(6 "%q"))
+ '(mouse-highlight 1)
+ '(mouse-wheel-progressive-speed nil)
  '(my-ibuffer-project-root-regexps
    '("~/\\.config\\(/my\\)?/[^/]+" "~/.local/bin" "~/.local/lib" "~/.local/my/[^/]+" "~/.local/share\\(/my\\)?/[^/]+" "~/.local/state\\(/my\\)?/[^/]+" "~/\\.emacs\\.d" "~/\\.ssh" "~/\\.nix-defexpr/channels[^/]*/[^/]+" "~/bin" "~/lib" "\\(.*/\\)?\\.?rustup/toolchains/[^/]+" "\\(.*/\\)?\\.?cargo/registry/src/[^/]+/[^/]+" "~/\\.rustup" "~/\\.cargo" "/boot" "/nix/store/[^/]+" "/nix/var/log/nix/drvs" "/nix/var/nix/profiles/per-user/[^/]+/channels[^/]*/[^/]+" "/nix/var/nix/profiles/per-user/[^/]+/[^/]+" "\\(.*/\\)?src/of-pkg-via-my/(build/)?[^/]+" "\\(.*/\\)?\\(debug\\|\\.build-id\\)" "~/\\.nix-profile/[^/]+"))
  '(native-comp-async-query-on-exit t)
@@ -258,6 +267,9 @@
  '(open-junk-file-format "~/tmp/junk/%Y/%m/%d/%H:%M:%S." t)
  '(package-archives nil)
  '(parse-sexp-ignore-comments t)
+ '(pixel-scroll-precision-interpolate-page t)
+ '(pixel-scroll-precision-interpolation-total-time 0.11)
+ '(pixel-scroll-precision-mode t)
  '(projectile-enable-cmake-presets t)
  '(projectile-mode-line-function 'my-projectile-mode-line)
  '(projectile-mode-line-prefix "")
@@ -281,6 +293,8 @@
    '((my-rust-lang-proj--is? . t)
      (lsp-rust-analyzer-rustfmt-extra-args .
                                            ["+nightly" "--unstable-features"])))
+ '(save-interprogram-paste-before-kill t)
+ '(scroll-conservatively 2)
  '(shell-command-prompt-show-cwd t)
  '(shell-file-name "bash")
  '(shell-prompt-pattern "^[^#$%>▸\12]*[#$%>▸] *")
@@ -430,7 +444,7 @@
  '(fringe ((t nil)))
  '(gud-highlight-current-line-face ((t (:inherit header-line-highlight :extend t))))
  '(header-line ((t (:background "gray70" :foreground "black" :box (:line-width -1 :style released-button)))))
- '(header-line-highlight ((t (:background "#CFC9AC"))))
+ '(header-line-highlight ((t (:background "#C7C2A9"))))
  '(help-key-binding ((t (:foreground "DarkBlue"))))
  '(highlight ((t (:background "yellow3"))))
  '(hydra-face-amaranth ((t (:foreground "#74007A" :weight bold))))

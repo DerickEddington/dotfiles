@@ -6,6 +6,8 @@
   :autoload
   (my--tramp-send-command--workaround-stty-icanon-bug--filter-args
    my-setup-tramp-ssh-multiplexing))
+(use-package magit
+  :commands magit-version)
 
 
 (when-have-library "vagrant-tramp"
@@ -25,8 +27,15 @@
                                        tramp-connection-properties)
    tramp-remote-path (cons 'tramp-own-remote-path tramp-remote-path))
 
-  (advice-add 'tramp-send-command :filter-args
-              #'my--tramp-send-command--workaround-stty-icanon-bug--filter-args))
+  (when (or (version< tramp-version "2.6.2")
+            (let ((mv (magit-version)))
+              (or (version< mv "4.0.0")
+                  (version< mv "20240102"))))
+    ;; Only needed for older versions of TRAMP and Magit.  Was fixed in newer versions:
+    ;; https://github.com/magit/magit/issues/4720
+    ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=62093
+    (advice-add 'tramp-send-command :filter-args
+                #'my--tramp-send-command--workaround-stty-icanon-bug--filter-args)))
 
 
 (use-package tramp-sh :ensure nil

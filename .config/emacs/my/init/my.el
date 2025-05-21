@@ -2,7 +2,8 @@
 
 (use-package my :load-path "my/lib"
   :autoload (my--xref-pop-to-location--maybe-dont-ask-follow-symlinks
-             my--custom-save-all--pretty-print-old-way))
+             my--custom-save-all--pretty-print-old-way
+             my--string-truncate-left))
 
 
 (use-package xref :ensure nil
@@ -19,3 +20,10 @@
     :config
     (advice-add 'custom-save-all :around
                 #'my--custom-save-all--pretty-print-old-way)))
+
+
+(unless (version< emacs-version "28")
+  (use-package subr-x :ensure nil
+    :config
+    (advice-add 'string-truncate-left :around
+                #'my--string-truncate-left)))

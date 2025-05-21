@@ -1,4 +1,4 @@
-;; -*- lexical-binding: t; -*-
+;; -*- lexical-binding: t; coding: utf-8; -*-
 
 (defgroup my nil
   "My own things."
@@ -92,6 +92,19 @@ Can be used like:
     (defun my--custom-save-all--pretty-print-old-way (func &rest rest)
       (let ((pp-use-max-width nil))
         (apply func rest))))))
+
+
+(unless (version< emacs-version "28")
+  (defun my--string-truncate-left (func string length)
+    "My modification of `string-truncate-left' to use \"…\" instead."
+    (declare (pure t) (side-effect-free t))
+    (if (char-displayable-p ?…)
+        (let ((strlen (length string)))
+          (if (<= strlen length)
+              string
+            (setq length (max 1 (- length 1)))
+            (concat "…" (substring string (- strlen length)))))
+      (apply func string length))))
 
 
 (provide 'my)

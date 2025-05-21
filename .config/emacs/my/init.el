@@ -93,7 +93,9 @@
 (use-package diff-hl :commands global-diff-hl-mode :init (global-diff-hl-mode))
 (unless (display-graphic-p)
   (use-package diff-hl-margin :ensure nil
-    :commands diff-hl-margin-mode :init (diff-hl-margin-mode)))
+    :commands diff-hl-margin-mode :init (diff-hl-margin-mode))
+  (use-package xt-mouse :ensure nil
+    :commands xterm-mouse-mode :init (xterm-mouse-mode)))
 (use-package flycheck :commands global-flycheck-mode :init (global-flycheck-mode))
 (global-visual-line-mode)
 (use-package ivy :commands ivy-mode :init (ivy-mode))
@@ -172,8 +174,14 @@
 
 
 (global-set-key [remap just-one-space] #'cycle-spacing)
+(global-set-key [remap mark-sexp] #'sp-mark-sexp)
 
-(global-set-key (kbd "C-M-<delete>") 'backward-kill-sexp)
+(global-set-key (kbd "C-M-<backspace>") #'backward-kill-sexp)
+(global-set-key (kbd "C-M-<DEL>") #'backward-kill-sexp)
+(global-set-key (kbd "C-c d") #'delete-trailing-whitespace)
+(global-set-key (kbd "C-c t") #'tabify)
+(global-set-key (kbd "C-c u") #'untabify)
+(global-set-key (kbd "C-c w") #'whitespace-mode)
 (global-set-key (kbd "C-\\") (lambda () (interactive) (insert ?λ)))
 (global-set-key (kbd "C-.") (lambda () (interactive) (insert ?▷)))
 
@@ -210,3 +218,9 @@
                (is-displayed (seq-some (lambda (b) (get-buffer-window b t)) bufs)))
           (unless is-displayed
             (seq-do #'kill-buffer bufs)))))))
+
+;; Kill the (hidden) *Compiler Input* that is sometimes left existing (sloppily) by
+;; `byte-compile-file' when it returns `'no-byte-compile', but only if there weren't any errors
+;; with previous byte-compilations.
+(unless byte-compile-last-warned-form
+  (ignore-errors (kill-buffer " *Compiler Input*")))
