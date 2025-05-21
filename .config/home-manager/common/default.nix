@@ -252,7 +252,7 @@ in
             "font.minimum-size.x-western" = 14;
             "browser.display.use_document_fonts" = 0;
             "browser.display.background_color" = "#9a9996";
-            "general.smoothScroll" = false;
+            "general.smoothScroll" = true;
 
             "browser.search.suggest.enabled" = false;
             "browser.search.update" = false;
