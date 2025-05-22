@@ -61,9 +61,6 @@ ENV["VAGRANT_DISABLE_VBOXSYMLINKCREATE"] = "1"
 
 Vagrant.configure("2") do |config|
 
-  # TODO: Each does a package update to its repo's latest, as a provision script that also does a
-  # "reload" reboot.  Probably have some helper function for setting this up.
-
   config.vm.define "deb12", autostart: false do |deb12|
     deb12.vm.box = "debian/bookworm64"
     setup_my_way(deb12)
@@ -90,7 +87,28 @@ Vagrant.configure("2") do |config|
     # Ubuntu dropped support for Vagrant (! due to changed license), starting with 24.04.
     ubu24.vm.box = "bento/ubuntu-24.04"
     setup_my_way(ubu24)
-    provision_apt_upgrade(ubu24.vm)
+   #provision_apt_upgrade(ubu24.vm)  # Would encounter problem with a TUI menu not rendering.
+    ubu24.vm.provision "apt-update", type: "shell", privileged: true,
+                       inline: "apt-get update"
+    ubu24.vm.provision "say-to-upgrade", type: "shell", privileged: true,
+                       inline: "
+                         if [ -e /var/tmp/already-said-to-upgrade ]; then
+                           rm /var/tmp/already-said-to-upgrade
+                         else
+                           echo 'You need to manually do:'
+                           echo '  vm#  apt-get upgrade --yes --with-new-pkgs'
+                           echo '  host$  vagrant reload $name'
+                           echo '  vm#  apt-get autoremove --yes'
+                           touch /var/tmp/already-said-to-upgrade
+                           exit 1
+                         fi 1>&2
+                       "
+  end
+
+  config.vm.define "ubu25", autostart: false do |ubu25|
+    ubu25.vm.box = "alvistack/ubuntu-25.04"
+    setup_my_way(ubu25)
+    provision_apt_upgrade(ubu25.vm)
   end
 
   config.vm.define "arch", autostart: false do |arch|
