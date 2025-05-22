@@ -62,7 +62,7 @@ in
           runCommandLocal "srcdir-for-rustup-custom-toolchain--${name}"
             { nativeBuildInputs = with pkgs; [ dwarfdump ripgrep ]; }
             # TODO: Unsure if still correct for newer Nightly which changed some of this.
-            # TODO: Those changes might eventually be in Stable and so this'll need to work then.
+            # TODO: Those changes are now in Stable and so this needs to work now.
             ''
               shopt -s nullglob
               set -o errexit -o nounset -o pipefail # -o xtrace
