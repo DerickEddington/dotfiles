@@ -1,11 +1,11 @@
 { config, pkgs, lib, ... }:
 
 let
-  inherit (builtins) pathExists;
+  inherit (builtins) elemAt filter hasAttr isString pathExists split;
   inherit (lib) mkDefault mkEnableOption mkIf mkOption types;
   inherit (lib.attrsets) mapAttrs' mapAttrsToList;
   inherit (lib.lists) flatten;
-  inherit (lib.strings) escapeShellArg;
+  inherit (lib.strings) escapeShellArg fixedWidthNumber toIntBase10;
   inherit (pkgs) runCommandLocal symlinkJoin;
   inherit (pkgs) rust-bin;  # (Assumes my system-wide overlay added this.)
 
@@ -154,8 +154,24 @@ in
           # only updated when that is (otherwise the latest would be updated every day).
           the-nightly = let
             dateOfStable = rust-bin.stable.latest._manifest.date;
+            chosenDate =
+              if hasAttr dateOfStable rust-bin.nightly
+              then dateOfStable
+              else  # Rarely, there isn't a Nightly for the same date.
+                let otherDate = date:
+                      let
+                        parts = filter isString (split "-" date);
+                        year = elemAt parts 0;
+                        month = elemAt parts 1;
+                        day = toIntBase10 (elemAt parts 2);
+                        otherDay = fixedWidthNumber 2 (if day >= 2 then day - 1 else day + 1);
+                      in
+                        "${year}-${month}-${otherDay}";
+                in otherDate dateOfStable;
+            chosen =
+              rust-bin.nightly.${chosenDate} or rust-bin.nightly.latest;
           in
-            mkDefault (rust-bin.nightly.${dateOfStable}.minimal.override {
+            mkDefault (chosen.minimal.override {
               extensions = [
                 "clippy"
                 "rustfmt"
