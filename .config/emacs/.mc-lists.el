@@ -4,6 +4,7 @@
 (setq mc/cmds-to-run-for-all
       '(
         backward-sexp
+        backward-up-list
         beginning-of-defun
         beginning-of-visual-line
         c-electric-brace
@@ -25,6 +26,7 @@
         dired-previous-line
         dired-tree-down
         dired-up-directory
+        down-list
         end-of-defun
         end-of-visual-line
         forward-sexp
