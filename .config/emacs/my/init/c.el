@@ -7,7 +7,11 @@
         ([remap sp-transpose-sexp]     . sp-transpose-hybrid-sexp))
   :hook
   (((c-mode c++-mode) . hs-minor-mode)
-   ((c-mode c++-mode) . imenu-add-menubar-index)))
+   ((c-mode c++-mode) . imenu-add-menubar-index)
+   (c-mode-common . my-c-mode-hook)))
+
+(defun my-c-mode-hook ()
+  (face-remap-set-base 'button nil))
 
 (use-package eldoc :ensure nil)
 
@@ -35,7 +39,8 @@
           ([remap sp-transpose-sexp]     . sp-transpose-hybrid-sexp))
     :hook
     ((c-ts-mode . hs-minor-mode)
-     (c-ts-mode . imenu-add-menubar-index)))
+     (c-ts-mode . imenu-add-menubar-index)
+     (c-ts-base-mode . my-c-mode-hook)))
 
   ;; Set this here so this is only done when our conditional is true.
   (setopt major-mode-remap-alist (append '((c-mode . c-ts-mode)) major-mode-remap-alist))
