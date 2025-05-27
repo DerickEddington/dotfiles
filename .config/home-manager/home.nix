@@ -35,6 +35,12 @@ in
 
   my.emacs.extraPackages = [(epkgs:
     with epkgs; [
+      # Register Tree-Sitter grammars with Emacs.
+     #(treesit-grammars.with-grammars (grammars: with grammars; [
+     #]))
+      # To use newer grammar versions.  (In addition to (i.e. keep) the above.)  Was broken when I
+      # tried 2025-05-26.
+     #tree-sitter-langs
     ]
   )];
 

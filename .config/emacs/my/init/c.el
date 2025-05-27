@@ -2,7 +2,7 @@
 
 (use-package cc-mode :ensure nil
   :bind
-  (:map c-mode-map
+  (:map c-mode-base-map
         ([remap sp-forward-slurp-sexp] . sp-slurp-hybrid-sexp)
         ([remap sp-transpose-sexp]     . sp-transpose-hybrid-sexp))
   :hook
@@ -17,3 +17,42 @@
   :hook ((c-mode c++-mode) . lsp))
 
 (use-package cmake-mode)
+
+
+(defconst my-use-c-ts-mode
+  (and my-use-treesitter-modes
+       (treesit-language-available-p 'c)))
+
+(defconst my-use-c++-ts-mode
+  (and my-use-c-ts-mode
+       (treesit-language-available-p 'cpp)))
+
+(when my-use-c-ts-mode                          ;; (Keep below in-sync with above.)
+  (use-package c-ts-mode :ensure nil
+    :bind
+    (:map c-ts-base-mode-map
+          ([remap sp-forward-slurp-sexp] . sp-slurp-hybrid-sexp)
+          ([remap sp-transpose-sexp]     . sp-transpose-hybrid-sexp))
+    :hook
+    ((c-ts-mode . hs-minor-mode)
+     (c-ts-mode . imenu-add-menubar-index)))
+
+  ;; Set this here so this is only done when our conditional is true.
+  (setopt major-mode-remap-alist (append '((c-mode . c-ts-mode)) major-mode-remap-alist))
+
+  (use-package lsp-mode
+    :hook (c-ts-mode . lsp)))
+
+(when my-use-c++-ts-mode                        ;; (Keep below in-sync with above.)
+  (use-package c-ts-mode :ensure nil
+    :hook
+    ((c++-ts-mode . hs-minor-mode)
+     (c++-ts-mode . imenu-add-menubar-index)))
+
+  ;; Set this here so this is only done when our conditional is true.
+  (setopt major-mode-remap-alist (append '((c++-mode . c++-ts-mode)
+                                           (c-or-c++-mode . c-or-c++-ts-mode))
+                                         major-mode-remap-alist))
+
+  (use-package lsp-mode
+    :hook (c++-ts-mode . lsp)))

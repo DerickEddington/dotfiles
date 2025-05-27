@@ -27,3 +27,9 @@
     :config
     (advice-add 'string-truncate-left :around
                 #'my--string-truncate-left)))
+
+
+(defconst my-use-treesitter-modes
+  (and nil  ;; Remove this `nil' if want to use Tree-sitter modes.
+       (version<= "30" emacs-version)
+       (treesit-available-p)))
