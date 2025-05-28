@@ -11,7 +11,12 @@
    (c-mode-common . my-c-mode-hook)))
 
 (defun my-c-mode-hook ()
-  (face-remap-set-base 'button nil))
+  (face-remap-set-base 'button nil)
+  (font-lock-add-keywords nil
+    '(("\\(?:\\s-\\|\\s.\\|\\s(\\|\\s)\\|^\\)\\(\\(?:\\(?:[[:digit:]]*[.][[:digit:]]+\\|[[:digit:]]+[.]\\)\\(?:[eE][+-]?[[:digit:]]+\\)?\\|[[:digit:]]+[eE][+-]?[[:digit:]]+\\|0[xX]\\(?:[[:xdigit:]]*[.][[:xdigit:]]+\\|[[:xdigit:]]+[.]?\\)[pP][+-]?[[:digit:]]+\\)[flFL]?\\)\\(?:\\s-\\|\\s.\\|\\s(\\|\\s)\\|$\\)"
+       1 'font-lock-constant-face)
+      ("\\_<\\(?:[1-9][[:digit:]]*\\|[0-7]+\\|\\(?:0[xX]\\)[[:xdigit:]]+\\)\\(?:[uU]\\(?:[lL]\\|ll\\|LL\\)?\\|\\(?:[lL]\\|ll\\|LL\\)[uU]?\\)?\\_>"
+       . 'font-lock-constant-face))))
 
 (use-package eldoc :ensure nil)
 
