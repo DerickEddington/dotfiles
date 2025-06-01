@@ -1,11 +1,15 @@
 ;; -*- lexical-binding: t; -*-
 
 (use-package my-lsp :load-path "my/lib"
-  :autoload (my-lsp-stdio-connection--wait-for-stty-to-take-effect
+  :autoload (my-lsp-ui-doc-toggle-moused
+             my-lsp-stdio-connection--wait-for-stty-to-take-effect
              my-lsp-resolve-final-command--wait-for-stty-to-take-effect))
 
 
 (use-package lsp-mode
+
+  :bind (:map lsp-mode-map
+              ("C-h ." . lsp-describe-thing-at-point))
 
   :custom
   ;; This variable is not customizable, so we set it like this here.
@@ -29,3 +33,11 @@
 
 (use-package lsp-ivy)
 (use-package lsp-ui)
+
+(use-package lsp-ui-doc :ensure nil  ;; (It's installed by `lsp-ui').
+  :bind
+  (:map lsp-mode-map
+        ("s-<mouse-1>" . my-lsp-ui-doc-toggle-moused)
+        ("C-h d" . lsp-ui-doc-toggle)
+   :map lsp-command-map
+        ("hd" . lsp-ui-doc-toggle)))

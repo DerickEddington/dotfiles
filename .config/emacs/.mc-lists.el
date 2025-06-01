@@ -81,6 +81,7 @@
         lsp-signature-stop
         lsp-ui-doc--handle-mouse-movement
         magit-status
+        my-lsp-ui-doc-toggle-moused
         overwrite-mode
         read-only-mode
         suspend-frame

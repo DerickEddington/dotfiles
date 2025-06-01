@@ -6,6 +6,17 @@
 (use-package lsp-mode
   :autoload (lsp-resolve-final-command lsp-warn))
 
+(use-package lsp-ui)
+
+(use-package lsp-ui-doc :ensure nil  ;; (It's installed by `lsp-ui').
+  :autoload (lsp-ui-doc-toggle))
+
+
+(defun my-lsp-ui-doc-toggle-moused (click-event)
+  (interactive "e")
+  (mouse-set-point click-event)
+  (lsp-ui-doc-toggle))
+
 
 (defun my-lsp-stdio-connection--wait-for-stty-to-take-effect (result)
   (if (file-remote-p default-directory)
