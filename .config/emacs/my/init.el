@@ -175,7 +175,8 @@
 
 (global-set-key [remap just-one-space] #'cycle-spacing)
 (global-set-key [remap mark-sexp] #'sp-mark-sexp)
-
+(global-set-key (kbd "C-h c") #'describe-char)
+(global-set-key (kbd "C-h C-k") #'describe-key-briefly)
 (global-set-key (kbd "C-M-<backspace>") #'backward-kill-sexp)
 (global-set-key (kbd "C-M-<DEL>") #'backward-kill-sexp)
 (global-set-key (kbd "C-c d") #'delete-trailing-whitespace)
