@@ -19,7 +19,11 @@
   (use-package cus-edit :ensure nil
     :config
     (advice-add 'custom-save-all :around
-                #'my--custom-save-all--pretty-print-old-way)))
+                #'my--custom-save-all--pretty-print-old-way))
+
+  (defface my-negated-operator-face
+    '((t (:inherit (font-lock-negation-char-face font-lock-operator-face))))
+    "Merge these two faces for use as one name."))
 
 
 (unless (version< emacs-version "28")
