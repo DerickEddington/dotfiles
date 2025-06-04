@@ -83,9 +83,12 @@
         magit-status
         my-lsp-ui-doc-toggle-moused
         overwrite-mode
+        pixel-scroll-precision
         read-only-mode
         suspend-frame
         undo-redo
         wdired-exit
         widget-button-click
+        xref-find-definitions
+        xref-go-back
         ))
