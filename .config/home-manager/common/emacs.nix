@@ -164,6 +164,7 @@ in
           # Unstable.
           {
             inherit (self.melpaStablePackages)
+              magit magit-section transient
             ;
           }
         )
