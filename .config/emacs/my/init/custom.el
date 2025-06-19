@@ -539,6 +539,7 @@
  '(shadow ((t (:foreground "grey40"))))
  '(show-paren-match ((t (:background "gold3"))))
  '(show-paren-mismatch ((t (:background "white" :foreground "purple"))))
+ '(smerge-markers ((t (:inherit (warning magit-blame-heading) :extend t))))
  '(speedbar-file-face ((((class color) (background dark)) (:foreground "white smoke"))))
  '(success ((t (:foreground "#006E10" :weight bold))))
  '(swiper-line-face ((t nil)))

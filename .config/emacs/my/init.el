@@ -75,6 +75,7 @@
                    "multiple-cursors"
                    "ivy"
                    "magit"
+                   "smerge"
                    "flycheck"
                    "lsp"
                    "gdb"
