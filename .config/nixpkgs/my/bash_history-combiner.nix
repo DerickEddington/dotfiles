@@ -15,7 +15,7 @@ rustPlatform.buildRustPackage rec {
     hash = "sha256-+Rrb7K9xrNihF/krpaG33z7cpbUH8g4Rb77Ee89voyo=";
   };
 
-  cargoHash = "sha256-1kIF8DtLsgb0CD2ysQv2yf/RA/2pu5LDFMm0q2Xcx4E=";
+  cargoHash = "sha256-3YcXuRiRq4lgwXvYgVau1fyNCIFo6FipYK7dl7/vGek=";
 
   meta = with lib; {
     description = "Combines a Bash session history with a single history with dups and ignores erased.";
