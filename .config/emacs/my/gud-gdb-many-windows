@@ -1,6 +1,7 @@
 ;; -*- mode: lisp-data; -*-
 (((min-height . 12)
   (min-width . 20)
+  (min-weight . 20)  ;; "Alias" of `min-width'. Workaround bug in `window-state-put'.
   (min-height-ignore . 7)
   (min-width-ignore . 8)
   (min-height-safe . 3)
@@ -15,6 +16,7 @@
   (total-width . 208)
   (total-height . 13)
   (normal-width . 1.0)
+  (normal-height . 0.220338983)
   (combination-limit)
   (leaf
    (total-width . 104)
@@ -55,6 +57,7 @@
   (total-width . 208)
   (total-height . 41)
   (normal-width . 1.0)
+  (normal-height . 0.694915254)
   (combination-limit)
   (leaf
    (total-width . 104)
@@ -98,6 +101,7 @@
   (total-width . 208)
   (total-height . 5)
   (normal-width . 1.0)
+  (normal-height . 0.084745763)
   (combination-limit)
   (leaf
    (total-width . 104)
