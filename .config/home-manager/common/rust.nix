@@ -82,7 +82,8 @@ in
               [ ''${#libstd[@]} -eq 1 ]  # If not, fail intentionally.
               compDir=()
               compDirRegexs=(
-                '^std/src/lib\.rs'          # As newer Nightly has.
+                '^/rustc/[0-9a-fA-F]+/library/std/src/lib\.rs'  # As newest Nightly has.
+                '^std/src/lib\.rs'          # As some recent Nightly and maybe Stable has.
                 '^library/std/src/lib\.rs'  # As Stable and older Nightly has.
                 '^src/libstd/lib\.rs'       # Their older layout.
               )
@@ -96,7 +97,7 @@ in
               popd
               [ ''${#compDir[@]} -eq 1 ]  # If not, fail intentionally.
 
-              # The newer Nightly now includes the trailing `/library`.
+              # Some recent Nightly and maybe Stable now includes the trailing `/library`.
               [[ "$compDir" =~ ^(/rustc/[[:xdigit:]]{40})(/library)?$ ]]  # If not, fail.
               hashIdDir=''${BASH_REMATCH[1]}
 
