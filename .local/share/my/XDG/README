@@ -1,0 +1,4 @@
+For XDG user dirs that I don't want to see at the top of my $HOME dir.
+There probably should still be somewhere for them, in case some app uses them,
+so place them here as last resort.
+Use ~/.config/user-dirs.dirs to configure whichever you want to be here or not.

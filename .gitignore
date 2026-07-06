@@ -53,6 +53,7 @@ secring.gpg
 !/.local/share/my/keepass/template.kdbx
 !/.local/share/rust-script
 !/.local/share/user-tmpfiles.d/
+/.local/share/my/XDG/
 /.local/state/*
 !/.local/state/my/
 /.local/state/my/bash/interactive/history/combined
